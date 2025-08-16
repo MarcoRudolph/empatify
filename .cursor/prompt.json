@@ -1,0 +1,30 @@
+{
+  "name": "rudolpho-chat",
+  "description": "Next.js (App Router) mit TypeScript, Shadcn UI, Drizzle ORM und Zod. Klare Architektur, starke Konventionen, hohe Codequalität.",
+  "instructions": [
+    "Bevor du einen Workaround implementierst oder halluszinierst, generiere eine Prompt für perplexity, die das Problem hinreichend erklärt und nutze tool perplexity_ask.",
+    "Rule precedence: Bei Konflikten gewinnt die spezifischere Regel (nextjs.instructions.md > core.mdc > tools).",
+    "Halte die Projektstruktur strikt ein: Drizzle/DB lebt in src/drizzle/** (nicht in src/lib/db).",
+    "Verwende ausschließlich Drizzle ORM; mache keine Vorschläge für TypeORM oder NestJS-Patterns in Next.js-Dateien.",
+    "Nutze Path-Aliases (@drizzle/*, @app/*, @components/*, @lib/*, @services/*, @types/*) konsistent.",
+    "Next.js App Router: Standard ist React Server Components. Markiere Client Components nur wenn nötig (\"use client\").",
+    "Mutationen bevorzugt als Server Actions oder API Routes unter src/app/api/** – keine ad-hoc Fetch-Calls im Client für sensible Logik.",
+    "Alle Eingaben werden mit Zod validiert; Typen nach Möglichkeit via z.infer ableiten (kein any).",
+    "UI: Tailwind CSS + Shadcn. Prüfe vor neuen Bausteinen, ob Shadcn eine passende Komponente hat.",
+    "Barrierefreiheit: Nutze semantische HTML-Elemente, ARIA-Attribute nur gezielt, Fokuszustände dürfen nicht entfernt werden.",
+    "Fehler-/Loading-Zustände: Implementiere sinnvolle Empty/Loading/Error-UI. Keine stummen Fehler.",
+    "Keine neuen Dependencies ohne starken Grund; nutze bestehende Utilities unter src/lib/utils/**.",
+    "Tests: Schreibe für neue Logik Unit-Tests (z. B. Vitest) und für kritische Flows e2e (z. B. Playwright).",
+    "Code-Qualität: Halte dich an ESLint/Prettier/tsconfig (strict). Keine console.log im Prod-Code; Logging über Utility.",
+    "Security: Keine Secrets hardcoden; env-Zugriffe typisieren (z. B. Zod-Schema für process.env).",
+    "Performance: Verwende dynamische Importe nur bei Bedarf, achte auf Streaming/SSR, meide unnötige Client-Bundles.",
+    "Bevorzuge stabile, dokumentierte APIs. Füge JSDoc-Kommentare für öffentliche Utilities hinzu.",
+    "Folge allen Konventionen aus .cursor/rules/core.mdc und nextjs.instructions.md.",
+    "Wenn externe Doku nötig ist: nutze die Regeln in perplexity-tool.mdc rein für Recherche; Code-Entscheidungen müssen zu unseren Projektregeln passen.",
+    "Frage nicht nach abschließender Bestätigung; setze die Änderungen direkt um.",
+    "Führe vor jedem UI-Commit eine visuelle Kurz-Review durch: nenne 5 konkrete Verbesserungen (Hierarchie, Weißraum, Alignment, Kontrast, Lesbarkeit) und setze sie direkt um. Ändere dabei ausschließlich Werte aus tokens.json.",
+    "Wenn Klassen Arbitrary Values oder Hexfarben enthalten, ersetze sie automatisch durch Token-Utilities (z. B. bg-primary-500, p-lg, rounded-2xl) und entferne Magic Numbers.",
+    "Für neue Komponenten immer Loading-, Error-, Empty- und Hover/Focus/Disabled-States erzeugen. States nach shadcn/ui v4-Pattern implementieren."
+  ]
+}
+  

@@ -1,0 +1,28 @@
+---
+name: Perplexity Tool Usage
+description: Rules for invoking Perplexity web search when uncertain or ambiguous tasks arise.
+globs: "**"
+alwaysApply: true
+---
+# Perplexity Web Search Rules
+
+This document defines when to use the Perplexity MCP server to resolve uncertain queries, fetch real-time data, or lookup external documentation for the "Boost Your Date" web app.
+
+## 1. When to Invoke Perplexity
+
+- **Use Cases**:
+  - Fetching recent or up-to-date information (e.g., new features in Next.js, TypeScript, or Tailwind CSS).
+  - Resolving ambiguous queries (e.g., "I’m unsure how to configure Clerk webhooks").
+  - Looking up documentation or examples for libraries like Drizzle ORM, Shaper, or Pusher.
+- **Trigger Keywords**:
+  - Prompt contains: `recent`, `latest`, `up-to-date`, `web`, `uncertain`, `not`, `sure`, `lookup`, `research`.
+- **Example Prompts**:
+  - "I’m uncertain about the latest Zod validation patterns. Search with Perplexity."
+  - "What’s the recent Pusher API for real-time notifications?"
+  - "Lookup the Shadcn UI documentation for button components."
+- **MCP Server**: Use the `perplexity-ask` server configured in `.mcp/config/mcp.json`.
+
+## 2. Guidelines
+- **Approval**: Cursor will suggest the Perplexity tool when a prompt matches the above conditions. Approve the tool usage to proceed.
+- **Context Preservation**: Ensure the prompt includes enough context (e.g., project libraries like Next.js, Clerk, or Drizzle) for accurate results.
+- **Fallback**: For tasks not requiring external data (e.g., writing a local React component or applying TypeScript types), skip Perplexity and use Cursor’s internal capabilities.
