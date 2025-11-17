@@ -1,0 +1,284 @@
+# WORKFLOW – Task & Tool Orchestration (`workflow.mdc`)
+
+This file defines **how** the assistant should work:
+- how to interpret requests,
+- when and how to use MCP servers and research tools,
+- how to structure multi-step workflows,
+- and how to combine architecture + design + context.
+
+It does **not** define visual tokens or architectural rules; those live in:
+- `core.mdc` (global behavior)
+- `architecture.mdc` (code structure)
+- `design.mdc` (design system)
+- `design.checklist.mdc` (UI quality control)
+- `tokens.json` (visual language)
+
+---
+
+## 1. Scope & Precedence
+
+Use `workflow.mdc` for **process-level decisions**:
+
+- How to break down a task.
+- When to use which MCP server.
+- In what order to:
+  1. Research,
+  2. Analyze context,
+  3. Plan,
+  4. Implement,
+  5. Review.
+
+Precedence (from most to least specific):
+
+1. Explicit user instructions and project-specific rule files.
+2. Domain rules:
+   - `design.mdc`, `design.checklist.mdc`
+   - `architecture.mdc`
+3. This `workflow.mdc`.
+4. `core.mdc` (global behavior).
+5. Tools and external sources (MCP, web, docs).
+
+If a tool suggestion conflicts with any of the rules above, **ignore the tool and follow the rules**.
+
+---
+
+## 2. Task Classification & Tool Mapping
+
+For every request, first classify the task (UI, code, context, mixed) and then choose tools:
+
+- For **external research / general docs** → use `perplexity-ask`.
+- For **UI component inspiration / “magic” layouts** → use `magic-ui`.
+- For **framework/library docs and examples** → use `context7`.
+- For **n8n workflows / automations** → use `n8n-mcp Docs` or `n8n MCP` when the user asks about n8n.
+
+Once classified, apply the corresponding workflow below.
+
+---
+
+## 3. General 5-Step Workflow (applies to all tasks)
+
+For every non-trivial task, follow this pattern:
+
+1. **Understand**
+   - Restate the goal in your own words.
+   - Identify constraints (stack, design system, tokens, existing patterns).
+   - Identify which domain rules apply (`design.mdc`, `architecture.mdc`, etc.).
+
+2. **Gather Context**
+   - Use project files and `context7` (if available) to understand existing patterns.
+   - Use external docs via `perplexity_ask` when needed (framework APIs, best practices, UI inspiration).
+
+3. **Plan**
+   - For complex tasks:
+     - Use `perplexity-ask` (if available) to break down the problem into steps.
+   - Create a brief plan: what you will change/add, and where.
+
+4. **Implement**
+   - Apply architecture rules from `architecture.mdc`.
+   - Apply tokens + design rules from `design.mdc`.
+   - For UI: follow the **UI-specific workflow** (section 4).
+
+5. **Review**
+   - For UI: run through `design.checklist.mdc` and fix violations.
+   - For code: check types, structure, errors/loading/empty states.
+   - Ensure all visual styles are driven by `tokens.json` tokens.
+
+---
+
+## 4. Workflow for UI / Design Tasks
+
+For any task involving a **new page, layout, or visually significant component**, follow this workflow **strictly**.
+
+### 4.1 Phase 1 – Research & Inspiration
+
+**Goal**: collect patterns, not copy-paste code.
+
+1. Project context first
+   - Use existing files and patterns in the repo to understand the current style.
+
+2. External UI inspiration
+   - Use `perplexity-ask` to search for modern landing pages or app UIs.
+   - Summarize typical structures (hero, feature grid, social proof, etc.) and adapt them.
+
+3. Optional: UI generators
+   - If `magic-ui` is available:
+     - Ask it for alternative hero layouts, bento grids, or visually rich sections.
+     - Use its output as conceptual inspiration and then re-implement using:
+       - React + TypeScript
+       - shadcn/ui
+       - Tailwind classes built from `tokens.json`.
+
+**Rule**: Tools give inspiration. **Tokens, design.mdc, and the project’s patterns remain the source of truth.**
+
+---
+
+### 4.2 Phase 2 – Layout Sketch (Text-Only Wireframe)
+
+Before writing JSX/TSX:
+
+1. Produce a **text-based layout sketch** that includes:
+   - Sections in order (hero, features, social proof, how-it-works, pricing, FAQ, footer, etc.).
+   - For each section:
+     - role/purpose,
+     - layout (1-column, 2-column, grid),
+     - key elements (heading, overline, copy, CTAs, visuals).
+   - Where tokens are relevant, mention them conceptually:
+     - “Hero uses `colors.background.section` with large `typography.heading.h1` and `components.button.primary.base`.”
+
+2. Align the sketch with:
+   - `design.mdc` layout patterns,
+   - `tokens.json` tokens,
+   - any existing pages (to keep style consistent).
+
+Only after this sketch is clear and coherent, proceed to implementation.
+
+---
+
+### 4.3 Phase 3 – Implementation (Token-Driven UI)
+
+1. Implement the layout using:
+   - React + TypeScript,
+   - shadcn/ui primitives,
+   - Tailwind classes that are **compositions of tokens from `tokens.json`**.
+
+2. Apply architecture rules:
+   - Place base components under `src/components/ui/**` if they are primitives.
+   - Place composed feature-level components under `src/components/features/**` or `src/features/**`.
+   - Keep data-fetching logic in services/hooks, not inline in heavy UI components.
+
+3. Implement all required states:
+   - Default
+   - Hover
+   - Focus / focus-visible
+   - Disabled
+   - Loading
+   - Empty / Error (for anything data-driven)
+
+States must use consistent token-driven styling (no ad-hoc colors or spacing).
+
+---
+
+### 4.4 Phase 4 – Visual Review (Checklist-Driven)
+
+After code is written:
+
+1. Use `design.checklist.mdc` and go through each section:
+   - Designer workflow
+   - Color/token enforcement
+   - Typography & hierarchy
+   - Layout & spacing
+   - Component-specific checks (hero, feature sections, etc.)
+   - Interaction & state coverage
+   - Accessibility
+   - Anti-pattern guard
+
+2. For each failed item:
+   - Fix it **directly in the code**, not only in text.
+   - Prefer adjusting token composition (e.g. using `radius.lg`, `shadow.soft`, different container tokens) instead of adding new raw values.
+
+3. Ensure the final UI:
+   - Feels like a modern, cohesive marketing/product interface.
+   - Uses clear visual hierarchy and generous whitespace.
+   - Is visibly consistent with other pages that follow `design.mdc` + `tokens.json`.
+
+---
+
+## 5. Workflow for Code / Architecture Tasks
+
+For tasks focused on backend logic, data flow, or general architecture:
+
+1. **Context via `@momentum-dev/context7` (if available)**
+   - Use it to:
+     - locate relevant files,
+     - summarize existing patterns,
+     - understand current architecture and naming.
+
+2. **Optional structured planning via `perplexity-ask`**
+   - For complex changes (multi-step refactor, new cross-cutting feature):
+     - use sequential-thinking to outline:
+       - current behavior,
+       - desired behavior,
+       - steps to migrate,
+       - risks and edge cases.
+
+3. **Follow `architecture.mdc`**
+   - Place new logic in the correct layer (services, hooks, features, etc.).
+   - Keep components lean in terms of logic.
+   - Ensure types, validation, error handling and tests are appropriate.
+
+4. **Review**
+   - Check for:
+     - strict types,
+     - clear separation of concerns,
+     - good naming,
+     - no console logs,
+     - proper error/loading handling.
+
+For architecture-heavy or framework-specific questions:
+   - Use `context7` (and optionally `perplexity-ask`) to fetch up-to-date framework/library documentation and patterns instead of guessing APIs.
+
+---
+
+## 6. Workflow for Context / Analysis Tasks
+
+When the user wants understanding rather than new code:
+
+1. Use `context7` (if available) to:
+   - parse and summarize relevant files or modules,
+   - identify key flows, entry points, and dependencies,
+   - extract patterns (e.g. how APIs, themes, or forms are implemented).
+
+2. Optionally:
+   - Use `perplexity_ask` to cross-check external best practices or docs for the concepts being used.
+
+3. Provide:
+   - A structured explanation,
+   - Pointers to exact files/modules,
+   - Clear mental model:
+     - how data flows,
+     - how control flows,
+     - how responsibilities are split.
+
+4. Suggest improvements if asked, reusing:
+   - `architecture.mdc` for structure,
+   - `design.mdc` for UI-related aspects if relevant.
+
+### Additional Workflow Rule
+
+- During UI research, extract patterns and structures but never copy external UI code 1:1. Always adapt patterns to match design.mdc, design.checklist.mdc, and tokens.json.
+
+---
+
+## 7. Tool Fallback Rules
+
+- If a specific MCP server is **not installed or not available**:
+  - Skip its steps but still follow the overall workflow.
+  - Example:
+    - If `perplexity-ask` is missing:
+      - still manually break the problem into steps (simple internal reasoning).
+    - If `magic-ui` is missing:
+      - rely more heavily on:
+        - `perplexity_ask` for inspiration,
+        - patterns defined in `design.mdc` and existing components.
+
+- Never fail a task just because a tool is unavailable; instead, adapt and apply the same process manually as far as possible.
+
+---
+
+## 8. Communication Style in the Workflow
+
+When applying this workflow:
+
+- Be **transparent and structured**, but not overly verbose:
+  - Mention important steps (e.g. “Here’s the layout sketch”, “Here’s the implementation”, “Here’s what I learned from the existing code…”).
+- For UI tasks:
+  - Always show the **textual layout sketch** before the JSX/TSX implementation.
+- For complex changes:
+  - Briefly show the **plan** before the code.
+- For reviews:
+  - Highlight the main issues and the improvements you made.
+
+Your goal is to feel like a **thoughtful senior teammate**:
+- who can reason in steps,
+- leverage tools intelligently,
+- and always bring results back in line with `core.mdc`, `architecture.mdc`, `design.mdc`, `design.checklist.mdc`, and `tokens.json`.

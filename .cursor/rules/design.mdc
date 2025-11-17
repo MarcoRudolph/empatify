@@ -1,0 +1,112 @@
+# DESIGN RULES (design.mdc)
+
+## Purpose
+Enforce **modern, accessible UI** using the **latest shadcn/ui version**.  
+Deprecated patterns, outdated components, or old shadcn/ui imports are strictly forbidden.
+
+---
+
+## 1. Technical Requirements
+- Use **Next.js (App Router)** with **TypeScript**.
+- Styling must use **TailwindCSS** and project tokens from `.cursor/tokens.json` (single source of truth).
+- Components must be derived from:
+  - `/components/ui`
+  - or the latest shadcn/ui templates.
+- Icons must use `lucide-react` via `<Icon name="..." />`.
+- Do not use inline styles (except for dynamic runtime calculations).
+- Use Radix UI primitives for accessibility patterns.
+
+**Token Source:** All design tokens are defined in `.cursor/tokens.json`. This file contains both raw values (for runtime) and Tailwind class references (for Cursor AI guidance). The tokens are exported via `src/styles/tokens.ts` and `src/styles/tokens.css` for use in the application.
+
+---
+
+## 2. Color System (Tokens Only)
+Primary brand color: **Orange #FF6B00**.  
+All CTAs, buttons, key accents, and hover states must use primary tokens.
+
+### Token Definitions
+| Token        | Hex      | Usage                                      |
+|--------------|----------|---------------------------------------------|
+| primary-50   | #FFF4E8  | Light backgrounds                           |
+| primary-100  | #FFE1CC  | Card backgrounds                            |
+| primary-500  | #FF6B00  | Main CTA, icons                             |
+| primary-600  | #E65F00  | Hover states                                |
+| primary-900  | #732E00  | Active states, strong text                  |
+| neutral-50   | #0F0F0F  | Primary dark background                     |
+| neutral-100  | #1A1A1A  | Secondary dark background                   |
+| neutral-900  | #FFFFFF  | Primary text on dark backgrounds            |
+| accent-blue  | #2DB4FF  | Secondary accents                           |
+
+### Replace magic numbers:
+- No hex colors.
+- No arbitrary Tailwind values.
+- Always use token utilities (e.g., `bg-primary-500`, `text-neutral-900`, `rounded-2xl`, `p-8`).
+
+---
+
+## 3. Typography Rules
+- Font: **Inter**, sans-serif.
+- Font weights: **400, 500, 700** only.
+
+### Scale
+- `h1`: `text-5xl` `font-bold` `tracking-tight`
+- `h2`: `text-4xl` `font-bold`
+- `p`: `text-lg` `leading-relaxed`
+- `small`: `text-sm` `text-neutral-400`
+
+Always use semantic HTML headings in correct hierarchy.
+
+---
+
+## 4. Layout & Spacing Rules
+- **Container:** `max-w-[1280px]` + `px-6`
+- **Sections:** `py-20`, mobile `py-12`
+- **Grid:** 12 columns, `gap-8`
+- **Cards:** `rounded-2xl` `shadow-lg` `p-8`
+- **Buttons:** `rounded-full`, min-height `h-12`, padding `px-6`, no sharp corners
+
+---
+
+## 5. Landing Page Component Rules
+
+### Hero Section
+- Left side: h1, p, primary button (`bg-primary-500`), small secondary info line.
+- Right side: smartphone/mockup with light 3D tilt, `rounded-xl`, `shadow-xl`.
+- Background: dark (`bg-neutral-50` token → very dark gray).
+
+### Stats Row
+- Horizontal layout.
+- Number uses `accent-blue`.
+- Subtitle uses neutral text tokens.
+
+### Avatar Row
+- Circular avatars (48px), `border-neutral-800`.
+- Below: text “And loved by … users”.
+
+---
+
+## 6. Interaction & Animation Rules
+- Hover: slightly darker primary color or a scale animation (`transition-transform duration-200`).
+- Focus: `outline-none ring-2 ring-primary-500`.
+- Cards: Hover → `translate-y-[-2px]` + `shadow-xl`.
+- Use transitions consistently across interactive elements.
+
+---
+
+## 7. Accessibility Rules (WCAG AA)
+- Text/background contrast must meet WCAG AA.
+- Every interactive element must be keyboard-accessible.
+- Provide ARIA labels for icons without visible text.
+- Never remove focus outlines or focus visibility.
+
+---
+
+## 8. Enforcement Rules for Cursor
+- When generating UI:
+  - Validate all colors against token rules.
+  - Replace arbitrary values automatically with tokens.
+  - Add all required states: **Loading**, **Error**, **Empty**, **Hover**, **Focus**, **Disabled**.
+  - Follow shadcn/ui **v4 state structure**.
+- Always check for an existing shadcn/ui component before creating a new one.
+- Never use outdated shadcn/ui code or imports.
+- UI must always reflect the brand color system and spacing rules.

@@ -1,12 +1,21 @@
-/* Design Tokens as CSS Custom Properties */
+/**
+ * Design Tokens as CSS Custom Properties
+ * 
+ * This file is generated from .cursor/tokens.json (single source of truth)
+ * When updating tokens, modify .cursor/tokens.json and sync the values here.
+ * 
+ * TODO: Consider generating this file automatically from .cursor/tokens.json
+ */
+
 :root {
-  /* Colors */
+  /* Colors - Primary */
   --color-primary-50: #FFF4E8;
   --color-primary-100: #FFE1CC;
   --color-primary-500: #FF6B00;
   --color-primary-600: #E65F00;
   --color-primary-900: #732E00;
   
+  /* Colors - Neutral */
   --color-neutral-50: #0F0F0F;
   --color-neutral-75: #141414;
   --color-neutral-100: #1A1A1A;
@@ -18,6 +27,7 @@
   --color-neutral-800: #E5E5E5;
   --color-neutral-900: #FFFFFF;
   
+  /* Colors - Accent */
   --color-accent-blue: #2DB4FF;
   
   /* Semantic Colors */
@@ -100,6 +110,7 @@
 /* Dark mode support (if needed) */
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Dark mode overrides can go here */
+    /* Dark mode overrides can go here if needed */
+    /* Currently using dark mode by default */
   }
 }

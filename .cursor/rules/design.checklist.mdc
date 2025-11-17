@@ -1,0 +1,171 @@
+# DESIGN CHECKLIST (design.checklist.mdc)
+
+> This checklist must be applied whenever generating, refactoring, or reviewing UI code.
+> Always fix violations automatically instead of just describing them.
+
+---
+
+## 1. General Process
+
+- [ ] Have you read and applied all rules from `design.mdc` for this change?
+- [ ] Is every UI change consistent with:
+  - [ ] Design tokens from `.cursor/tokens.json` (single source of truth)
+  - [ ] shadcn/ui v4 patterns
+  - [ ] Accessibility rules (WCAG AA, keyboard, ARIA)
+
+If any item is not fulfilled, update the code before returning it.
+
+---
+
+## 2. Color & Token Enforcement
+
+- [ ] Are **all colors** coming from the token system (Tailwind utilities or CSS variables)?
+  - [ ] No raw hex values (e.g. `#FF6B00`).
+  - [ ] No arbitrary color classes (e.g. `bg-[#FF6B00]`).
+- [ ] Are primary brand usages using **primary tokens**:
+  - [ ] CTAs and primary buttons → `bg-primary-500`
+  - [ ] Hover states → `bg-primary-600` or suitable variant
+  - [ ] Strong text or active states → `text-primary-900` or similar
+- [ ] Is the background consistent with dark mode tokens:
+  - [ ] Main background → `bg-neutral-50` (very dark)
+  - [ ] Secondary surfaces → `bg-neutral-100`
+  - [ ] Text on dark → `text-neutral-900` (white)
+- [ ] Are **accent elements** (numbers, highlights) using `accent-blue` utilities where appropriate?
+
+If a class uses arbitrary values or hex, **replace it with the correct token utility**.
+
+---
+
+## 3. Typography & Hierarchy
+
+- [ ] Are text styles using the defined scale:
+  - [ ] `h1` → `text-5xl font-bold tracking-tight`
+  - [ ] `h2` → `text-4xl font-bold`
+  - [ ] Paragraphs → `text-lg leading-relaxed`
+  - [ ] Small text → `text-sm text-neutral-400`
+- [ ] Are semantic heading levels correct (`h1` > `h2` > `h3`, no jumps)?
+- [ ] Is the font family implicitly or explicitly aligned with `Inter, sans-serif`?
+- [ ] Does the visual hierarchy clearly indicate:
+  - [ ] primary headline
+  - [ ] secondary text
+  - [ ] supporting/meta information
+
+If hierarchy is weak, adjust font size/weight and spacing according to the scale.
+
+---
+
+## 4. Layout & Spacing
+
+- [ ] Does the outer layout follow:
+  - [ ] Container: `max-w-[1280px] mx-auto px-6`
+  - [ ] Sections: `py-20` (desktop), `py-12` (mobile breakpoint)
+- [ ] Are grids using:
+  - [ ] 12-column layouts (`grid-cols-12` or responsive equivalent)
+  - [ ] `gap-8` for primary spacing between items
+- [ ] Are cards using:
+  - [ ] `rounded-2xl`
+  - [ ] `shadow-lg`
+  - [ ] `p-8`
+- [ ] Are buttons using:
+  - [ ] `rounded-full`
+  - [ ] `h-12` minimum height
+  - [ ] Horizontal padding `px-6`
+  - [ ] No sharp corners
+
+If spacing is inconsistent or using arbitrary values, align it to these spacing rules.
+
+---
+
+## 5. Component-Specific Checks (Landing Page)
+
+### Hero Section
+
+- [ ] Does the hero follow the left/right structure:
+  - [ ] Left: h1, supporting paragraph, primary button (`bg-primary-500`), secondary info line.
+  - [ ] Right: smartphone/mockup with light 3D tilt, `rounded-xl`, `shadow-xl`.
+- [ ] Is the background a dark mode neutral token (`bg-neutral-50` / very dark)?
+
+### Stats Row
+
+- [ ] Are stats laid out horizontally (or responsively horizontal on desktop)?
+- [ ] Are key figures styled with `accent-blue` or accent token utilities?
+- [ ] Are subtitles in neutral gray text utilities (e.g. `text-neutral-400` / similar)?
+
+### Avatar Row
+
+- [ ] Are avatars circular with fixed size (48px) using Tailwind classes:
+  - [ ] `h-12 w-12 rounded-full` (or equivalent)
+  - [ ] `border-neutral-800`
+- [ ] Does the text below match the pattern “And loved by … users”?
+
+---
+
+## 6. shadcn/ui & Component Usage
+
+- [ ] Are components derived from **`/components/ui`** or the official up-to-date shadcn/ui templates?
+- [ ] Are imports using the **current shadcn/ui structure** (no legacy import paths)?
+- [ ] Before introducing a new UI pattern, did you:
+  - [ ] Check if shadcn/ui already provides a suitable component?
+  - [ ] Prefer extending/wrapping existing components instead of reinventing them?
+- [ ] Are Radix primitives used properly for accessible behaviors (menus, dialogs, tooltips, etc.)?
+
+If any legacy pattern or import appears, refactor it to the current shadcn/ui style.
+
+---
+
+## 7. Interaction & State Coverage
+
+- [ ] Does every interactive component define:
+  - [ ] Default state
+  - [ ] Hover state (`hover:` classes, possibly scale transform)
+  - [ ] Focus state (`focus-visible:` / `ring-2 ring-primary-500`)
+  - [ ] Disabled state (`disabled:` styles and `aria-disabled` or `disabled` attributes)
+- [ ] For data-driven components, are the following states handled:
+  - [ ] Loading state
+  - [ ] Error state
+  - [ ] Empty state
+- [ ] Are transitions consistent:
+  - [ ] `transition` + `duration-200` on hover/interactive elements
+  - [ ] Cards use `translate-y-[-2px]` + `shadow-xl` on hover where appropriate
+
+If any state is missing, implement it before returning the component.
+
+---
+
+## 8. Accessibility (A11y) Validation
+
+- [ ] Contrast:
+  - [ ] Does text have sufficient contrast against the background (WCAG AA)?
+  - [ ] Are primary CTAs clearly distinguishable?
+- [ ] Keyboard:
+  - [ ] Can all interactive elements be reached via keyboard (Tab)?
+  - [ ] Are focus states visible and not removed?
+- [ ] ARIA:
+  - [ ] Do icon-only buttons or controls have `aria-label` or accessible text?
+  - [ ] Are roles and aria attributes only used when needed and correctly applied?
+
+If any of these fail, adjust colors, focus styles, or ARIA attributes.
+
+---
+
+## 9. Anti-Pattern Guard
+
+- [ ] No inline styles, except where dynamic style calculations are strictly necessary.
+- [ ] No usage of raw `className` with arbitrary values when a token utility exists.
+- [ ] No mixing of design systems (no MUI, Chakra, etc.) – only Tailwind + shadcn/ui.
+- [ ] No deprecated shadcn/ui APIs, props, or structures.
+
+If an anti-pattern is detected, refactor to match the design system.
+
+---
+
+## 10. Final Self-Review
+
+Before finalizing:
+
+- [ ] Does the UI feel visually consistent with the rest of the system (colors, spacing, typography)?
+- [ ] Does the layout work across typical breakpoints (mobile, tablet, desktop)?
+- [ ] Would this component be reusable and composable in other parts of the app?
+- [ ] Are all design decisions aligned with `design.mdc` and tokens from `.cursor/tokens.json`?
+
+If the answer to any of these is “no” or “not sure”, refine the code until it clearly matches the system.

@@ -1,0 +1,283 @@
+# ARCHITECTURE GUIDELINES (`architecture.mdc`)
+
+This file defines the **technical architecture, folder structure, and coding standards** for the project.
+It focuses on **code & structure**, not visual design (see `design.mdc` for that).
+
+---
+
+## 1. Scope & Precedence
+
+These rules apply to:
+
+- All TypeScript / JavaScript code
+- React / Next.js components and hooks
+- API / data-access logic
+- Shared utilities and services
+
+Precedence:
+
+1. Feature- or project-specific rules (if any)
+2. This `architecture.mdc`
+3. `core.mdc` (global behavior)
+4. Tools / external suggestions (MCP, docs, etc.)
+
+If a tool or external source conflicts with this file, **this file wins**.
+
+---
+
+## 2. Tech Stack & High-Level Principles
+
+- **Framework**: Next.js (App Router) + React
+- **Language**: TypeScript (strict)
+- **Styling**: Tailwind CSS + shadcn/ui
+- **Data layer**: Drizzle ORM (under `src/drizzle/**`) where applicable
+- **Validation**: Zod (for runtime input validation and schema-driven typing)
+- **Build quality**:
+  - Strict ESLint and Prettier
+  - No `any` unless absolutely unavoidable and clearly justified
+  - No `console.log` in production code (use logging utilities instead)
+
+General principles:
+
+- Favor **clarity over cleverness**.
+- Keep **concerns separated** (UI, domain logic, data access).
+- Design for **testability** and **maintainability**.
+
+---
+
+## 3. Project Structure & Path Aliases
+
+### 3.1 Directory structure
+
+Preferred structure (illustrative):
+
+- `src/app/**` – Next.js App Router routes, layouts, pages, route handlers
+- `src/components/ui/**` – shadcn/ui primitives and low-level UI building blocks
+- `src/components/features/**` – feature-level components (composed UIs, flows)
+- `src/features/**` – feature modules (logic + UI), grouped by domain
+- `src/lib/**` – generic utilities and helpers (non-feature-specific)
+- `src/lib/hooks/**` – reusable React hooks
+- `src/services/**` – data-access, API clients, abstractions to backend / 3rd party
+- `src/types/**` – shared type definitions and DTOs
+- `src/drizzle/**` – Drizzle ORM schema, migrations, and DB-related code
+- `src/config/**` – configuration modules (env, feature flags, etc.)
+- `tests/**` – unit and integration tests (if not colocated)
+
+### 3.2 Path aliases
+
+Use path aliases consistently; avoid long relative imports like `../../../`:
+
+- `@components/*` → `src/components/*`
+- `@lib/*`        → `src/lib/*`
+- `@features/*`   → `src/features/*`
+- `@services/*`   → `src/services/*`
+- `@types/*`      → `src/types/*`
+- `@drizzle/*`    → `src/drizzle/*` (if configured)
+
+**Rules**
+
+- Prefer path aliases over deep relative paths.
+- Keep index files (`index.ts`, `index.tsx`) small and focused on re-exports or light composition.
+
+---
+
+## 4. TypeScript & Validation
+
+- Use **strict TypeScript**:
+  - No untyped parameters, no inferred `any`.
+  - Use explicit generics where necessary.
+- Avoid `any`:
+  - If unavoidable, localize and document it.
+- Derive types from schemas:
+  - Use `z.infer<typeof schema>` for Zod schemas.
+- Prefer **type-safe APIs**:
+  - DTOs and domain types live in `@types` or feature folders.
+  - Avoid duplicating types between frontend and backend; share where possible.
+
+### Additional Validation Rules (from prompt.json)
+
+- All external input (APIs, forms, dynamic data) must be validated using **Zod**.
+- Whenever possible, derive TypeScript types using `z.infer<typeof Schema>` instead of manually rewriting types.
+- Never use `any` to bypass validation or typing; localize and document unavoidable exceptions.
+- Avoid deeply nested relative imports (e.g. ../../../..). Use path aliases consistently.
+- When implementing new components, check existing primitives in `src/components/ui/**` and existing feature-level components in `src/components/features/**` before creating a new one.
+- Never swallow errors silently. Always surface meaningfully typed error results or error-boundary-safe states.
+
+
+---
+
+## 5. Data Flow & State Management
+
+### 5.1 Local vs global state
+
+- Default: **local component state + React hooks**.
+- Extract shared logic into custom hooks under `src/lib/hooks/**` or `src/features/**`.
+- Introduce global state management libraries only when:
+  - There is a clear cross-cutting concern that cannot be handled by lifting state or context.
+  - The trade-off is justified and documented.
+
+### 5.2 Data fetching
+
+- Prefer **Next.js data-fetching primitives** (server components, route handlers) where appropriate.
+- Keep **data-fetching and side effects** in:
+  - `src/services/**` (API client functions)
+  - Route handlers / server actions
+  - Custom hooks (for client-side data access)
+- UI components should be mostly **presentational**, delegating heavy logic to services/hooks.
+
+---
+
+## 6. Data Layer & Drizzle ORM
+
+When working with persistent data:
+
+- Place schema and DB logic under `src/drizzle/**`.
+- Use Drizzle ORM for:
+  - Type-safe queries
+  - Migrations
+  - Schema definitions
+- Higher-level services in `src/services/**` wrap Drizzle calls and expose:
+  - Clear, typed functions for the rest of the app.
+  - Domain-level operations, not raw queries.
+
+UI components and feature logic must not depend directly on low-level DB details; they should consume **service functions**.
+
+---
+
+## 7. UI Architecture (Non-visual)
+
+> Visual design, tokens, spacing, and patterns are covered in `design.mdc`.  
+> This section focuses on **structure and composition**, not styling details.
+
+- **shadcn/ui components**:
+  - Live in `src/components/ui/**`.
+  - Are treated as primitives or small building blocks.
+- **Feature components**:
+  - Live in `src/components/features/**` or under `src/features/**`.
+  - Compose multiple primitives and domain logic for specific use-cases.
+- Avoid “god components”:
+  - Components should have a focused responsibility.
+  - Break down large UIs into smaller, composable pieces.
+- Forms:
+  - Use shared form components and schema-based validation (e.g. Zod + React Hook Form if used in the project).
+  - Keep validation logic close to the domain and reused across UI + API where possible.
+
+---
+
+## 8. Error, Loading & Empty States
+
+Every non-trivial data-driven UI must handle:
+
+- **Loading** state:
+  - Skeleton, spinner, or placeholder components.
+- **Error** state:
+  - Clear message, guidance, and (if possible) a retry action.
+- **Empty** state:
+  - Helpful copy and clear next steps, not just “No data”.
+
+Rules:
+
+- Never swallow errors silently.
+- Propagate errors through **well-typed** error boundaries or states.
+- Ensure states align with the design system (`design.mdc`) but the **logic and branching** belong here.
+
+---
+
+## 9. Tests & Quality
+
+- For new logic and critical paths:
+  - Write **unit tests** (Vitest, Jest or project-standard) for:
+    - Pure functions
+    - Complex hooks
+    - Service-layer logic
+  - Add **e2e tests** (Playwright, Cypress, etc.) for:
+    - Critical flows
+    - Important user journeys
+
+Testing guidelines:
+
+- Keep tests deterministic and fast.
+- Avoid heavy mocking at the expense of realism; prefer testing behavior over implementation details.
+- Co-locate tests near the code where it makes sense, or use `tests/**` with clear naming.
+
+---
+
+## 10. Logging & Observability
+
+- Do not use `console.log` in production code.
+- Use the project’s **logging utility** (e.g. `@lib/log` or similar) for:
+  - Errors
+  - Important lifecycle events
+  - Debug information when needed
+
+When implementing new features:
+
+- Consider what needs to be observable:
+  - API failures
+  - Unexpected states
+  - Key user actions
+
+---
+
+## 11. Performance & Bundling
+
+- Avoid unnecessary client-side code:
+  - Prefer Server Components where appropriate.
+  - Use dynamic imports (`React.lazy` or `next/dynamic`) only when:
+    - You are splitting large, rarely used components.
+    - It meaningfully reduces initial bundle size.
+- Prevent unnecessary re-renders:
+  - Use `React.memo`, `useMemo`, `useCallback` judiciously.
+  - Keep props stable; avoid inline heavy functions where not needed.
+- For lists / heavy UIs:
+  - Consider virtualization and pagination if data volume is large.
+
+Performance should be balanced with readability; do not prematurely optimize.
+
+---
+
+## 12. Security & Configuration
+
+- **Secrets & env**:
+  - Never hardcode secrets or credentials.
+  - Access environment variables through a typed config module (e.g. using Zod to validate `process.env`).
+- **Input validation**:
+  - Validate external input (forms, API payloads) using Zod or equivalent schemas.
+- **Authentication / Authorization**:
+  - Follow project-specific patterns (not defined here).
+  - Keep auth logic separated from pure UI components.
+
+---
+
+## 13. Dependencies & Libraries
+
+- Do not add new dependencies without strong justification.
+- Prefer:
+  - Existing utilities in `src/lib/**` and `src/services/**`.
+  - Stable and well-documented OSS with good ecosystem support.
+- When introducing a new library:
+  - Explain why it is needed.
+  - Integrate it in a way that keeps the rest of the codebase decoupled (e.g. wrap it in an adapter/service).
+
+---
+
+## 14. Collaboration with `workflow.mdc` (Future)
+
+Once `workflow.mdc` is defined:
+
+- Use it for **process-level behavior**:
+  - Research → design → implementation → review steps
+  - How to handle user requests from first interpretation to final output
+- `architecture.mdc` focuses on:
+  - **What the codebase should look like**
+  - **How responsibilities are structured**
+
+When in doubt:
+
+- Ask: “Is this about *how we code* (architecture) or *how we work* (workflow)?”
+  - If it’s about code structure → `architecture.mdc`.
+  - If it’s about steps and process → `workflow.mdc`.
+
+---
+
+By following `architecture.mdc` together with `core.mdc`, `design.mdc`, `design.checklist.mdc` and `tokens.json`, the assistant should consistently produce **clean, well-structured, production-quality code** that fits your project’s architecture and design system.

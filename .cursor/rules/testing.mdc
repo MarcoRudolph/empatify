@@ -1,0 +1,787 @@
+# TESTING – Test Infrastructure & Guidelines (`testing.mdc`)
+
+This file defines the **testing strategy, infrastructure, and best practices** for the Empatify project.
+It provides comprehensive guidance on how to write, run, and maintain tests across all layers of the application.
+
+---
+
+## 1. Test Stack Overview
+
+The project uses a **layered testing approach** with modern tools:
+
+### Core Testing Tools
+
+- **Vitest** (`^3.2.4`) – Unit and component testing
+  - Fast, Vite-native test runner
+  - Jest-compatible API
+  - Built-in coverage support
+  - jsdom environment for DOM testing
+
+- **@testing-library/react** (`^16.3.0`) – Component testing
+  - React Testing Library for component tests
+  - Focuses on user-centric testing
+  - Accessibility-first queries
+
+- **Playwright** (`^1.54.2`) – End-to-end testing
+  - Multi-browser automation (Chrome, Firefox, Safari)
+  - Mobile device emulation
+  - Built-in screenshots, videos, and traces
+
+- **@cucumber/cucumber** (`^12.1.0`) – Behavior-Driven Development
+  - Gherkin syntax for readable test scenarios
+  - Step definitions in TypeScript
+  - BDD workflow integration
+
+- **MSW** (`^2.10.5`) – API mocking
+  - Mock Service Worker for HTTP interception
+  - Works with both Vitest and Playwright
+  - Realistic API response mocking
+
+- **@axe-core/playwright** (`^4.10.2`) – Accessibility testing
+  - Automated accessibility scanning
+  - WCAG compliance checking
+  - Integrated with Playwright tests
+
+---
+
+## 2. Test Structure & Organization
+
+### Directory Structure
+
+```
+/tests
+├── /unit              # Unit tests (Vitest)
+│   └── *.test.ts      # Test individual functions, utilities, business logic
+├── /component         # Component tests (Vitest + Testing Library)
+│   └── *.test.tsx     # Test React components in isolation
+├── /e2e               # End-to-end tests (Playwright + Cucumber)
+│   ├── /features      # Gherkin .feature files (User Stories)
+│   │   └── *.feature  # BDD scenarios in Gherkin syntax
+│   ├── /steps         # Cucumber step definitions
+│   │   └── *.steps.ts # Map Gherkin steps to Playwright actions
+│   ├── /pages         # Page Object Model
+│   │   └── *.ts       # Encapsulate page interactions
+│   ├── /fixtures      # Test data and fixtures
+│   └── /reports       # Test reports (HTML, JSON, XML)
+├── /mocks             # MSW handlers for API mocking
+│   ├── handlers.ts    # Request handlers
+│   └── server.ts      # MSW server setup
+└── /utils             # Test utilities and helpers
+    └── test-utils.tsx  # Custom render, helpers, mocks
+```
+
+### Test File Naming
+
+- **Unit tests**: `*.test.ts` (e.g., `utils.test.ts`)
+- **Component tests**: `*.test.tsx` (e.g., `Button.test.tsx`)
+- **E2E tests**: `*.spec.ts` or use Cucumber `.feature` files
+- **Step definitions**: `*.steps.ts` (e.g., `home.steps.ts`)
+- **Page Objects**: `*.ts` with descriptive names (e.g., `HomePage.ts`)
+
+---
+
+## 3. Running Tests
+
+### Available Scripts
+
+```bash
+# Unit tests
+npm run test:unit              # Run all unit tests once
+npm run test:component         # Run component tests only
+
+# E2E tests
+npm run test:e2e               # Run Playwright tests (headless)
+npm run test:e2e:headed        # Run Playwright tests (with browser UI)
+npm run e2e:report             # View E2E test reports
+
+# Coverage
+npm run test:coverage          # Generate coverage report
+
+# Type checking
+npm run typecheck              # TypeScript type checking
+```
+
+### Watch Mode (Development)
+
+For unit and component tests, Vitest supports watch mode:
+```bash
+npx vitest                    # Watch mode (auto-rerun on changes)
+npx vitest --ui               # Interactive UI mode
+```
+
+### Debugging Tests
+
+**Unit/Component Tests:**
+```bash
+npx vitest --ui               # Interactive test UI
+npx vitest --reporter=verbose # Verbose output
+```
+
+**E2E Tests:**
+```bash
+npm run test:e2e:headed       # Run with visible browser
+npx playwright test --debug   # Debug mode (step through)
+```
+
+---
+
+## 4. Unit Testing (Vitest)
+
+### Purpose
+Test individual functions, utilities, and business logic in isolation.
+
+### Location
+`tests/unit/`
+
+### Configuration
+- **Config**: `vitest.config.ts`
+- **Environment**: `jsdom` (for DOM APIs)
+- **Setup**: `tests/setup.ts` (global test setup)
+- **Aliases**: `@/` resolves to `src/`
+
+### Example
+
+```typescript
+import { describe, it, expect } from 'vitest'
+import { formatDate, calculateScore } from '@/lib/utils/helpers'
+
+describe('formatDate', () => {
+  it('should format date correctly', () => {
+    const date = new Date('2025-01-15')
+    expect(formatDate(date)).toBe('Jan 15, 2025')
+  })
+
+  it('should handle invalid dates', () => {
+    expect(() => formatDate(null as any)).toThrow()
+  })
+})
+
+describe('calculateScore', () => {
+  it('should calculate score correctly', () => {
+    expect(calculateScore(10, 5)).toBe(50)
+  })
+})
+```
+
+### Best Practices
+
+- **Test one thing per test** – Each `it()` should verify a single behavior
+- **Use descriptive names** – Test names should explain what is being tested
+- **Follow AAA pattern** – Arrange, Act, Assert
+- **Test edge cases** – Null, undefined, empty strings, boundary values
+- **Mock external dependencies** – Use MSW or Vitest mocks for API calls
+
+---
+
+## 5. Component Testing (Testing Library + Vitest)
+
+### Purpose
+Test React components in isolation with DOM behavior validation and accessibility checks.
+
+### Location
+`tests/component/`
+
+### Setup
+Uses custom render function from `tests/utils/test-utils.tsx` that includes:
+- `NextIntlClientProvider` for internationalization
+- Design token context
+- Common test setup
+
+### Example
+
+```typescript
+import { describe, it, expect } from 'vitest'
+import { render, screen, userEvent } from '@/tests/utils/test-utils'
+import { Button } from '@/components/ui/Button'
+import { expectToBeAccessible } from '@/tests/utils/test-utils'
+
+describe('Button Component', () => {
+  it('should render with text', () => {
+    render(<Button>Click me</Button>)
+    expect(screen.getByRole('button', { name: /click me/i })).toBeInTheDocument()
+  })
+
+  it('should be accessible', async () => {
+    const { container } = render(<Button>Click me</Button>)
+    await expectToBeAccessible(container)
+  })
+
+  it('should handle click events', async () => {
+    const handleClick = vi.fn()
+    render(<Button onClick={handleClick}>Click me</Button>)
+    
+    const button = screen.getByRole('button', { name: /click me/i })
+    await userEvent.click(button)
+    
+    expect(handleClick).toHaveBeenCalledTimes(1)
+  })
+
+  it('should be disabled when disabled prop is true', () => {
+    render(<Button disabled>Click me</Button>)
+    expect(screen.getByRole('button')).toBeDisabled()
+  })
+})
+```
+
+### Best Practices
+
+- **Test user interactions, not implementation** – Focus on what users see and do
+- **Use semantic queries** – Prefer `getByRole`, `getByLabelText` over `getByTestId`
+- **Always test accessibility** – Use `expectToBeAccessible()` helper
+- **Test loading/error states** – Verify component behavior in all states
+- **Use `userEvent` over `fireEvent`** – More realistic user interactions
+
+### Available Queries (Priority Order)
+
+1. `getByRole` – Most accessible (preferred)
+2. `getByLabelText` – For form inputs
+3. `getByPlaceholderText` – For inputs with placeholders
+4. `getByText` – For text content
+5. `getByDisplayValue` – For form values
+6. `getByTestId` – Last resort (use `data-testid`)
+
+---
+
+## 6. End-to-End Testing (Playwright + Cucumber)
+
+### Purpose
+Test complete user workflows and stories across multiple browsers and devices.
+
+### Location
+`tests/e2e/`
+
+### Configuration
+- **Config**: `playwright.config.ts`
+- **Base URL**: `http://localhost:3000`
+- **Browsers**: Chromium, Firefox, WebKit
+- **Mobile**: Pixel 5, iPhone 12
+- **Auto-start**: Dev server starts automatically
+
+### BDD Workflow with Cucumber
+
+#### 1. Write Feature Files (Gherkin)
+
+Create `.feature` files in `tests/e2e/features/`:
+
+```gherkin
+Feature: Home Page
+  As a user
+  I want to visit the home page
+  So that I can learn about Empatify
+
+  Scenario: View home page content
+    Given I am on the home page
+    When I view the page
+    Then I should see the main heading "Empatify"
+    And I should see a subtitle about the design system
+
+  Scenario: Navigate to features section
+    Given I am on the home page
+    When I scroll down the page
+    Then I should see the features section
+
+  Scenario: Click Get Started button
+    Given I am on the home page
+    When I click the "Get Started" button
+    Then the button should have a hover effect
+```
+
+#### 2. Define Step Definitions
+
+Map Gherkin steps to Playwright actions in `tests/e2e/steps/*.steps.ts`:
+
+```typescript
+import { Given, When, Then } from '@cucumber/cucumber'
+import { expect } from '@playwright/test'
+import { HomePage } from '../pages/HomePage'
+
+let homePage: HomePage
+
+Given('I am on the home page', async function() {
+  homePage = new HomePage(this.page)
+  await homePage.goto()
+})
+
+When('I view the page', async function() {
+  await homePage.waitForPageLoad()
+})
+
+Then('I should see the main heading {string}', async function(heading: string) {
+  const title = await homePage.getMainHeading()
+  expect(title).toBe(heading)
+})
+```
+
+#### 3. Create Page Objects
+
+Encapsulate page interactions in `tests/e2e/pages/*.ts`:
+
+```typescript
+import { Page, Locator } from '@playwright/test'
+
+export class HomePage {
+  readonly page: Page
+  readonly mainHeading: Locator
+  readonly getStartedButton: Locator
+
+  constructor(page: Page) {
+    this.page = page
+    this.mainHeading = page.locator('h1')
+    this.getStartedButton = page.getByRole('button', { name: 'Get Started' })
+  }
+
+  async goto() {
+    await this.page.goto('/')
+  }
+
+  async waitForPageLoad() {
+    await this.page.waitForLoadState('networkidle')
+    await this.mainHeading.waitFor({ state: 'visible' })
+  }
+
+  async getMainHeading(): Promise<string> {
+    return await this.mainHeading.textContent() || ''
+  }
+}
+```
+
+#### 4. Run Tests
+
+```bash
+npm run test:e2e              # Run all E2E tests
+npm run test:e2e:headed        # Run with visible browser
+npm run e2e:report             # View HTML report
+```
+
+### Direct Playwright Tests (Without Cucumber)
+
+You can also write direct Playwright tests:
+
+```typescript
+import { test, expect } from '@playwright/test'
+import { HomePage } from './pages/HomePage'
+
+test('home page loads correctly', async ({ page }) => {
+  const homePage = new HomePage(page)
+  await homePage.goto()
+  await homePage.waitForPageLoad()
+  
+  expect(await homePage.getMainHeading()).toBe('Empatify')
+})
+```
+
+### Best Practices
+
+- **Use Page Objects** – Encapsulate page interactions for reusability
+- **Test from user perspective** – Write tests as users would interact
+- **Test critical user journeys** – Focus on main workflows
+- **Use data-testid sparingly** – Prefer semantic selectors
+- **Wait for elements** – Use `waitFor()` instead of `sleep()`
+- **Test across browsers** – Verify compatibility
+
+---
+
+## 7. Accessibility Testing
+
+### Integration
+
+Accessibility testing is integrated at multiple levels:
+
+1. **Component Tests** – Use `expectToBeAccessible()` helper
+2. **E2E Tests** – Use `@axe-core/playwright` for full-page scans
+
+### Component Level
+
+```typescript
+import { expectToBeAccessible } from '@/tests/utils/test-utils'
+
+it('should be accessible', async () => {
+  const { container } = render(<MyComponent />)
+  await expectToBeAccessible(container)
+})
+```
+
+### E2E Level
+
+```typescript
+import { AxeBuilder } from '@axe-core/playwright'
+
+async getAccessibilityViolations() {
+  const accessibilityScanResults = await new AxeBuilder({ page: this.page })
+    .include('main')
+    .analyze()
+  
+  return accessibilityScanResults.violations
+}
+```
+
+### Cucumber Step
+
+```typescript
+When('I check the page for accessibility', async function() {
+  await homePage.checkAccessibility()
+})
+
+Then('there should be no accessibility violations', async function() {
+  const violations = await homePage.getAccessibilityViolations()
+  expect(violations).toHaveLength(0)
+})
+```
+
+### WCAG Standards
+
+- **Target**: WCAG 2.1 Level AA compliance
+- **Check**: Color contrast, ARIA labels, keyboard navigation, screen reader compatibility
+
+---
+
+## 8. API Mocking (MSW)
+
+### Purpose
+Mock API calls during testing for consistent, fast, and reliable tests.
+
+### Location
+`tests/mocks/`
+
+### Setup
+
+**Handlers** (`tests/mocks/handlers.ts`):
+```typescript
+import { http, HttpResponse } from 'msw'
+
+export const handlers = [
+  http.get('/api/users', () => {
+    return HttpResponse.json([
+      { id: 1, name: 'John Doe' },
+      { id: 2, name: 'Jane Smith' }
+    ])
+  }),
+
+  http.post('/api/users', async ({ request }) => {
+    const body = await request.json()
+    return HttpResponse.json({ id: 3, ...body }, { status: 201 })
+  })
+]
+```
+
+**Server Setup** (`tests/mocks/server.ts`):
+```typescript
+import { setupServer } from 'msw/node'
+import { handlers } from './handlers'
+
+export const server = setupServer(...handlers)
+```
+
+### Usage in Tests
+
+MSW automatically intercepts HTTP requests in tests. No additional setup needed in individual tests.
+
+### Custom Mocks Per Test
+
+```typescript
+import { server } from '@/tests/mocks/server'
+import { http, HttpResponse } from 'msw'
+
+it('should handle API error', async () => {
+  server.use(
+    http.get('/api/users', () => {
+      return HttpResponse.json({ error: 'Server error' }, { status: 500 })
+    })
+  )
+
+  // Test error handling
+})
+```
+
+---
+
+## 9. Test Utilities
+
+### Custom Render Function
+
+Located in `tests/utils/test-utils.tsx`:
+
+```typescript
+import { render } from '@/tests/utils/test-utils'
+import { MyComponent } from '@/components/MyComponent'
+
+it('should render', () => {
+  render(<MyComponent />)
+  // Automatically includes NextIntlClientProvider and other providers
+})
+```
+
+### Available Helpers
+
+- `render()` – Custom render with all providers
+- `expectToBeAccessible()` – Accessibility assertion
+- `createMockUser()` – Generate mock user data
+- `createMockDesignTokens()` – Generate mock design tokens
+- `fillFormField()` – Helper for form testing
+- `submitForm()` – Helper for form submission
+
+---
+
+## 10. Test Coverage
+
+### Generate Coverage Report
+
+```bash
+npm run test:coverage
+```
+
+### Coverage Targets
+
+- **Statements**: 80%
+- **Branches**: 80%
+- **Functions**: 80%
+- **Lines**: 80%
+
+### Coverage Reports
+
+- **Text**: Console output
+- **JSON**: `coverage/coverage-final.json`
+- **HTML**: `coverage/index.html` (open in browser)
+
+### Excluded from Coverage
+
+- `node_modules/`
+- `tests/`
+- `**/*.d.ts`
+- `**/*.config.*`
+- `src/types/`
+
+---
+
+## 11. Writing New Tests
+
+### Checklist for New Features
+
+When adding a new feature, ensure you:
+
+1. ✅ **Unit tests** for utility functions and business logic
+2. ✅ **Component tests** for React components (with accessibility)
+3. ✅ **E2E tests** for critical user journeys
+4. ✅ **Accessibility tests** at component and E2E level
+5. ✅ **API mocking** if the feature makes HTTP requests
+
+### Test File Template
+
+**Unit Test** (`tests/unit/myFunction.test.ts`):
+```typescript
+import { describe, it, expect } from 'vitest'
+import { myFunction } from '@/lib/utils/myFunction'
+
+describe('myFunction', () => {
+  it('should do something', () => {
+    expect(myFunction()).toBe(expected)
+  })
+})
+```
+
+**Component Test** (`tests/component/MyComponent.test.tsx`):
+```typescript
+import { describe, it, expect } from 'vitest'
+import { render, screen } from '@/tests/utils/test-utils'
+import { MyComponent } from '@/components/MyComponent'
+
+describe('MyComponent', () => {
+  it('should render', () => {
+    render(<MyComponent />)
+    expect(screen.getByRole('...')).toBeInTheDocument()
+  })
+})
+```
+
+**E2E Feature** (`tests/e2e/features/my-feature.feature`):
+```gherkin
+Feature: My Feature
+  As a user
+  I want to do something
+  So that I can achieve a goal
+
+  Scenario: Basic flow
+    Given I am on the page
+    When I do something
+    Then I should see the result
+```
+
+---
+
+## 12. Debugging Tests
+
+### Unit/Component Tests
+
+```bash
+npx vitest --ui               # Interactive UI
+npx vitest --reporter=verbose # Verbose output
+npx vitest --run --reporter=verbose MyComponent.test.tsx  # Single file
+```
+
+### E2E Tests
+
+```bash
+npm run test:e2e:headed       # Run with visible browser
+npx playwright test --debug   # Debug mode (step through)
+npx playwright test --headed --project=chromium  # Single browser
+```
+
+### View Reports
+
+```bash
+# E2E HTML reports
+open tests/e2e/reports/html/index.html
+
+# Coverage reports
+open coverage/index.html
+
+# Cucumber reports
+open tests/e2e/reports/cucumber.html
+```
+
+---
+
+## 13. CI/CD Integration
+
+### GitHub Actions Example
+
+```yaml
+- name: Run Tests
+  run: |
+    npm run test:unit
+    npm run test:component
+    npm run test:e2e
+
+- name: Generate Coverage
+  run: npm run test:coverage
+
+- name: Upload Coverage
+  uses: codecov/codecov-action@v3
+```
+
+### CI-Optimized Commands
+
+- Tests run in parallel where possible
+- E2E tests retry on failure (2 retries in CI)
+- Coverage reports uploaded to code coverage service
+
+---
+
+## 14. Common Patterns & Examples
+
+### Testing Async Operations
+
+```typescript
+it('should fetch data', async () => {
+  const { result } = renderHook(() => useFetchData())
+  await waitFor(() => {
+    expect(result.current.data).toBeDefined()
+  })
+})
+```
+
+### Testing Forms
+
+```typescript
+import { fillFormField, submitForm } from '@/tests/utils/test-utils'
+
+it('should submit form', async () => {
+  render(<MyForm />)
+  await fillFormField('Email', 'test@example.com')
+  await submitForm('Submit')
+  // Assert form submission
+})
+```
+
+### Testing Navigation
+
+```typescript
+import { useRouter } from 'next/navigation'
+
+it('should navigate on click', async () => {
+  const router = useRouter()
+  const spy = vi.spyOn(router, 'push')
+  
+  render(<Link href="/about">About</Link>)
+  await userEvent.click(screen.getByRole('link'))
+  
+  expect(spy).toHaveBeenCalledWith('/about')
+})
+```
+
+### Testing Responsive Design
+
+```typescript
+// In E2E tests
+When('I view the page on mobile', async function() {
+  await this.page.setViewportSize({ width: 375, height: 667 })
+})
+
+Then('the layout should be responsive', async function() {
+  const isResponsive = await homePage.checkResponsiveLayout()
+  expect(isResponsive).toBe(true)
+})
+```
+
+---
+
+## 15. Troubleshooting
+
+### Common Issues
+
+**Tests fail with "Cannot find module"**
+- Check path aliases in `vitest.config.ts`
+- Ensure `@/` resolves to `src/`
+
+**E2E tests fail with "Navigation timeout"**
+- Ensure dev server is running (`npm run dev`)
+- Check `baseURL` in `playwright.config.ts`
+
+**Cucumber steps not found**
+- Verify step definitions are in `tests/e2e/steps/**/*.ts`
+- Check `cucumber.js` configuration
+
+**MSW not intercepting requests**
+- Ensure `server.listen()` is called in test setup
+- Check handler patterns match request URLs
+
+**Accessibility tests fail**
+- Review violations in test output
+- Fix ARIA labels, color contrast, keyboard navigation
+
+---
+
+## 16. Best Practices Summary
+
+### General
+
+- ✅ Write tests before or alongside code (TDD/BDD)
+- ✅ Keep tests simple and focused
+- ✅ Use descriptive test names
+- ✅ Follow AAA pattern (Arrange, Act, Assert)
+- ✅ Test behavior, not implementation
+
+### Component Tests
+
+- ✅ Test user interactions, not internal state
+- ✅ Use semantic queries (`getByRole`, `getByLabelText`)
+- ✅ Always test accessibility
+- ✅ Test loading, error, and empty states
+
+### E2E Tests
+
+- ✅ Write from user perspective
+- ✅ Use Page Objects for maintainability
+- ✅ Test critical user journeys
+- ✅ Test across multiple browsers
+
+### Maintenance
+
+- ✅ Keep tests up to date with code changes
+- ✅ Remove obsolete tests
+- ✅ Refactor tests when patterns emerge
+- ✅ Review test coverage regularly
+
+---
+
+This testing infrastructure provides comprehensive coverage from unit tests to end-to-end scenarios, ensuring code quality, accessibility, and user experience across all layers of the application.

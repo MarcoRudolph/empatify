@@ -120,3 +120,15 @@ Then('the color contrast should meet WCAG AA standards', async function() {
   const contrastCompliant = await homePage.checkColorContrast()
   expect(contrastCompliant).toBe(true)
 })
+
+
+
+
+
+
+
+
+
+
+
+

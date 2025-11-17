@@ -1,0 +1,166 @@
+{
+  "common": {
+    "appName": "Empatify",
+    "letsPlay": "Vamos Jogar",
+    "login": "Entrar",
+    "logout": "Sair",
+    "settings": "Configurações",
+    "search": "Pesquisar",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "close": "Fechar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "previous": "Anterior",
+    "submit": "Enviar",
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "dashboard": "Painel"
+  },
+  "landing": {
+    "title": "Empatify",
+    "subtitle": "Use your empathy and spotify to win the crowd",
+    "about": {
+      "title": "Sobre o Empatify",
+      "description": "Empatify é um jogo multiplayer de adivinhação e avaliação de música onde você se conecta com amigos através de experiências musicais compartilhadas."
+    },
+    "howTo": {
+      "title": "How to",
+      "step1": "Crie ou entre em uma sala",
+      "step2": "Sugira músicas e avalie as sugestões de outros",
+      "step3": "Descubra novas músicas e construa conexões"
+    }
+  },
+  "auth": {
+    "loginWithGoogle": "Entrar com Google",
+    "loginWithMagicLink": "Entrar com Magic Link",
+    "email": "E-mail",
+    "enterEmail": "Digite seu e-mail",
+    "sendMagicLink": "Enviar Magic Link",
+    "magicLinkSent": "Magic Link enviado! Verifique seu e-mail.",
+    "invalidEmail": "Endereço de e-mail inválido"
+  },
+  "dashboard": {
+    "title": "Painel",
+    "startGame": "Iniciar Jogo",
+    "lobbies": "Salas",
+    "linkSpotify": "Vincular Spotify",
+    "userSearch": "Pesquisar Usuários",
+    "friends": "Amigos",
+    "miniStats": "Estatísticas Rápidas",
+    "createGame": "Criar Jogo",
+    "freePlanRoundsNote": "O plano gratuito está limitado a 5 rodadas",
+    "freePlanCategoryNote": "O plano gratuito permite apenas a categoria 'Todas'",
+    "noLobbies": "Você ainda não tem salas"
+  },
+  "lobby": {
+    "create": "Criar Sala",
+    "categoryAll": "Todas",
+    "category60s": "Anos 60",
+    "category70s": "Anos 70",
+    "category80s": "Anos 80",
+    "category90s": "Anos 90",
+    "category2000s": "Anos 2000",
+    "category2010s": "Anos 2010",
+    "category2020s": "Anos 2020",
+    "categorySchlager": "Schlager",
+    "categoryTechno": "Techno",
+    "categoryHipHopRnB": "HipHop & R&B",
+    "categoryRock": "Rock",
+    "categoryDubstep": "DubStep",
+    "categoryPop": "Pop",
+    "categoryJazz": "Jazz",
+    "categoryCountry": "Country",
+    "categoryElectronic": "Eletrônica",
+    "categoryIndie": "Indie & Alternativo",
+    "join": "Entrar na Sala",
+    "invite": "Convidar Usuários",
+    "category": "Categoria Musical",
+    "rounds": "Número de Rodadas",
+    "selectCategory": "Selecionar Categoria",
+    "selectRounds": "Selecionar Rodadas",
+    "round": "Rodada",
+    "of": "de",
+    "suggestSong": "Sugerir Música",
+    "rateSong": "Avaliar Música",
+    "averageRating": "Avaliação Média",
+    "individualRatings": "Avaliações Individuais",
+    "noSongSuggested": "Nenhuma música sugerida ainda",
+    "notRated": "Ainda não avaliado"
+  },
+  "game": {
+    "round": "Rodada",
+    "progress": "Progresso",
+    "suggestSong": "Sugerir Música",
+    "suggestSongHighlight": "Você ainda não sugeriu uma música",
+    "users": "Usuários",
+    "song": "Música",
+    "rating": "Avaliação",
+    "playSong": "Reproduzir Música",
+    "rateAfterListening": "Avaliar após ouvir (1-10)"
+  },
+  "settings": {
+    "title": "Configurações",
+    "profile": "Perfil",
+    "displayName": "Nome de Exibição",
+    "avatar": "Avatar",
+    "uploadAvatar": "Enviar Avatar",
+    "language": "Idioma",
+    "selectLanguage": "Selecionar Idioma",
+    "subscription": "Assinatura",
+    "freePlan": "Plano Gratuito",
+    "proPlan": "Plano Pro",
+    "upgradeToPro": "Atualizar para Pro",
+    "currentPlan": "Plano Atual"
+  },
+  "stats": {
+    "title": "Estatísticas",
+    "wins": "Vitórias",
+    "gamesPlayed": "Jogos Jogados",
+    "playersPlayedWith": "Jogadores com Quem Jogou",
+    "topRatingsGiven": "Melhores Avaliações Dadas",
+    "gameHistory": "Histórico de Jogos"
+  },
+  "friends": {
+    "title": "Amigos",
+    "addFriend": "Adicionar Amigo",
+    "searchByEmail": "Pesquisar por E-mail",
+    "searchByName": "Pesquisar por Nome",
+    "noFriends": "Ainda não há amigos",
+    "friendAdded": "Amigo adicionado com sucesso"
+  },
+  "messages": {
+    "title": "Mensagens",
+    "sendMessage": "Enviar Mensagem",
+    "typeMessage": "Digite sua mensagem...",
+    "lobbyInvitation": "Você foi convidado para entrar em uma sala!"
+  },
+  "footer": {
+    "businessName": "rudolpho-chat",
+    "description": "Automação alimentada por IA para suas interações no Instagram. Deixe o bot fazer o trabalho para você.",
+    "developedBy": "Desenvolvido por",
+    "service": {
+      "title": "Serviço",
+      "pricing": "Preços",
+      "proFeatures": "Recursos Pro",
+      "dashboard": "Painel",
+      "documentation": "Documentação"
+    },
+    "legal": {
+      "title": "Legal",
+      "imprint": "Impresso",
+      "termsOfUse": "Termos de uso",
+      "cookiePolicy": "Política de cookies",
+      "privacy": "Política de Privacidade"
+    },
+    "copyright": "© 2025 rudolpho-chat. Todos os direitos reservados.",
+    "privacy": "Política de Privacidade",
+    "imprint": "Impresso",
+    "terms": "Termos de Serviço",
+    "termsOfUse": "Termos de Uso"
+  }
+}
+

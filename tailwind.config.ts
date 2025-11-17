@@ -1,8 +1,10 @@
 import type { Config } from "tailwindcss";
-import designTokens from "./src/styles/tokens";
+
+// Import tokens - use require for CommonJS compatibility in Tailwind config
+const designTokens = require("./src/styles/tokens").default || require("./src/styles/tokens").designTokens;
 
 export default {
-  darkMode: ["class"],
+  darkMode: "class",
   content: ["./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
     extend: {
@@ -66,16 +68,14 @@ export default {
       },
       padding: {
         button: designTokens.layout.buttonPx,
-        card: designTokens.layout.cardPadding
-      },
-      gap: {
-        grid: designTokens.layout.gridGap
-      },
-      padding: {
+        card: designTokens.layout.cardPadding,
         section: {
           desktop: designTokens.layout.sectionPaddingDesktopY,
           mobile: designTokens.layout.sectionPaddingMobileY
         }
+      },
+      gap: {
+        grid: designTokens.layout.gridGap
       },
       transitionDuration: {
         fast: designTokens.motion.duration.fast,

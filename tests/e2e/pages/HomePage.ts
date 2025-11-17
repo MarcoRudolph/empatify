@@ -138,3 +138,15 @@ export class HomePage {
     return textVisible && bgVisible
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,1363 @@
+# API – REST API Conventions & Best Practices (`api.mdc`)
+
+This file defines **REST API design patterns, conventions, and best practices** for building robust, production-ready API routes in Next.js App Router.
+It provides comprehensive guidance on URL structure, HTTP methods, error handling, validation, security, and performance optimization.
+
+---
+
+## 1. Scope & Precedence
+
+These rules apply to:
+
+- All Next.js API route handlers (`src/app/api/**/route.ts`)
+- Server actions and API endpoints
+- Request/response handling
+- Authentication and authorization
+- Input validation and error handling
+- API versioning and documentation
+
+Precedence:
+
+1. Feature- or project-specific API rules (if any)
+2. This `api.mdc`
+3. `architecture.mdc` (for code structure and TypeScript patterns)
+4. `core.mdc` (global behavior)
+
+---
+
+## 2. Next.js App Router API Structure
+
+### 2.1 Route Handler Location
+
+API routes are defined using **route handlers** in the App Router:
+
+```
+src/app/api/
+├── v1/                    # API versioning
+│   ├── users/
+│   │   ├── route.ts       # GET /api/v1/users, POST /api/v1/users
+│   │   └── [id]/
+│   │       └── route.ts  # GET /api/v1/users/:id, PUT, PATCH, DELETE
+│   ├── auth/
+│   │   └── route.ts      # Authentication endpoints
+│   └── health/
+│       └── route.ts      # Health check endpoint
+```
+
+### 2.2 Route Handler Pattern
+
+Each route handler exports named functions for HTTP methods:
+
+```typescript
+// src/app/api/v1/users/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+
+export async function GET(request: NextRequest) {
+  // Handle GET request
+}
+
+export async function POST(request: NextRequest) {
+  // Handle POST request
+}
+```
+
+---
+
+## 3. RESTful URL Naming Conventions
+
+### 3.1 Resource-Oriented Design
+
+**Core Principles:**
+
+- **Use nouns, not verbs** – URLs represent resources, not actions
+- **Use plural nouns** – `/users`, `/products`, `/orders`
+- **Hierarchical structure** – Represent relationships: `/users/{userId}/orders`
+- **Consistent naming** – Use the same conventions across all endpoints
+- **Predictable URLs** – Developers should be able to guess endpoints
+
+### 3.2 URL Structure Examples
+
+```typescript
+// ✅ GOOD - Resource-oriented, predictable
+GET    /api/v1/users              // List all users
+GET    /api/v1/users/{id}         // Get specific user
+POST   /api/v1/users              // Create new user
+PUT    /api/v1/users/{id}         // Replace entire user
+PATCH  /api/v1/users/{id}         // Partially update user
+DELETE /api/v1/users/{id}         // Delete user
+GET    /api/v1/users/{id}/orders  // Get user's orders
+
+// ❌ BAD - Verbs in URLs, inconsistent
+GET    /api/v1/getUsers
+POST   /api/v1/user/create
+GET    /api/v1/user-list
+POST   /api/v1/updateUser/{id}
+```
+
+### 3.3 Query Parameters
+
+Use query parameters for filtering, sorting, and pagination:
+
+```typescript
+// Filtering and search
+GET /api/v1/users?role=admin&status=active
+GET /api/v1/users?search=john
+
+// Sorting
+GET /api/v1/users?sort=name&order=asc
+
+// Pagination
+GET /api/v1/users?page=1&pageSize=20
+GET /api/v1/users?cursor=eyJpZCI6Imxhc3QtaWQifQ==
+```
+
+---
+
+## 4. HTTP Methods & Status Codes
+
+### 4.1 HTTP Method Usage
+
+| Method | Purpose | Idempotent | Safe | Use Case |
+|--------|---------|------------|------|----------|
+| GET | Retrieve resource(s) | Yes | Yes | Fetch data |
+| POST | Create new resource | No | No | Create with side effects |
+| PUT | Replace entire resource | Yes | No | Full update |
+| PATCH | Partially update resource | No | No | Partial update |
+| DELETE | Remove resource | Yes | No | Delete resource |
+| HEAD | Like GET but no body | Yes | Yes | Check existence |
+
+### 4.2 Status Code Standards
+
+**2xx Success:**
+- `200 OK` – Successful GET, PUT, PATCH
+- `201 Created` – Successful POST (resource created)
+- `204 No Content` – Successful DELETE or PUT with no response body
+
+**3xx Redirection:**
+- `301 Moved Permanently` – Resource moved
+- `304 Not Modified` – Cached resource still valid
+
+**4xx Client Error:**
+- `400 Bad Request` – Invalid request (validation errors)
+- `401 Unauthorized` – Missing or invalid authentication
+- `403 Forbidden` – Authenticated but insufficient permissions
+- `404 Not Found` – Resource doesn't exist
+- `409 Conflict` – Resource conflict (e.g., duplicate email)
+- `422 Unprocessable Entity` – Valid format but semantic errors
+- `429 Too Many Requests` – Rate limit exceeded
+
+**5xx Server Error:**
+- `500 Internal Server Error` – Unexpected server error
+- `503 Service Unavailable` – Service temporarily unavailable
+
+### 4.3 Status Code Examples
+
+```typescript
+// Success responses
+return NextResponse.json({ data: user }, { status: 200 })
+return NextResponse.json({ data: newUser }, { status: 201 })
+return new NextResponse(null, { status: 204 }) // No content
+
+// Error responses
+return NextResponse.json(
+  { error: { code: 'VALIDATION_ERROR', message: 'Invalid input' } },
+  { status: 400 }
+)
+return NextResponse.json(
+  { error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
+  { status: 401 }
+)
+return NextResponse.json(
+  { error: { code: 'NOT_FOUND', message: 'User not found' } },
+  { status: 404 }
+)
+```
+
+---
+
+## 5. Request/Response Formats
+
+### 5.1 JSON Standardization
+
+All API requests and responses use JSON with consistent structure:
+
+**Request Headers:**
+```
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer <token>
+```
+
+**Response Headers:**
+```
+Content-Type: application/json
+Cache-Control: public, max-age=3600
+ETag: "abc123"
+```
+
+### 5.2 Response Structure
+
+**Success Response:**
+```typescript
+{
+  "data": {
+    "id": "user-123",
+    "name": "John Doe",
+    "email": "john@example.com"
+  },
+  "meta": {
+    "timestamp": "2025-01-15T10:30:00Z"
+  }
+}
+```
+
+**List Response with Pagination:**
+```typescript
+{
+  "data": [
+    { "id": "user-1", "name": "John" },
+    { "id": "user-2", "name": "Jane" }
+  ],
+  "pagination": {
+    "page": 1,
+    "pageSize": 20,
+    "total": 150,
+    "totalPages": 8,
+    "hasNextPage": true,
+    "hasPreviousPage": false,
+    "cursor": "eyJpZCI6Imxhc3QtaWQifQ==" // For cursor-based pagination
+  }
+}
+```
+
+### 5.3 Pagination Strategies
+
+**Offset-Based Pagination** (Simple, but less efficient for large datasets):
+```typescript
+GET /api/v1/users?page=1&pageSize=20
+```
+
+**Cursor-Based Pagination** (Recommended for large, changing datasets):
+```typescript
+GET /api/v1/users?cursor=eyJpZCI6Imxhc3QtaWQifQ==&limit=20
+```
+
+**Implementation Example:**
+```typescript
+const paginationSchema = z.object({
+  page: z.coerce.number().int().positive().default(1).optional(),
+  pageSize: z.coerce.number().int().positive().max(100).default(20).optional(),
+  cursor: z.string().optional(),
+})
+
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams
+  const pagination = paginationSchema.parse({
+    page: searchParams.get('page'),
+    pageSize: searchParams.get('pageSize'),
+    cursor: searchParams.get('cursor'),
+  })
+
+  // Implement pagination logic
+  // Return paginated response
+}
+```
+
+---
+
+## 6. Error Handling & Response Structure
+
+### 6.1 Standardized Error Response
+
+All errors follow a consistent structure:
+
+```typescript
+{
+  "error": {
+    "code": "ERROR_CODE",           // Machine-readable code
+    "message": "Human-readable message",
+    "status": 400,                   // HTTP status code
+    "timestamp": "2025-01-15T10:30:00Z",
+    "requestId": "req-abc-123",      // For debugging
+    "details": [                     // Optional: field-level errors
+      {
+        "field": "email",
+        "message": "Must be a valid email address",
+        "value": "invalid-email"
+      }
+    ]
+  }
+}
+```
+
+### 6.2 Error Code Categories
+
+**Validation Errors:**
+- `VALIDATION_ERROR` – General validation failure
+- `INVALID_FORMAT` – Invalid data format
+- `MISSING_REQUIRED_FIELD` – Required field missing
+
+**Authentication/Authorization:**
+- `UNAUTHORIZED` – Missing or invalid token
+- `INSUFFICIENT_PERMISSIONS` – Insufficient permissions
+- `TOKEN_EXPIRED` – Authentication token expired
+
+**Resource Errors:**
+- `NOT_FOUND` – Resource doesn't exist
+- `ALREADY_EXISTS` – Resource already exists (duplicate)
+- `CONFLICT` – Resource conflict
+
+**Server Errors:**
+- `INTERNAL_ERROR` – Unexpected server error
+- `SERVICE_UNAVAILABLE` – Service temporarily unavailable
+- `DATABASE_ERROR` – Database operation failed
+
+### 6.3 Error Handling Implementation
+
+```typescript
+// src/lib/api/errors.ts
+export class ApiError extends Error {
+  constructor(
+    public code: string,
+    public message: string,
+    public status: number,
+    public details?: Array<{ field: string; message: string; value?: unknown }>
+  ) {
+    super(message)
+    this.name = 'ApiError'
+  }
+}
+
+export function createErrorResponse(error: ApiError, requestId: string) {
+  return NextResponse.json(
+    {
+      error: {
+        code: error.code,
+        message: error.message,
+        status: error.status,
+        timestamp: new Date().toISOString(),
+        requestId,
+        ...(error.details && { details: error.details }),
+      },
+    },
+    { status: error.status }
+  )
+}
+
+// Usage in route handler
+export async function POST(request: NextRequest) {
+  const requestId = crypto.randomUUID()
+  
+  try {
+    // Validation and processing
+    const body = await request.json()
+    const validated = schema.parse(body)
+    
+    // Business logic
+    const result = await createUser(validated)
+    
+    return NextResponse.json({ data: result }, { status: 201 })
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const apiError = new ApiError(
+        'VALIDATION_ERROR',
+        'Request validation failed',
+        400,
+        error.errors.map(e => ({
+          field: e.path.join('.'),
+          message: e.message,
+          value: e.input,
+        }))
+      )
+      return createErrorResponse(apiError, requestId)
+    }
+    
+    if (error instanceof ApiError) {
+      return createErrorResponse(error, requestId)
+    }
+    
+    // Log unexpected errors
+    console.error('Unexpected error:', error)
+    
+    return createErrorResponse(
+      new ApiError('INTERNAL_ERROR', 'An unexpected error occurred', 500),
+      requestId
+    )
+  }
+}
+```
+
+### 6.4 Error Handling Best Practices
+
+- ✅ **Never expose stack traces** in production responses
+- ✅ **Include request IDs** for debugging and support
+- ✅ **Use appropriate HTTP status codes** matching error types
+- ✅ **Provide actionable error messages** for developers
+- ✅ **Log errors server-side** with full context
+- ✅ **Return consistent error structure** across all endpoints
+
+---
+
+## 7. Input Validation with Zod
+
+### 7.1 Validation Strategy
+
+**All external input must be validated** using Zod schemas:
+
+- Request body (POST, PUT, PATCH)
+- Query parameters
+- Path parameters (route segments)
+- Headers (when needed)
+
+### 7.2 Validation Examples
+
+```typescript
+import { z } from 'zod'
+import { NextRequest, NextResponse } from 'next/server'
+
+// Request body schema
+const createUserSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  name: z.string().min(1, 'Name is required').max(255, 'Name too long'),
+  age: z.number().int().positive().optional(),
+  role: z.enum(['user', 'admin', 'moderator'], {
+    errorMap: () => ({ message: 'Invalid role' }),
+  }),
+})
+
+// Query parameters schema
+const listUsersSchema = z.object({
+  page: z.coerce.number().int().positive().default(1).optional(),
+  pageSize: z.coerce.number().int().positive().max(100).default(20).optional(),
+  role: z.enum(['user', 'admin', 'moderator']).optional(),
+  search: z.string().min(1).optional(),
+})
+
+// Path parameters schema
+const userIdSchema = z.object({
+  id: z.string().uuid('Invalid user ID format'),
+})
+
+// Route handler with validation
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const validatedData = createUserSchema.parse(body)
+    
+    // Process validated data
+    const user = await createUser(validatedData)
+    
+    return NextResponse.json({ data: user }, { status: 201 })
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        {
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Request validation failed',
+            status: 400,
+            details: error.errors.map(e => ({
+              field: e.path.join('.'),
+              message: e.message,
+              value: e.input,
+            })),
+          },
+        },
+        { status: 400 }
+      )
+    }
+    throw error
+  }
+}
+
+// GET with query parameter validation
+export async function GET(request: NextRequest) {
+  try {
+    const searchParams = request.nextUrl.searchParams
+    const query = listUsersSchema.parse({
+      page: searchParams.get('page'),
+      pageSize: searchParams.get('pageSize'),
+      role: searchParams.get('role'),
+      search: searchParams.get('search'),
+    })
+    
+    const users = await listUsers(query)
+    return NextResponse.json({ data: users })
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        {
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Invalid query parameters',
+            status: 400,
+            details: error.errors,
+          },
+        },
+        { status: 400 }
+      )
+    }
+    throw error
+  }
+}
+
+// Dynamic route with path parameter validation
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { id } = userIdSchema.parse({ id: params.id })
+    const user = await getUserById(id)
+    
+    if (!user) {
+      return NextResponse.json(
+        {
+          error: {
+            code: 'NOT_FOUND',
+            message: 'User not found',
+            status: 404,
+          },
+        },
+        { status: 404 }
+      )
+    }
+    
+    return NextResponse.json({ data: user })
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        {
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Invalid user ID format',
+            status: 400,
+          },
+        },
+        { status: 400 }
+      )
+    }
+    throw error
+  }
+}
+```
+
+### 7.3 Type Inference from Schemas
+
+Derive TypeScript types from Zod schemas:
+
+```typescript
+// Define schema
+const createUserSchema = z.object({
+  email: z.string().email(),
+  name: z.string().min(1),
+  role: z.enum(['user', 'admin']),
+})
+
+// Infer type
+type CreateUserInput = z.infer<typeof createUserSchema>
+
+// Use in function signature
+async function createUser(input: CreateUserInput) {
+  // Type-safe implementation
+}
+```
+
+---
+
+## 8. Authentication & Authorization
+
+### 8.1 Authentication Patterns
+
+**JWT-Based Authentication** (Recommended):
+
+```typescript
+// src/lib/auth/middleware.ts
+import { NextRequest, NextResponse } from 'next/server'
+import jwt from 'jsonwebtoken'
+
+interface TokenPayload {
+  userId: string
+  email: string
+  roles: string[]
+  iat: number
+  exp: number
+}
+
+export function verifyToken(token: string): TokenPayload | null {
+  try {
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET!
+    ) as TokenPayload
+    return decoded
+  } catch (error) {
+    return null
+  }
+}
+
+export function getAuthToken(request: NextRequest): string | null {
+  const authHeader = request.headers.get('Authorization')
+  if (!authHeader?.startsWith('Bearer ')) {
+    return null
+  }
+  return authHeader.substring(7)
+}
+
+export function requireAuth(
+  handler: (request: NextRequest, user: TokenPayload) => Promise<NextResponse>
+) {
+  return async (request: NextRequest) => {
+    const token = getAuthToken(request)
+    
+    if (!token) {
+      return NextResponse.json(
+        {
+          error: {
+            code: 'UNAUTHORIZED',
+            message: 'Authentication required',
+            status: 401,
+          },
+        },
+        { status: 401 }
+      )
+    }
+    
+    const payload = verifyToken(token)
+    if (!payload) {
+      return NextResponse.json(
+        {
+          error: {
+            code: 'UNAUTHORIZED',
+            message: 'Invalid or expired token',
+            status: 401,
+          },
+        },
+        { status: 401 }
+      )
+    }
+    
+    return handler(request, payload)
+  }
+}
+```
+
+### 8.2 Authorization (Role-Based Access Control)
+
+```typescript
+// src/lib/auth/authorization.ts
+export function requireRole(...allowedRoles: string[]) {
+  return (
+    handler: (request: NextRequest, user: TokenPayload) => Promise<NextResponse>
+  ) => {
+    return requireAuth(async (request, user) => {
+      const hasRole = allowedRoles.some(role => user.roles.includes(role))
+      
+      if (!hasRole) {
+        return NextResponse.json(
+          {
+            error: {
+              code: 'INSUFFICIENT_PERMISSIONS',
+              message: 'Insufficient permissions',
+              status: 403,
+            },
+          },
+          { status: 403 }
+        )
+      }
+      
+      return handler(request, user)
+    })
+  }
+}
+
+// Usage in route handler
+export const GET = requireRole('admin', 'moderator')(
+  async (request: NextRequest, user: TokenPayload) => {
+    // Only admins and moderators can access this
+    const data = await getAdminData()
+    return NextResponse.json({ data })
+  }
+)
+```
+
+### 8.3 Authentication Best Practices
+
+- ✅ **Use short-lived access tokens** (15-60 minutes)
+- ✅ **Implement refresh token rotation** for long-lived sessions
+- ✅ **Never expose tokens in URLs** (use Authorization header)
+- ✅ **Validate tokens on every request** (stateless)
+- ✅ **Include user context in tokens** (userId, roles)
+- ✅ **Require HTTPS** in production
+- ✅ **Implement rate limiting** on authentication endpoints
+
+---
+
+## 9. API Versioning
+
+### 9.1 URL-Based Versioning (Recommended)
+
+Version APIs from day one using URL-based versioning:
+
+```
+/api/v1/users
+/api/v2/users
+```
+
+**Benefits:**
+- Clear and explicit in URLs
+- Easy to maintain multiple versions
+- Straightforward for caching and CDN strategies
+- Developers can easily test different versions
+
+### 9.2 Versioning Implementation
+
+```typescript
+// src/app/api/v1/users/route.ts
+export async function GET(request: NextRequest) {
+  // v1 implementation
+}
+
+// src/app/api/v2/users/route.ts
+export async function GET(request: NextRequest) {
+  // v2 implementation (can coexist with v1)
+}
+```
+
+### 9.3 Versioning Best Practices
+
+- ✅ **Version from the start** – Don't retrofit later
+- ✅ **Maintain backward compatibility** when possible
+- ✅ **Document breaking changes** clearly
+- ✅ **Deprecate old versions** with clear timelines
+- ✅ **Use semantic versioning** (v1, v2, etc.)
+
+---
+
+## 10. Rate Limiting & Security
+
+### 10.1 Rate Limiting
+
+Protect APIs from abuse and excessive usage:
+
+```typescript
+// src/lib/api/rate-limit.ts
+import { Ratelimit } from '@upstash/ratelimit'
+import { Redis } from '@upstash/redis'
+
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(100, '1 h'),
+  analytics: true,
+  prefix: '@upstash/ratelimit',
+})
+
+export async function checkRateLimit(identifier: string) {
+  const { success, limit, reset, remaining } = await ratelimit.limit(identifier)
+  
+  return {
+    success,
+    limit,
+    reset,
+    remaining,
+  }
+}
+
+// Usage in route handler
+export async function POST(request: NextRequest) {
+  const userId = getUserIdFromToken(request) || request.ip || 'anonymous'
+  
+  const rateLimit = await checkRateLimit(userId)
+  
+  if (!rateLimit.success) {
+    return NextResponse.json(
+      {
+        error: {
+          code: 'RATE_LIMIT_EXCEEDED',
+          message: 'Too many requests',
+          status: 429,
+        },
+      },
+      {
+        status: 429,
+        headers: {
+          'X-RateLimit-Limit': rateLimit.limit.toString(),
+          'X-RateLimit-Remaining': rateLimit.remaining.toString(),
+          'X-RateLimit-Reset': new Date(rateLimit.reset).toISOString(),
+          'Retry-After': '3600',
+        },
+      }
+    )
+  }
+  
+  // Continue with request processing
+}
+```
+
+### 10.2 Security Headers
+
+Set security headers on all API responses:
+
+```typescript
+// src/lib/api/security-headers.ts
+export function setSecurityHeaders(response: NextResponse): NextResponse {
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+  response.headers.set('X-Frame-Options', 'DENY')
+  response.headers.set('X-XSS-Protection', '1; mode=block')
+  response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
+  
+  return response
+}
+
+// Usage
+export async function GET(request: NextRequest) {
+  const response = NextResponse.json({ data: 'content' })
+  return setSecurityHeaders(response)
+}
+```
+
+### 10.3 CORS Configuration
+
+Configure CORS explicitly:
+
+```typescript
+// src/lib/api/cors.ts
+export function setCorsHeaders(response: NextResponse): NextResponse {
+  const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || []
+  const origin = request.headers.get('origin')
+  
+  if (origin && allowedOrigins.includes(origin)) {
+    response.headers.set('Access-Control-Allow-Origin', origin)
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS')
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    response.headers.set('Access-Control-Max-Age', '86400')
+  }
+  
+  return response
+}
+
+// Handle OPTIONS preflight
+export async function OPTIONS(request: NextRequest) {
+  const response = new NextResponse(null, { status: 204 })
+  return setCorsHeaders(response)
+}
+```
+
+### 10.4 Input Sanitization
+
+Sanitize user input to prevent injection attacks:
+
+```typescript
+import DOMPurify from 'isomorphic-dompurify'
+
+export function sanitizeInput(input: string): string {
+  return DOMPurify.sanitize(input, { ALLOWED_TAGS: [] })
+}
+
+// Validate URLs to prevent SSRF
+export function validateUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url)
+    const allowedProtocols = ['http:', 'https:']
+    const allowedHosts = process.env.ALLOWED_HOSTS?.split(',') || []
+    
+    return (
+      allowedProtocols.includes(parsed.protocol) &&
+      (allowedHosts.length === 0 || allowedHosts.includes(parsed.hostname))
+    )
+  } catch {
+    return false
+  }
+}
+```
+
+---
+
+## 11. Performance Optimization
+
+### 11.1 Caching Strategies
+
+Implement caching to reduce server load:
+
+```typescript
+// src/lib/api/cache.ts
+export function setCacheHeaders(
+  response: NextResponse,
+  options: {
+    maxAge: number
+    isPrivate?: boolean
+    mustRevalidate?: boolean
+  }
+): NextResponse {
+  const { maxAge, isPrivate = false, mustRevalidate = false } = options
+  
+  const cacheControl = [
+    isPrivate ? 'private' : 'public',
+    `max-age=${maxAge}`,
+    mustRevalidate ? 'must-revalidate' : '',
+  ]
+    .filter(Boolean)
+    .join(', ')
+  
+  response.headers.set('Cache-Control', cacheControl)
+  
+  // Add ETag for conditional requests
+  const etag = generateETag(response.body)
+  response.headers.set('ETag', etag)
+  
+  return response
+}
+
+// Usage
+export async function GET(request: NextRequest) {
+  const data = await getCachedData()
+  const response = NextResponse.json({ data })
+  
+  return setCacheHeaders(response, {
+    maxAge: 3600, // 1 hour
+    isPrivate: false,
+    mustRevalidate: true,
+  })
+}
+```
+
+### 11.2 Conditional GET Requests
+
+Support conditional requests with ETags:
+
+```typescript
+export async function GET(request: NextRequest) {
+  const data = await getData()
+  const etag = generateETag(JSON.stringify(data))
+  
+  const ifNoneMatch = request.headers.get('If-None-Match')
+  if (ifNoneMatch === etag) {
+    return new NextResponse(null, { status: 304 })
+  }
+  
+  const response = NextResponse.json({ data })
+  response.headers.set('ETag', etag)
+  return response
+}
+```
+
+### 11.3 Response Compression
+
+Next.js automatically compresses responses with gzip. Ensure it's enabled:
+
+```typescript
+// next.config.ts
+export default {
+  compress: true, // Enabled by default
+}
+```
+
+---
+
+## 12. Complete Route Handler Example
+
+Here's a complete, production-ready route handler example:
+
+```typescript
+// src/app/api/v1/users/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
+import { requireAuth } from '@/lib/auth/middleware'
+import { checkRateLimit } from '@/lib/api/rate-limit'
+import { setSecurityHeaders, setCorsHeaders } from '@/lib/api/security-headers'
+import { createUser, listUsers } from '@/services/user-service'
+import { ApiError, createErrorResponse } from '@/lib/api/errors'
+
+// Request body schema
+const createUserSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  name: z.string().min(1, 'Name is required').max(255, 'Name too long'),
+  role: z.enum(['user', 'admin', 'moderator']),
+})
+
+// Query parameters schema
+const listUsersSchema = z.object({
+  page: z.coerce.number().int().positive().default(1).optional(),
+  pageSize: z.coerce.number().int().positive().max(100).default(20).optional(),
+  role: z.enum(['user', 'admin', 'moderator']).optional(),
+  search: z.string().min(1).optional(),
+})
+
+// GET /api/v1/users
+export const GET = requireAuth(async (request: NextRequest, user) => {
+  const requestId = crypto.randomUUID()
+  
+  try {
+    // Rate limiting
+    const rateLimit = await checkRateLimit(user.userId)
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        {
+          error: {
+            code: 'RATE_LIMIT_EXCEEDED',
+            message: 'Too many requests',
+            status: 429,
+          },
+        },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': rateLimit.limit.toString(),
+            'X-RateLimit-Remaining': rateLimit.remaining.toString(),
+            'Retry-After': '3600',
+          },
+        }
+      )
+    }
+    
+    // Validate query parameters
+    const searchParams = request.nextUrl.searchParams
+    const query = listUsersSchema.parse({
+      page: searchParams.get('page'),
+      pageSize: searchParams.get('pageSize'),
+      role: searchParams.get('role'),
+      search: searchParams.get('search'),
+    })
+    
+    // Fetch data
+    const result = await listUsers(query, user)
+    
+    // Build response
+    const response = NextResponse.json({
+      data: result.users,
+      pagination: result.pagination,
+    })
+    
+    // Set headers
+    setSecurityHeaders(response)
+    setCorsHeaders(response, request)
+    response.headers.set('X-Request-ID', requestId)
+    
+    return response
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const apiError = new ApiError(
+        'VALIDATION_ERROR',
+        'Invalid query parameters',
+        400,
+        error.errors.map(e => ({
+          field: e.path.join('.'),
+          message: e.message,
+        }))
+      )
+      return createErrorResponse(apiError, requestId)
+    }
+    
+    if (error instanceof ApiError) {
+      return createErrorResponse(error, requestId)
+    }
+    
+    console.error('Unexpected error:', error)
+    return createErrorResponse(
+      new ApiError('INTERNAL_ERROR', 'An unexpected error occurred', 500),
+      requestId
+    )
+  }
+})
+
+// POST /api/v1/users
+export const POST = requireAuth(async (request: NextRequest, user) => {
+  const requestId = crypto.randomUUID()
+  
+  try {
+    // Rate limiting
+    const rateLimit = await checkRateLimit(user.userId)
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        {
+          error: {
+            code: 'RATE_LIMIT_EXCEEDED',
+            message: 'Too many requests',
+            status: 429,
+          },
+        },
+        { status: 429 }
+      )
+    }
+    
+    // Validate request body
+    const body = await request.json()
+    const validatedData = createUserSchema.parse(body)
+    
+    // Business logic
+    const newUser = await createUser(validatedData, user)
+    
+    // Build response
+    const response = NextResponse.json(
+      { data: newUser },
+      { status: 201 }
+    )
+    
+    // Set headers
+    setSecurityHeaders(response)
+    setCorsHeaders(response, request)
+    response.headers.set('X-Request-ID', requestId)
+    response.headers.set('Location', `/api/v1/users/${newUser.id}`)
+    
+    return response
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const apiError = new ApiError(
+        'VALIDATION_ERROR',
+        'Request validation failed',
+        400,
+        error.errors.map(e => ({
+          field: e.path.join('.'),
+          message: e.message,
+          value: e.input,
+        }))
+      )
+      return createErrorResponse(apiError, requestId)
+    }
+    
+    if (error instanceof ApiError) {
+      return createErrorResponse(error, requestId)
+    }
+    
+    console.error('Unexpected error:', error)
+    return createErrorResponse(
+      new ApiError('INTERNAL_ERROR', 'An unexpected error occurred', 500),
+      requestId
+    )
+  }
+})
+```
+
+---
+
+## 13. Service Layer Pattern
+
+Keep business logic in service layer, not route handlers:
+
+```typescript
+// src/services/user-service.ts
+import { db } from '@/lib/db'
+import { users } from '@/lib/db/schema'
+import { eq, and, like } from 'drizzle-orm'
+import type { CreateUserInput, ListUsersQuery } from '@/types/user'
+
+export async function createUser(
+  input: CreateUserInput,
+  createdBy: { userId: string }
+) {
+  // Business logic here
+  const [user] = await db
+    .insert(users)
+    .values({
+      ...input,
+      createdBy: createdBy.userId,
+      createdAt: new Date(),
+    })
+    .returning()
+  
+  return user
+}
+
+export async function listUsers(query: ListUsersQuery, requester: { userId: string }) {
+  // Build query with filters
+  let dbQuery = db.select().from(users)
+  
+  if (query.role) {
+    dbQuery = dbQuery.where(eq(users.role, query.role))
+  }
+  
+  if (query.search) {
+    dbQuery = dbQuery.where(like(users.name, `%${query.search}%`))
+  }
+  
+  // Pagination
+  const offset = (query.page - 1) * query.pageSize
+  const results = await dbQuery.limit(query.pageSize).offset(offset)
+  
+  // Get total count
+  const total = await db.select().from(users).then(rows => rows.length)
+  
+  return {
+    users: results,
+    pagination: {
+      page: query.page,
+      pageSize: query.pageSize,
+      total,
+      totalPages: Math.ceil(total / query.pageSize),
+      hasNextPage: query.page * query.pageSize < total,
+      hasPreviousPage: query.page > 1,
+    },
+  }
+}
+```
+
+---
+
+## 14. Testing API Routes
+
+### 14.1 Unit Testing Route Handlers
+
+```typescript
+// tests/unit/api/users.test.ts
+import { describe, it, expect, vi } from 'vitest'
+import { GET, POST } from '@/app/api/v1/users/route'
+import { NextRequest } from 'next/server'
+
+describe('GET /api/v1/users', () => {
+  it('should return users list', async () => {
+    const request = new NextRequest('http://localhost:3000/api/v1/users')
+    const response = await GET(request)
+    const data = await response.json()
+    
+    expect(response.status).toBe(200)
+    expect(data).toHaveProperty('data')
+    expect(data).toHaveProperty('pagination')
+  })
+})
+```
+
+### 14.2 E2E Testing with Playwright
+
+```typescript
+// tests/e2e/api/users.spec.ts
+import { test, expect } from '@playwright/test'
+
+test('GET /api/v1/users returns 200', async ({ request }) => {
+  const response = await request.get('/api/v1/users', {
+    headers: {
+      Authorization: 'Bearer test-token',
+    },
+  })
+  
+  expect(response.status()).toBe(200)
+  const data = await response.json()
+  expect(data).toHaveProperty('data')
+})
+```
+
+---
+
+## 15. API Documentation
+
+### 15.1 OpenAPI/Swagger Integration
+
+Consider using OpenAPI for API documentation:
+
+```typescript
+// openapi.yaml
+openapi: 3.0.0
+info:
+  title: Empatify API
+  version: 1.0.0
+
+paths:
+  /api/v1/users:
+    get:
+      summary: List users
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+```
+
+### 15.2 Inline Documentation
+
+Document route handlers with JSDoc:
+
+```typescript
+/**
+ * GET /api/v1/users
+ * 
+ * Retrieves a paginated list of users.
+ * 
+ * @param request - Next.js request object
+ * @returns JSON response with users array and pagination metadata
+ * 
+ * Query Parameters:
+ * - page: number (default: 1)
+ * - pageSize: number (default: 20, max: 100)
+ * - role: 'user' | 'admin' | 'moderator' (optional)
+ * - search: string (optional)
+ * 
+ * Headers:
+ * - Authorization: Bearer <token> (required)
+ * 
+ * Responses:
+ * - 200: Success with users list
+ * - 400: Validation error
+ * - 401: Unauthorized
+ * - 429: Rate limit exceeded
+ */
+export async function GET(request: NextRequest) {
+  // Implementation
+}
+```
+
+---
+
+## 16. Best Practices Summary
+
+### URL Design
+- ✅ Use nouns, not verbs
+- ✅ Use plural nouns for collections
+- ✅ Represent relationships hierarchically
+- ✅ Keep URLs consistent and predictable
+
+### HTTP Methods
+- ✅ Use GET for retrieval (idempotent, safe)
+- ✅ Use POST for creation (non-idempotent)
+- ✅ Use PUT for full replacement (idempotent)
+- ✅ Use PATCH for partial updates (non-idempotent)
+- ✅ Use DELETE for removal (idempotent)
+
+### Status Codes
+- ✅ Use appropriate status codes matching operation outcomes
+- ✅ Return 201 for successful POST
+- ✅ Return 204 for successful DELETE
+- ✅ Use 400 for validation errors
+- ✅ Use 401 for authentication failures
+- ✅ Use 403 for authorization failures
+- ✅ Use 404 for not found
+- ✅ Use 429 for rate limiting
+
+### Validation
+- ✅ Validate all external input with Zod
+- ✅ Derive TypeScript types from schemas
+- ✅ Return detailed validation errors
+- ✅ Sanitize user input to prevent injection
+
+### Error Handling
+- ✅ Use consistent error response structure
+- ✅ Include machine-readable error codes
+- ✅ Provide human-readable messages
+- ✅ Include request IDs for debugging
+- ✅ Never expose stack traces in production
+
+### Security
+- ✅ Authenticate all protected endpoints
+- ✅ Implement role-based authorization
+- ✅ Use rate limiting to prevent abuse
+- ✅ Set security headers on all responses
+- ✅ Configure CORS explicitly
+- ✅ Validate and sanitize all input
+
+### Performance
+- ✅ Implement caching with appropriate headers
+- ✅ Support conditional GET requests (ETags)
+- ✅ Use pagination for large datasets
+- ✅ Compress responses (gzip)
+- ✅ Optimize database queries
+
+### Code Organization
+- ✅ Keep route handlers thin (delegate to services)
+- ✅ Separate business logic into service layer
+- ✅ Use consistent error handling patterns
+- ✅ Document APIs with JSDoc or OpenAPI
+
+---
+
+This API guide provides comprehensive patterns and best practices for building robust, secure, and maintainable REST APIs in Next.js. Follow these conventions to ensure consistency, security, and excellent developer experience across all API endpoints.
