@@ -5,6 +5,7 @@ import { AnimatedGradientText } from '@/components/ui/animated-gradient-text';
 import { ShimmerButton } from '@/components/ui/shimmer-button';
 import { MagicCard } from '@/components/ui/magic-card';
 import { DotPattern } from '@/components/ui/dot-pattern';
+import OAuthCallbackHandler from './OAuthCallbackHandler';
 
 /**
  * Landing page component with Spotify-themed design
@@ -12,10 +13,22 @@ import { DotPattern } from '@/components/ui/dot-pattern';
  */
 export default async function LandingPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ code?: string; [key: string]: string | string[] | undefined }>;
 }) {
   const { locale } = await params;
+  const resolvedSearchParams = await searchParams;
+  
+  // If OAuth callback code is present, handle it client-side to preserve cookies
+  if (resolvedSearchParams.code) {
+    const code = Array.isArray(resolvedSearchParams.code) 
+      ? resolvedSearchParams.code[0] 
+      : resolvedSearchParams.code;
+    return <OAuthCallbackHandler code={code} locale={locale} />;
+  }
+  
   const t = await getTranslations('landing');
   const tCommon = await getTranslations('common');
 

@@ -37,37 +37,192 @@ export default async function DashboardPage({
     redirect(`/${locale}/login`);
   }
 
-  // Fetch user record from database
-  // Use try-catch to handle case where Spotify columns don't exist yet
-  let dbUser = null;
+  // Get or create user record from database
+  // Select only basic columns first to avoid Spotify column errors
+  let dbUser: any = null;
   let isSpotifyLinked = false;
-  
+
   try {
+    // First, try to get basic user info
     const userRecord = await db
-      .select()
+      .select({
+        id: users.id,
+        email: users.email,
+        name: users.name,
+        avatarUrl: users.avatarUrl,
+        proPlan: users.proPlan,
+        createdAt: users.createdAt,
+      })
       .from(users)
       .where(eq(users.email, user.email!))
       .limit(1);
 
-    dbUser = userRecord.length > 0 ? userRecord[0] : null;
-    
-    // Check if Spotify is linked (only if columns exist)
-    if (dbUser && 'spotifyAccessToken' in dbUser) {
-      isSpotifyLinked =
-        !!dbUser.spotifyAccessToken &&
-        !!dbUser.spotifyRefreshToken &&
-        dbUser.spotifyTokenExpiresAt &&
-        new Date(dbUser.spotifyTokenExpiresAt) > new Date();
+    if (userRecord.length === 0) {
+      // If user doesn't exist in database, create them
+      const displayName =
+        user.user_metadata?.display_name ||
+        user.user_metadata?.full_name ||
+        user.email?.split("@")[0] ||
+        "User";
+      const [newUser] = await db
+        .insert(users)
+        .values({
+          email: user.email!,
+          name: displayName,
+          avatarUrl: user.user_metadata?.avatar_url || null,
+        })
+        .returning({
+          id: users.id,
+          email: users.email,
+          name: users.name,
+          avatarUrl: users.avatarUrl,
+          proPlan: users.proPlan,
+          createdAt: users.createdAt,
+        });
+      dbUser = newUser;
+    } else {
+      dbUser = userRecord[0];
+    }
+
+    // Try to check Spotify columns separately (they might not exist)
+    if (dbUser) {
+      try {
+        const spotifyRecord = await db
+          .select({
+            spotifyAccessToken: users.spotifyAccessToken,
+            spotifyRefreshToken: users.spotifyRefreshToken,
+          })
+          .from(users)
+          .where(eq(users.id, dbUser.id))
+          .limit(1);
+
+        if (spotifyRecord.length > 0 && spotifyRecord[0]) {
+          const spotify = spotifyRecord[0];
+          // User is linked if they have both access and refresh tokens
+          isSpotifyLinked =
+            !!spotify.spotifyAccessToken && !!spotify.spotifyRefreshToken;
+        }
+      } catch (spotifyError: any) {
+        // Spotify columns don't exist, so Spotify is not linked
+        if (
+          spotifyError.message?.includes("spotify") ||
+          spotifyError.message?.includes("column")
+        ) {
+          console.warn(
+            "Spotify columns not found. Please run the migration."
+          );
+          isSpotifyLinked = false;
+        } else {
+          // Re-throw other errors
+          throw spotifyError;
+        }
+      }
     }
   } catch (error: any) {
-    // If error is about missing columns, Spotify is not linked
-    // This handles the case where migration hasn't been run yet
-    if (error.message?.includes('spotify') || error.message?.includes('column')) {
-      console.warn('Spotify columns not found. Please run the migration:', error.message);
-      isSpotifyLinked = false;
+    // DrizzleQueryError has a 'cause' property with the actual PostgreSQL error
+    const pgError = error?.cause || error;
+    
+    // Log detailed error information
+    console.error("Database error in dashboard:", {
+      drizzleMessage: error?.message,
+      drizzleQuery: error?.query,
+      drizzleParams: error?.params,
+      pgMessage: pgError?.message,
+      pgCode: pgError?.code,
+      pgDetail: pgError?.detail,
+      pgHint: pgError?.hint,
+      pgSeverity: pgError?.severity,
+      pgPosition: pgError?.position,
+      pgTable: pgError?.table,
+      pgColumn: pgError?.column,
+      pgSchema: pgError?.schema,
+      pgConstraint: pgError?.constraint,
+      pgRoutine: pgError?.routine,
+      pgFile: pgError?.file,
+      pgLine: pgError?.line,
+      fullError: error,
+    });
+
+    // Extract error messages from both Drizzle and PostgreSQL error
+    const drizzleMessage = error?.message || "";
+    const pgMessage = pgError?.message || "";
+    const errorMessage = pgMessage || drizzleMessage;
+    const errorCode = pgError?.code || error?.code;
+    
+    // Check for connection errors
+    const isConnectionError =
+      errorMessage.includes("timeout") ||
+      errorMessage.includes("ECONNREFUSED") ||
+      errorMessage.includes("connection") ||
+      errorMessage.includes("ENOTFOUND") ||
+      errorMessage.includes("ETIMEDOUT") ||
+      errorMessage.includes("getaddrinfo") ||
+      errorMessage.includes("connect") ||
+      errorCode === "ECONNREFUSED" ||
+      errorCode === "ETIMEDOUT" ||
+      errorCode === "ENOTFOUND" ||
+      errorCode === "08006"; // connection_failure
+
+    if (isConnectionError) {
+      console.error(
+        "Database connection error - Supabase may be down or DATABASE_URL is incorrect"
+      );
+      throw new Error(
+        `Database connection failed. Please check if Supabase is running and DATABASE_URL is configured correctly. PostgreSQL Error: ${pgMessage || errorMessage} (Code: ${errorCode || "N/A"})`
+      );
+    }
+
+    // Check if it's a table/column doesn't exist error
+    const isTableError = 
+      errorMessage.includes("does not exist") ||
+      errorMessage.includes("relation") ||
+      errorMessage.includes("column") ||
+      errorCode === "42P01" || // undefined_table
+      errorCode === "42703" || // undefined_column
+      errorCode === "42P07";   // duplicate_table
+
+    if (isTableError) {
+      console.error("Database schema error - tables or columns may not exist", {
+        pgError: pgError,
+        errorCode: errorCode,
+        table: pgError?.table,
+        column: pgError?.column,
+      });
+      throw new Error(
+        `Database schema error. The users table or required columns may not exist. Please run the database migrations. PostgreSQL Error: ${pgMessage || errorMessage} (Code: ${errorCode || "N/A"})${pgError?.hint ? `. Hint: ${pgError.hint}` : ""}`
+      );
+    }
+
+    // If error is about missing columns, try to continue without them
+    if (errorMessage.includes("spotify") || errorMessage.includes("column")) {
+      console.warn("Database error (possibly missing columns):", errorMessage);
+      // Try to get user without Spotify columns
+      try {
+        const userRecord = await db
+          .select({
+            id: users.id,
+            email: users.email,
+            name: users.name,
+            avatarUrl: users.avatarUrl,
+            proPlan: users.proPlan,
+            createdAt: users.createdAt,
+          })
+          .from(users)
+          .where(eq(users.email, user.email!))
+          .limit(1);
+        dbUser = userRecord.length > 0 ? userRecord[0] : null;
+        isSpotifyLinked = false;
+      } catch (retryError: any) {
+        console.error("Failed to fetch user on retry:", retryError);
+        throw new Error(
+          `Database error: ${retryError?.message || "Unknown error"}. Please check your database connection and ensure the users table exists.`
+        );
+      }
     } else {
-      // Re-throw other errors
-      throw error;
+      // Re-throw other errors with more context
+      throw new Error(
+        `Database error: ${errorMessage || "Unknown error"}. Code: ${error?.code || "N/A"}. Please check your database connection and schema.`
+      );
     }
   }
 

@@ -60,7 +60,13 @@
     "songsSuggested": "Songs vorgeschlagen",
     "createGame": "Spiel erstellen",
     "freePlanRoundsNote": "Im Free Plan sind 5 Runden fest vorgegeben",
-    "freePlanCategoryNote": "Im Free Plan ist nur 'Alle' verfügbar"
+    "freePlanCategoryNote": "Im Free Plan ist nur 'Alle' verfügbar",
+    "loading": "Lädt...",
+    "gameMode": "Spielmodus",
+    "gameModeSingleDevice": "Nur auf diesem Gerät spielen",
+    "gameModeMultiDevice": "Jeder spielt auf seinem Gerät mit",
+    "gameModeSingleDeviceDescription": "Alle Spieler nutzen dieses Gerät gemeinsam",
+    "gameModeMultiDeviceDescription": "Jeder Spieler tritt mit seinem eigenen Gerät bei"
   },
   "lobby": {
     "create": "Lobby erstellen",
@@ -95,7 +101,19 @@
     "averageRating": "Durchschnittsbewertung",
     "individualRatings": "Einzelbewertungen",
     "noSongSuggested": "Noch kein Song vorgeschlagen",
-    "notRated": "Noch nicht bewertet"
+    "notRated": "Noch nicht bewertet",
+    "participants": "Teilnehmer",
+    "inviteLink": "Einladungslink",
+    "copyLink": "Link kopieren",
+    "linkCopied": "Link kopiert",
+    "scanQRCode": "Scanne den QR-Code oder teile den Link, um Spieler einzuladen",
+    "host": "Host",
+    "allCategories": "Alle Kategorien",
+    "roundsLabel": "Runden",
+    "waitingForSong": "waiting for song",
+    "selectSong": "Song auswählen",
+    "noScores": "No Scores",
+    "noScoresDescription": "Noch keine Runde abgeschlossen. Sobald Songs bewertet wurden, erscheinen hier die Ergebnisse."
   },
   "game": {
     "round": "Runde",

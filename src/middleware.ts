@@ -5,7 +5,23 @@ import { NextRequest, NextResponse } from 'next/server';
 const intlMiddleware = createMiddleware(routing);
 
 export default async function middleware(request: NextRequest) {
-  // Handle i18n routing first
+  const pathname = request.nextUrl.pathname
+
+  // Skip i18n middleware for routes that don't need locale prefix:
+  // - /lobby/* (lobby routes)
+  // - /redirect (QR code redirect route)
+  // - /auth/* (auth callback routes - OAuth needs to preserve PKCE code verifier)
+  // - /api/* (API routes)
+  if (
+    pathname.startsWith('/lobby/') || 
+    pathname.startsWith('/redirect') ||
+    pathname.startsWith('/auth/') ||
+    pathname.startsWith('/api/')
+  ) {
+    return NextResponse.next()
+  }
+
+  // Handle i18n routing for other paths
   const response = intlMiddleware(request);
 
   // Add Supabase session handling here if needed
@@ -15,7 +31,14 @@ export default async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Match only internationalized pathnames
-  matcher: ['/', '/(de|en|pt|fr|es)/:path*'],
+  // Match internationalized pathnames, lobby routes, redirect route, and auth routes
+  matcher: [
+    '/', 
+    '/(de|en|pt|fr|es)/:path*', 
+    '/lobby/:path*', 
+    '/redirect',
+    '/auth/:path*',
+    '/api/:path*'
+  ],
 };
 

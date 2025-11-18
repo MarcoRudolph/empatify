@@ -60,7 +60,13 @@
     "songsSuggested": "Songs Suggested",
     "createGame": "Create Game",
     "freePlanRoundsNote": "Free Plan is limited to 5 rounds",
-    "freePlanCategoryNote": "Free Plan only allows 'All' category"
+    "freePlanCategoryNote": "Free Plan only allows 'All' category",
+    "loading": "Loading...",
+    "gameMode": "Game Mode",
+    "gameModeSingleDevice": "Play on this device only",
+    "gameModeMultiDevice": "Everyone plays on their own device",
+    "gameModeSingleDeviceDescription": "All players use this device together",
+    "gameModeMultiDeviceDescription": "Each player joins with their own device"
   },
   "lobby": {
     "create": "Create Lobby",
@@ -95,7 +101,16 @@
     "averageRating": "Average Rating",
     "individualRatings": "Individual Ratings",
     "noSongSuggested": "No song suggested yet",
-    "notRated": "Not rated yet"
+    "notRated": "Not rated yet",
+    "participants": "Participants",
+    "inviteLink": "Invite Link",
+    "copyLink": "Copy Link",
+    "linkCopied": "Link Copied",
+    "host": "Host",
+    "waitingForSong": "waiting for song",
+    "selectSong": "Select Song",
+    "noScores": "No Scores",
+    "noScoresDescription": "No rounds completed yet. Once songs have been rated, results will appear here."
   },
   "game": {
     "round": "Round",

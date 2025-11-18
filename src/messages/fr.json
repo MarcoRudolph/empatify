@@ -54,7 +54,14 @@
     "createGame": "Créer un jeu",
     "freePlanRoundsNote": "Le plan gratuit est limité à 5 tours",
     "freePlanCategoryNote": "Le plan gratuit ne permet que la catégorie 'Toutes'",
-    "noLobbies": "Vous n'avez pas encore de salons"
+    "noLobbies": "Vous n'avez pas encore de salons",
+    "loading": "Chargement...",
+    "spotifyLinked": "Spotify lié",
+    "gameMode": "Mode de jeu",
+    "gameModeSingleDevice": "Jouer uniquement sur cet appareil",
+    "gameModeMultiDevice": "Chacun joue sur son propre appareil",
+    "gameModeSingleDeviceDescription": "Tous les joueurs utilisent cet appareil ensemble",
+    "gameModeMultiDeviceDescription": "Chaque joueur rejoint avec son propre appareil"
   },
   "lobby": {
     "create": "Créer un salon",
@@ -89,7 +96,16 @@
     "averageRating": "Note moyenne",
     "individualRatings": "Notes individuelles",
     "noSongSuggested": "Aucune chanson suggérée pour le moment",
-    "notRated": "Pas encore évalué"
+    "notRated": "Pas encore évalué",
+    "participants": "Participants",
+    "inviteLink": "Lien d'invitation",
+    "copyLink": "Copier le lien",
+    "linkCopied": "Lien copié",
+    "host": "Hôte",
+    "waitingForSong": "en attente de chanson",
+    "selectSong": "Sélectionner une chanson",
+    "noScores": "Aucun Score",
+    "noScoresDescription": "Aucune manche terminée pour le moment. Une fois que les chansons auront été notées, les résultats apparaîtront ici."
   },
   "game": {
     "round": "Tour",

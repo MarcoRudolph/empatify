@@ -28,6 +28,7 @@ export const lobbies = pgTable('lobbies', {
   hostId: uuid('host_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   category: varchar('category', { length: 100 }),
   maxRounds: integer('max_rounds').default(5).notNull(),
+  gameMode: varchar('game_mode', { length: 20 }).default('multi-device').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({
   hostIdIdx: index('idx_lobbies_host_id').on(table.hostId),

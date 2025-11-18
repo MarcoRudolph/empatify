@@ -24,15 +24,68 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isMagicLinkSent, setIsMagicLinkSent] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const errorParam = searchParams.get("error")
-    if (errorParam === "auth_failed") {
-      setError("Authentication failed. Please try again.")
-    }
-  }, [searchParams])
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
 
   const supabase = createClient()
+
+  // Check if user is already authenticated and redirect to dashboard
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const {
+          data: { user },
+          error: authError,
+        } = await supabase.auth.getUser()
+
+        if (user && !authError) {
+          // User is authenticated, redirect to dashboard
+          const redirectParam = searchParams.get("redirect")
+          if (redirectParam) {
+            router.push(redirectParam)
+          } else {
+            // Get locale from URL or default
+            const pathname = window.location.pathname
+            const localeMatch = pathname.match(/^\/(de|en|pt|fr|es)\//)
+            const locale = localeMatch ? localeMatch[1] : "de"
+            router.push(`/${locale}/dashboard`)
+          }
+          return
+        }
+      } catch (err) {
+        console.error("Error checking auth:", err)
+      } finally {
+        setIsCheckingAuth(false)
+      }
+    }
+
+    checkAuth()
+  }, [router, searchParams, supabase])
+
+  useEffect(() => {
+    // Only show errors if we're not checking auth
+    if (isCheckingAuth) return
+
+    const errorParam = searchParams.get("error")
+    const errorDescription = searchParams.get("error_description")
+    const errorCode = searchParams.get("error_code")
+    
+    if (errorParam) {
+      console.error("🔴 Authentication Error Detected:", {
+        error: errorParam,
+        errorDescription,
+        errorCode,
+        fullUrl: window.location.href,
+        searchParams: Object.fromEntries(searchParams.entries()),
+        timestamp: new Date().toISOString(),
+      })
+      
+      if (errorParam === "auth_failed") {
+        setError("Authentication failed. Please try again.")
+      } else {
+        setError(`Authentication error: ${errorParam}${errorDescription ? ` - ${errorDescription}` : ""}`)
+      }
+    }
+  }, [searchParams, isCheckingAuth])
 
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -40,10 +93,31 @@ export default function LoginPage() {
     setError(null)
 
     try {
+      // Get redirect parameter from URL
+      const redirectParam = searchParams.get("redirect")
+      const redirectPath = redirectParam || "/dashboard"
+      
+      // Get base URL - use IP address in development instead of localhost
+      const getBaseUrl = () => {
+        if (process.env.NODE_ENV === "production") {
+          return window.location.origin
+        }
+        // In development, use IP address if available, otherwise use origin
+        const envUrl = process.env.NEXT_PUBLIC_APP_URL
+        if (envUrl && !envUrl.includes("localhost") && !envUrl.includes("127.0.0.1")) {
+          return envUrl
+        }
+        // Fallback to IP address for OAuth redirects
+        return "http://192.168.178.180:3000"
+      }
+      
+      const baseUrl = getBaseUrl()
+      const emailRedirectTo = `${baseUrl}/auth/callback?next=${encodeURIComponent(redirectPath)}`
+
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo,
         },
       })
 
@@ -51,6 +125,16 @@ export default function LoginPage() {
 
       setIsMagicLinkSent(true)
     } catch (err: any) {
+      console.error("🔴 Magic Link error:", {
+        error: err,
+        errorMessage: err.message,
+        errorStack: err.stack,
+        email,
+        emailRedirectTo,
+        baseUrl,
+        redirectPath,
+        timestamp: new Date().toISOString(),
+      })
       setError(err.message || t("invalidEmail"))
     } finally {
       setIsLoading(false)
@@ -62,13 +146,65 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      const redirectTo = `${window.location.origin}/auth/callback`
+      // Get redirect parameter from URL
+      const redirectParam = searchParams.get("redirect")
+      const redirectPath = redirectParam || "/dashboard"
+      
+      // Get base URL - use IP address in development instead of localhost
+      const getBaseUrl = () => {
+        if (process.env.NODE_ENV === "production") {
+          return window.location.origin
+        }
+        // In development, use IP address if available, otherwise use origin
+        const envUrl = process.env.NEXT_PUBLIC_APP_URL
+        if (envUrl && !envUrl.includes("localhost") && !envUrl.includes("127.0.0.1")) {
+          return envUrl
+        }
+        // Fallback to IP address for OAuth redirects
+        return "http://192.168.178.180:3000"
+      }
+      
+      const baseUrl = getBaseUrl()
+      
+      // IMPORTANT: Supabase uses the Site URL as the base for PKCE code verifier storage
+      // If the Site URL doesn't match where the code lands, the code verifier won't match
+      // We need to ensure the redirectTo URL matches what Supabase expects
+      
+      // Build redirect URL - use absolute URL to ensure Supabase stores code verifier correctly
+      // The redirectTo MUST match the Site URL or be in the Redirect URLs list in Supabase
+      const redirectTo = `${baseUrl}/auth/callback?next=${encodeURIComponent(redirectPath)}`
       
       // Log for debugging (remove in production)
       if (process.env.NODE_ENV === "development") {
-        console.log("Redirect URL:", redirectTo)
-        console.log("Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL)
+        console.log("OAuth Redirect Debug:", {
+          baseUrl,
+          redirectTo,
+          redirectPath,
+          windowOrigin: window.location.origin,
+          NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+          supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+        })
       }
+
+      // Log before OAuth call to see what we're sending
+      console.log("🟢 Starting OAuth flow:", {
+        redirectTo,
+        baseUrl,
+        windowLocation: window.location.href,
+        windowOrigin: window.location.origin,
+        redirectPath,
+        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+        timestamp: new Date().toISOString(),
+      })
+
+      // Check localStorage before OAuth (should be empty)
+      const localStorageBefore = Object.keys(localStorage).filter(key => 
+        key.includes('supabase') || key.includes('code-verifier') || key.includes('pkce') || key.startsWith('sb-')
+      )
+      console.log("📦 LocalStorage before OAuth:", {
+        keys: localStorageBefore,
+        count: localStorageBefore.length,
+      })
 
       const { error, data } = await supabase.auth.signInWithOAuth({
         provider: "google",
@@ -79,12 +215,50 @@ export default function LoginPage() {
 
       if (error) throw error
       
+      // Log after OAuth call to see what Supabase stored
+      // Note: This might not execute if Supabase redirects immediately
+      setTimeout(() => {
+        const localStorageAfter = Object.keys(localStorage).filter(key => 
+          key.includes('supabase') || key.includes('code-verifier') || key.includes('pkce') || key.startsWith('sb-')
+        )
+        console.log("📦 LocalStorage after OAuth (if still on page):", {
+          keys: localStorageAfter,
+          count: localStorageAfter.length,
+          values: localStorageAfter.map(key => ({
+            key,
+            valueLength: localStorage.getItem(key)?.length || 0,
+            valuePreview: localStorage.getItem(key)?.substring(0, 30) || null,
+          })),
+        })
+      }, 100)
+      
       // Note: Supabase will redirect automatically, so we don't need to handle the response
     } catch (err: any) {
-      console.error("Google sign-in error:", err)
+      console.error("🔴 Google sign-in error:", {
+        error: err,
+        errorMessage: err.message,
+        errorStack: err.stack,
+        redirectTo,
+        baseUrl,
+        redirectPath,
+        windowOrigin: window.location.origin,
+        timestamp: new Date().toISOString(),
+      })
       setError(err.message || "Failed to sign in with Google")
       setIsLoading(false)
     }
+  }
+
+  // Show loading state while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center relative overflow-hidden">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
+          <p className="text-neutral-600">Checking authentication...</p>
+        </div>
+      </div>
+    )
   }
 
   return (

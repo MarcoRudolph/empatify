@@ -54,7 +54,14 @@
     "createGame": "Crear juego",
     "freePlanRoundsNote": "El plan gratuito está limitado a 5 rondas",
     "freePlanCategoryNote": "El plan gratuito solo permite la categoría 'Todas'",
-    "noLobbies": "Aún no tienes salas"
+    "noLobbies": "Aún no tienes salas",
+    "loading": "Cargando...",
+    "spotifyLinked": "Spotify vinculado",
+    "gameMode": "Modo de juego",
+    "gameModeSingleDevice": "Jugar solo en este dispositivo",
+    "gameModeMultiDevice": "Cada uno juega en su propio dispositivo",
+    "gameModeSingleDeviceDescription": "Todos los jugadores usan este dispositivo juntos",
+    "gameModeMultiDeviceDescription": "Cada jugador se une con su propio dispositivo"
   },
   "lobby": {
     "create": "Crear sala",
@@ -89,7 +96,16 @@
     "averageRating": "Calificación promedio",
     "individualRatings": "Calificaciones individuales",
     "noSongSuggested": "Aún no se ha sugerido ninguna canción",
-    "notRated": "Aún no calificado"
+    "notRated": "Aún no calificado",
+    "participants": "Participantes",
+    "inviteLink": "Enlace de invitación",
+    "copyLink": "Copiar enlace",
+    "linkCopied": "Enlace copiado",
+    "host": "Anfitrión",
+    "waitingForSong": "esperando canción",
+    "selectSong": "Seleccionar canción",
+    "noScores": "Sin Puntuaciones",
+    "noScoresDescription": "Aún no se ha completado ninguna ronda. Una vez que se hayan calificado las canciones, los resultados aparecerán aquí."
   },
   "game": {
     "round": "Ronda",

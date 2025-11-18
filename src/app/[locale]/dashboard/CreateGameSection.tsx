@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useTranslations } from "next-intl"
+import { useRouter } from "next/navigation"
 import { MagicCard } from "@/components/ui/magic-card"
 import { ShimmerButton } from "@/components/ui/shimmer-button"
 import { Music, Loader2 } from "lucide-react"
@@ -15,6 +16,7 @@ export function CreateGameSection({
   isSpotifyLinked,
   isProPlan,
 }: CreateGameSectionProps) {
+  const router = useRouter()
   const t = useTranslations("dashboard")
   const tLobby = useTranslations("lobby")
   const tCommon = useTranslations("common")
@@ -22,6 +24,7 @@ export function CreateGameSection({
   const [rounds, setRounds] = useState(isProPlan ? 5 : 5)
   const [category, setCategory] = useState("all")
   const [isCreating, setIsCreating] = useState(false)
+  const [gameMode, setGameMode] = useState<"single-device" | "multi-device">("multi-device")
 
   const categories = [
     { value: "all", label: tLobby("categoryAll") },
@@ -49,17 +52,77 @@ export function CreateGameSection({
 
     setIsCreating(true)
     try {
-      // TODO: Implement actual lobby creation API call
-      // const response = await fetch("/api/lobby/create", {
-      //   method: "POST",
-      //   body: JSON.stringify({ rounds, category: category === "all" ? null : category }),
-      // })
-      console.log("Creating lobby with:", { rounds, category })
-      // Temporary: just log for now
-      setTimeout(() => setIsCreating(false), 1000)
+      const requestBody = {
+        rounds,
+        category: category === "all" ? null : category,
+        gameMode,
+      }
+      console.log("Creating lobby with:", requestBody)
+      
+      const response = await fetch("/api/lobby/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      })
+
+      console.log("Response status:", response.status)
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        
+        // Comprehensive error logging
+        console.error("=".repeat(80))
+        console.error("❌ LOBBY CREATION FAILED - CLIENT SIDE")
+        console.error("=".repeat(80))
+        console.error("📋 Request:", {
+          url: "/api/lobby/create",
+          method: "POST",
+          body: requestBody,
+        })
+        console.error("📋 Response:", {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData.error,
+        })
+        console.error("📋 Error Details:", {
+          message: errorData.error?.message,
+          code: errorData.error?.code,
+          pgCode: errorData.error?.pgCode,
+          pgDetail: errorData.error?.pgDetail,
+          pgHint: errorData.error?.pgHint,
+          drizzleQuery: errorData.error?.drizzleQuery,
+          drizzleParams: errorData.error?.drizzleParams,
+        })
+        console.error("=".repeat(80))
+        
+        // Create user-friendly error message
+        let errorMessage = errorData.error?.message || "Failed to create lobby"
+        if (errorData.error?.pgHint) {
+          errorMessage += `\n\nHint: ${errorData.error.pgHint}`
+        }
+        if (errorData.error?.pgCode === "42703") {
+          errorMessage += "\n\n💡 This looks like a missing database column. Please run the migration."
+        }
+        
+        throw new Error(errorMessage)
+      }
+
+      const data = await response.json()
+      console.log("Lobby created:", data)
+
+      // Redirect to lobby page
+      if (data.lobby?.id) {
+        console.log("Redirecting to:", `/lobby/${data.lobby.id}`)
+        router.push(`/lobby/${data.lobby.id}`)
+      } else {
+        throw new Error("No lobby ID in response")
+      }
     } catch (error) {
       console.error("Error creating lobby:", error)
       setIsCreating(false)
+      alert(error instanceof Error ? error.message : "Failed to create lobby. Please try again.")
     }
   }
 
@@ -78,6 +141,44 @@ export function CreateGameSection({
       </div>
 
       <div className="space-y-6">
+        {/* Game Mode Toggle */}
+        <div>
+          <label className="block text-sm font-medium text-neutral-900 mb-3">
+            {t("gameMode")}
+          </label>
+          <div className="flex gap-2 p-1 bg-neutral-100 rounded-lg border border-neutral-300">
+            <button
+              type="button"
+              onClick={() => setGameMode("single-device")}
+              disabled={!isSpotifyLinked}
+              className={`flex-1 px-4 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
+                gameMode === "single-device"
+                  ? "bg-primary-500 text-white shadow-md"
+                  : "bg-transparent text-neutral-600 hover:bg-neutral-200"
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              {t("gameModeSingleDevice")}
+            </button>
+            <button
+              type="button"
+              onClick={() => setGameMode("multi-device")}
+              disabled={!isSpotifyLinked}
+              className={`flex-1 px-4 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
+                gameMode === "multi-device"
+                  ? "bg-primary-500 text-white shadow-md"
+                  : "bg-transparent text-neutral-600 hover:bg-neutral-200"
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              {t("gameModeMultiDevice")}
+            </button>
+          </div>
+          <p className="mt-2 text-xs text-neutral-500">
+            {gameMode === "single-device"
+              ? t("gameModeSingleDeviceDescription")
+              : t("gameModeMultiDeviceDescription")}
+          </p>
+        </div>
+
         {/* Rounds Dropdown */}
         <div>
           <label
