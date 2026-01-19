@@ -38,7 +38,7 @@ export default async function LandingPage({
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Background Image - Placeholder for external image */}
         <div 
-          className="absolute inset-0 bg-gradient-to-br from-[#1DB954] via-[#191414] to-[#0D0D0D] opacity-90"
+          className="absolute inset-0 bg-gradient-to-br from-accent-spotify via-neutral-75 to-neutral-50 opacity-90"
           style={{
             backgroundImage: 'url(/img/landingpage_background_4K.png)',
             backgroundSize: 'cover',
@@ -61,24 +61,24 @@ export default async function LandingPage({
 
         {/* Hero Content */}
         <div className="relative z-10 max-w-container mx-auto px-md text-center py-3xl md:py-[100px]">
-          <h1 className="text-5xl md:text-6xl font-bold mb-3xl tracking-tight">
+          <h1 className="text-5xl md:text-6xl font-bold mb-[80px] md:mb-[100px] tracking-tight">
             <AnimatedGradientText
               speed={1.5}
-              colorFrom="#1DB954"
-              colorTo="#FF6B00"
+              colorFrom="var(--color-accent-spotify)"
+              colorTo="var(--color-primary-500)"
               className="text-5xl md:text-6xl"
             >
               {t('title')}
             </AnimatedGradientText>
           </h1>
-          <p className="text-xl md:text-2xl text-neutral-700 mb-3xl max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl text-neutral-700 mb-[80px] md:mb-[100px] max-w-2xl mx-auto leading-relaxed">
             {t('subtitle')}
           </p>
-          <div className="mt-3xl">
+          <div className="mt-[80px] md:mt-[100px]">
             <Link href="/login" className="inline-block">
               <ShimmerButton
-                background="#1DB954"
-                shimmerColor="#ffffff"
+                background="var(--color-accent-spotify)"
+                shimmerColor="var(--color-neutral-900)"
                 borderRadius="9999px"
                 className="font-bold text-lg px-8 py-4"
               >
@@ -101,17 +101,17 @@ export default async function LandingPage({
           cr={1}
         />
         <div className="max-w-container mx-auto px-md relative z-10">
-          <div className="max-w-3xl mx-auto text-center">
+          <div className="max-w-4xl mx-auto text-center">
             <MagicCard
-              className="p-2xl md:p-3xl rounded-xl"
-              gradientFrom="#1DB954"
-              gradientTo="#FF6B00"
-              gradientSize={300}
+              className="p-3xl md:p-[80px] lg:p-[96px] rounded-2xl"
+              gradientFrom="var(--color-accent-spotify)"
+              gradientTo="var(--color-primary-500)"
+              gradientSize={400}
             >
-              <h2 className="text-4xl font-bold mb-xl text-neutral-900">
+              <h2 className="text-4xl md:text-5xl font-bold mb-2xl md:mb-3xl text-neutral-900 tracking-tight">
                 {t('about.title')}
               </h2>
-              <p className="text-lg md:text-xl text-neutral-700 leading-relaxed">
+              <p className="text-lg md:text-xl lg:text-2xl text-neutral-700 leading-relaxed md:leading-loose max-w-3xl mx-auto">
                 {t('about.description')}
               </p>
             </MagicCard>
@@ -131,12 +131,12 @@ export default async function LandingPage({
               {/* Step 1 */}
               <MagicCard
                 className="w-full max-w-md p-xl md:p-2xl rounded-xl"
-                gradientFrom="#1DB954"
-                gradientTo="#FF6B00"
+                gradientFrom="var(--color-accent-spotify)"
+                gradientTo="var(--color-primary-500)"
                 gradientSize={250}
               >
                 <div className="text-center">
-                  <div className="w-20 h-20 bg-[#1DB954] rounded-full flex items-center justify-center mx-auto mb-lg text-white text-3xl font-bold shadow-lg">
+                  <div className="w-20 h-20 bg-accent-spotify rounded-full flex items-center justify-center mx-auto mb-lg text-neutral-900 text-3xl font-bold shadow-lg">
                     1
                   </div>
                   <h3 className="text-xl md:text-2xl font-semibold mb-sm text-neutral-900">
@@ -147,20 +147,20 @@ export default async function LandingPage({
 
               {/* Connector Arrow */}
               <div className="flex items-center justify-center">
-                <div className="h-16 md:h-20 w-0.5 bg-[#1DB954] relative">
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0 border-t-8 border-t-[#1DB954] border-l-4 border-l-transparent border-r-4 border-r-transparent" />
+                <div className="h-16 md:h-20 w-0.5 bg-accent-spotify relative">
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0 border-t-8 border-t-accent-spotify border-l-4 border-l-transparent border-r-4 border-r-transparent" />
                 </div>
               </div>
 
               {/* Step 2 */}
               <MagicCard
                 className="w-full max-w-md p-xl md:p-2xl rounded-xl"
-                gradientFrom="#1DB954"
-                gradientTo="#FF6B00"
+                gradientFrom="var(--color-accent-spotify)"
+                gradientTo="var(--color-primary-500)"
                 gradientSize={250}
               >
                 <div className="text-center">
-                  <div className="w-20 h-20 bg-[#1DB954] rounded-full flex items-center justify-center mx-auto mb-lg text-white text-3xl font-bold shadow-lg">
+                  <div className="w-20 h-20 bg-accent-spotify rounded-full flex items-center justify-center mx-auto mb-lg text-neutral-900 text-3xl font-bold shadow-lg">
                     2
                   </div>
                   <h3 className="text-xl md:text-2xl font-semibold mb-sm text-neutral-900">
@@ -171,20 +171,20 @@ export default async function LandingPage({
 
               {/* Connector Arrow */}
               <div className="flex items-center justify-center">
-                <div className="h-16 md:h-20 w-0.5 bg-[#1DB954] relative">
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0 border-t-8 border-t-[#1DB954] border-l-4 border-l-transparent border-r-4 border-r-transparent" />
+                <div className="h-16 md:h-20 w-0.5 bg-accent-spotify relative">
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0 border-t-8 border-t-accent-spotify border-l-4 border-l-transparent border-r-4 border-r-transparent" />
                 </div>
               </div>
 
               {/* Step 3 */}
               <MagicCard
                 className="w-full max-w-md p-xl md:p-2xl rounded-xl"
-                gradientFrom="#1DB954"
-                gradientTo="#FF6B00"
+                gradientFrom="var(--color-accent-spotify)"
+                gradientTo="var(--color-primary-500)"
                 gradientSize={250}
               >
                 <div className="text-center">
-                  <div className="w-20 h-20 bg-[#1DB954] rounded-full flex items-center justify-center mx-auto mb-lg text-white text-3xl font-bold shadow-lg">
+                  <div className="w-20 h-20 bg-accent-spotify rounded-full flex items-center justify-center mx-auto mb-lg text-neutral-900 text-3xl font-bold shadow-lg">
                     3
                   </div>
                   <h3 className="text-xl md:text-2xl font-semibold mb-sm text-neutral-900">

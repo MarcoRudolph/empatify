@@ -67,12 +67,17 @@ export function Navbar({ locale }: { locale: string }) {
             )}
             <Link href="/dashboard" className="flex items-center">
               <Image
-                src="/img/Emp_Trans.png"
+                src="/img/landingpage_background_4K.png"
                 alt="Empatify"
                 width={120}
                 height={40}
-                className="h-10 w-auto"
+                className="h-10 w-auto object-contain"
                 priority
+                loading="eager"
+                quality={85}
+                sizes="(max-width: 768px) 100px, 120px"
+                placeholder="blur"
+                blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjQwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iNDAiIGZpbGw9IiMxQTFBMUEiLz48L3N2Zz4="
               />
             </Link>
           </div>

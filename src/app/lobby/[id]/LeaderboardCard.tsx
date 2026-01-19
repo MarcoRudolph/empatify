@@ -44,8 +44,8 @@ export function LeaderboardCard({ leaderboard, hasScores = false }: LeaderboardC
     return (
       <MagicCard
         className="p-4 md:p-6 rounded-2xl shadow-lg border border-neutral-300"
-        gradientFrom="#FF6B00"
-        gradientTo="#E65F00"
+        gradientFrom="var(--color-primary-500)"
+        gradientTo="var(--color-primary-600)"
         gradientSize={400}
       >
         <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
@@ -77,8 +77,8 @@ export function LeaderboardCard({ leaderboard, hasScores = false }: LeaderboardC
   return (
     <MagicCard
       className="p-4 md:p-6 rounded-2xl shadow-lg border border-neutral-300"
-      gradientFrom="#FF6B00"
-      gradientTo="#E65F00"
+      gradientFrom="var(--color-primary-500)"
+      gradientTo="var(--color-primary-600)"
       gradientSize={400}
     >
       <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">

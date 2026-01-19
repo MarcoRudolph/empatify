@@ -54,6 +54,7 @@ export const designTokens = {
     },
     accent: {
       blue: c('accent')['blue'].value,
+      spotify: c('accent')['spotify'].value,
     },
     semantic: {
       bg: resolveTokenValue(c('semantic')['bg'].value),
@@ -63,6 +64,7 @@ export const designTokens = {
       mutedText: resolveTokenValue(c('semantic')['mutedText'].value),
       link: resolveTokenValue(c('semantic')['link'].value),
       focusRing: resolveTokenValue(c('semantic')['focusRing'].value),
+      error: c('semantic')['error'].value,
     },
   },
   typography: {

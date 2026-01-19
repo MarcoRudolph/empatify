@@ -55,7 +55,7 @@ export default async function LobbyPage({ params }: LobbyPageProps) {
 
     // Get or create current user's database record
     let currentDbUserId: string | null = null
-    let currentDbUser = await db
+    const currentDbUser = await db
       .select({ id: users.id })
       .from(users)
       .where(eq(users.email, user.email!))
@@ -172,13 +172,14 @@ export default async function LobbyPage({ params }: LobbyPageProps) {
             hostId: lobby.hostId,
             category: lobby.category,
             maxRounds: lobby.maxRounds,
+            gameMode: lobby.gameMode || "multi-device",
             createdAt: lobby.createdAt.toISOString(),
           }}
           participants={participants.map((p) => ({
             ...p,
             joinedAt: p.joinedAt.toISOString(),
           }))}
-          currentUserId={user.id}
+          currentUserId={currentDbUserId || ""}
         />
       </NextIntlClientProvider>
     )

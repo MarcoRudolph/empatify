@@ -277,8 +277,8 @@ export default function LoginPage() {
       <div className="relative z-10 w-full max-w-[440px] mx-auto px-6">
         <MagicCard
           className="p-8 md:p-10 rounded-2xl shadow-lg"
-          gradientFrom="#FF6B00"
-          gradientTo="#E65F00"
+          gradientFrom="var(--color-primary-500)"
+          gradientTo="var(--color-primary-600)"
           gradientSize={400}
         >
           {/* Back Button */}
@@ -296,8 +296,8 @@ export default function LoginPage() {
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
               <AnimatedGradientText
                 speed={1.5}
-                colorFrom="#FF6B00"
-                colorTo="#E65F00"
+                colorFrom="var(--color-primary-500)"
+                colorTo="var(--color-primary-600)"
                 className="text-4xl md:text-5xl"
               >
                 {tCommon("login")}
@@ -364,8 +364,8 @@ export default function LoginPage() {
               <ShimmerButton
                 type="submit"
                 disabled={isLoading || !email}
-                background="#FF6B00"
-                shimmerColor="#ffffff"
+                background="var(--color-primary-500)"
+                shimmerColor="var(--color-neutral-900)"
                 borderRadius="9999px"
                 className="w-full font-bold text-lg h-12 px-6 disabled:opacity-50 disabled:cursor-not-allowed transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
               >

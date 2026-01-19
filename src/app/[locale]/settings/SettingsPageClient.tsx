@@ -25,35 +25,94 @@ export function SettingsPageClient({
   const router = useRouter()
   const t = useTranslations("settings")
   const tCommon = useTranslations("common")
+  const tDashboard = useTranslations("dashboard")
   const supabase = createClient()
 
   const [displayName, setDisplayName] = useState(
     user.user_metadata?.display_name || user.email?.split("@")[0] || ""
   )
+  const [originalName] = useState(
+    user.user_metadata?.display_name || user.email?.split("@")[0] || ""
+  )
   const [isSaving, setIsSaving] = useState(false)
+  const [isChecking, setIsChecking] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isUnlinkingSpotify, setIsUnlinkingSpotify] = useState(false)
   const [spotifyLinked, setSpotifyLinked] = useState(isSpotifyLinked)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [nameError, setNameError] = useState<string | null>(null)
 
   const handleSaveName = async () => {
-    setIsSaving(true)
+    // Reset errors
     setError(null)
     setSuccess(null)
+    setNameError(null)
+
+    // Validate name
+    const trimmedName = displayName.trim()
+    if (!trimmedName || trimmedName.length === 0) {
+      setNameError(t("nameRequired"))
+      return
+    }
+
+    // If name hasn't changed, don't do anything
+    if (trimmedName === originalName) {
+      setSuccess("Keine Änderungen")
+      return
+    }
+
+    setIsSaving(true)
+    setIsChecking(true)
 
     try {
-      const { error } = await supabase.auth.updateUser({
-        data: { display_name: displayName },
+      // First check if name is available
+      const checkResponse = await fetch(`/api/user/check-name?name=${encodeURIComponent(trimmedName)}`)
+      const checkData = await checkResponse.json()
+
+      if (!checkResponse.ok) {
+        throw new Error(checkData.error?.message || "Fehler beim Prüfen des Namens")
+      }
+
+      if (!checkData.available) {
+        setNameError(t("nameAlreadyTaken"))
+        setIsSaving(false)
+        setIsChecking(false)
+        return
+      }
+
+      // Name is available, update it
+      const updateResponse = await fetch("/api/user/update-name", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: trimmedName }),
       })
 
-      if (error) throw error
+      const updateData = await updateResponse.json()
 
-      setSuccess("Name erfolgreich gespeichert")
+      if (!updateResponse.ok) {
+        if (updateData.error?.code === "NAME_ALREADY_TAKEN") {
+          setNameError(t("nameAlreadyTaken"))
+        } else {
+          throw new Error(updateData.error?.message || t("nameUpdateError"))
+        }
+        setIsSaving(false)
+        setIsChecking(false)
+        return
+      }
+
+      const successMessage = t("nameUpdateSuccess")
+      // Fallback if translation is not found
+      setSuccess(successMessage || "Name erfolgreich gespeichert")
+      // Update original name to reflect the change
+      setDisplayName(trimmedName)
     } catch (err: any) {
       setError(err.message || "Fehler beim Speichern")
     } finally {
       setIsSaving(false)
+      setIsChecking(false)
     }
   }
 
@@ -144,8 +203,8 @@ export function SettingsPageClient({
           {/* Profile Section */}
           <MagicCard
             className="p-8 rounded-2xl shadow-lg mb-8"
-            gradientFrom="#FF6B00"
-            gradientTo="#E65F00"
+            gradientFrom="var(--color-primary-500)"
+            gradientTo="var(--color-primary-600)"
             gradientSize={400}
           >
             <div className="flex items-center gap-3 mb-6">
@@ -177,24 +236,39 @@ export function SettingsPageClient({
               >
                 {t("displayName")}
               </label>
-              <div className="flex gap-3">
-                <input
-                  id="displayName"
-                  type="text"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  className="flex-1 px-4 py-3 border border-neutral-300 rounded-lg bg-neutral-50 text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:border-transparent transition-all duration-200"
-                  placeholder={t("displayName")}
-                />
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="flex-1">
+                  <input
+                    id="displayName"
+                    type="text"
+                    value={displayName}
+                    onChange={(e) => {
+                      setDisplayName(e.target.value)
+                      setNameError(null) // Clear error when user types
+                    }}
+                    className={`w-full px-4 py-3 border rounded-lg bg-neutral-50 text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:border-transparent transition-all duration-200 ${
+                      nameError
+                        ? "border-[var(--color-error)] focus-visible:ring-[var(--color-error)]"
+                        : "border-neutral-300 focus-visible:ring-primary-500"
+                    }`}
+                    placeholder={t("displayName")}
+                    disabled={isSaving || isChecking}
+                  />
+                  {nameError && (
+                    <p className="mt-2 text-sm text-[var(--color-error)]">
+                      {nameError}
+                    </p>
+                  )}
+                </div>
                 <ShimmerButton
                   onClick={handleSaveName}
-                  disabled={isSaving}
-                  background="#FF6B00"
-                  shimmerColor="#ffffff"
+                  disabled={isSaving || isChecking || displayName.trim() === originalName}
+                  background="var(--color-primary-500)"
+                  shimmerColor="var(--color-neutral-900)"
                   borderRadius="9999px"
-                  className="px-6 h-12 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 h-12 font-medium disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                 >
-                  {isSaving ? (
+                  {isSaving || isChecking ? (
                     <span className="flex items-center gap-2">
                       <Loader2 className="size-4 animate-spin" />
                       <span>{tCommon("loading")}</span>
@@ -226,12 +300,12 @@ export function SettingsPageClient({
           {/* Spotify Connection Section */}
           <MagicCard
             className="p-8 rounded-2xl shadow-lg mb-8"
-            gradientFrom="#1DB954"
-            gradientTo="#1AA34A"
+            gradientFrom="var(--color-accent-spotify)"
+            gradientTo="var(--color-accent-spotify)"
             gradientSize={400}
           >
             <div className="flex items-center gap-3 mb-6">
-              <Link2 className="size-6 text-[#1DB954]" />
+              <Link2 className="size-6 text-accent-spotify" />
               <h2 className="text-2xl font-bold text-neutral-900">
                 {t("spotifyConnection")}
               </h2>
@@ -239,8 +313,8 @@ export function SettingsPageClient({
 
             {spotifyLinked ? (
               <div className="space-y-4">
-                <div className="flex items-center gap-3 p-4 bg-[#1DB954]/10 border border-[#1DB954]/30 rounded-lg">
-                  <div className="size-2 bg-[#1DB954] rounded-full"></div>
+                <div className="flex items-center gap-3 p-4 bg-accent-spotify/10 border border-accent-spotify/30 rounded-lg">
+                  <div className="size-2 bg-accent-spotify rounded-full"></div>
                   <span className="text-sm font-medium text-neutral-900">
                     {t("spotifyConnected")}
                   </span>
@@ -248,8 +322,8 @@ export function SettingsPageClient({
                 <ShimmerButton
                   onClick={handleUnlinkSpotify}
                   disabled={isUnlinkingSpotify}
-                  background="#DC2626"
-                  shimmerColor="#ffffff"
+                  background="var(--color-error)"
+                  shimmerColor="var(--color-neutral-900)"
                   borderRadius="9999px"
                   className="w-full md:w-auto px-6 h-12 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -274,9 +348,21 @@ export function SettingsPageClient({
                     {t("spotifyNotConnected")}
                   </span>
                 </div>
-                <p className="text-sm text-neutral-500">
+                <p className="text-sm text-neutral-500 mb-6">
                   {t("spotifyNotConnectedDescription")}
                 </p>
+                <ShimmerButton
+                  onClick={() => {
+                    window.location.href = "/api/spotify/auth"
+                  }}
+                  background="var(--color-accent-spotify)"
+                  shimmerColor="var(--color-neutral-900)"
+                  borderRadius="9999px"
+                  className="w-full h-16 md:h-20 text-lg md:text-xl font-bold flex items-center justify-center gap-4 shadow-[0_0_25px_rgba(29,185,84,0.5)] hover:shadow-[0_0_35px_rgba(29,185,84,0.7)] active:scale-[0.98] transition-all duration-200 border-2 border-accent-spotify/30"
+                >
+                  <Link2 className="size-7 md:size-8" />
+                  <span className="text-neutral-900">{tDashboard("linkSpotify")}</span>
+                </ShimmerButton>
               </div>
             )}
           </MagicCard>
@@ -284,8 +370,8 @@ export function SettingsPageClient({
           {/* Danger Zone */}
           <MagicCard
             className="p-8 rounded-2xl shadow-lg border-2 border-red-500/20"
-            gradientFrom="#FF6B00"
-            gradientTo="#E65F00"
+            gradientFrom="var(--color-primary-500)"
+            gradientTo="var(--color-primary-600)"
             gradientSize={400}
           >
             <div className="flex items-center gap-3 mb-6">
@@ -302,8 +388,8 @@ export function SettingsPageClient({
             <ShimmerButton
               onClick={handleDeleteAccount}
               disabled={isDeleting}
-              background="#DC2626"
-              shimmerColor="#ffffff"
+              background="var(--color-error)"
+              shimmerColor="var(--color-neutral-900)"
               borderRadius="9999px"
               className="px-6 h-12 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >

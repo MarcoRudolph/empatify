@@ -116,3 +116,112 @@ export async function POST(
   }
 }
 
+/**
+ * DELETE /api/lobby/[id]/song
+ * Deletes a song suggestion for the current user in the specified round
+ */
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: lobbyId } = await params
+    const supabase = await createClient()
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json(
+        {
+          error: {
+            code: "UNAUTHORIZED",
+            message: "Authentication required",
+            status: 401,
+          },
+        },
+        { status: 401 }
+      )
+    }
+
+    const requestUrl = new URL(request.url)
+    const roundNumber = requestUrl.searchParams.get("roundNumber")
+
+    if (!roundNumber) {
+      return NextResponse.json(
+        {
+          error: {
+            code: "VALIDATION_ERROR",
+            message: "roundNumber query parameter is required",
+            status: 400,
+          },
+        },
+        { status: 400 }
+      )
+    }
+
+    // Get user's database ID
+    const [dbUser] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, user.email!))
+      .limit(1)
+
+    if (!dbUser) {
+      return NextResponse.json(
+        {
+          error: {
+            code: "USER_NOT_FOUND",
+            message: "User not found in database",
+            status: 404,
+          },
+        },
+        { status: 404 }
+      )
+    }
+
+    // Find and delete the song
+    const existingSong = await db
+      .select()
+      .from(songs)
+      .where(
+        and(
+          eq(songs.lobbyId, lobbyId),
+          eq(songs.suggestedBy, dbUser.id),
+          eq(songs.roundNumber, parseInt(roundNumber))
+        )
+      )
+      .limit(1)
+
+    if (existingSong.length === 0) {
+      return NextResponse.json(
+        {
+          error: {
+            code: "SONG_NOT_FOUND",
+            message: "Song not found",
+            status: 404,
+          },
+        },
+        { status: 404 }
+      )
+    }
+
+    await db.delete(songs).where(eq(songs.id, existingSong[0].id))
+
+    return NextResponse.json({ success: true }, { status: 200 })
+  } catch (error: any) {
+    console.error("Error deleting song:", error)
+    return NextResponse.json(
+      {
+        error: {
+          code: "INTERNAL_ERROR",
+          message: error?.message || "Failed to delete song",
+          status: 500,
+        },
+      },
+      { status: 500 }
+    )
+  }
+}
+

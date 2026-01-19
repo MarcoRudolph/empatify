@@ -11,24 +11,24 @@ export const Footer: React.FC<{ locale: string }> = async ({ locale }) => {
 
   return (
     <footer className="bg-neutral-100 border-t border-neutral-300">
-      <div className="max-w-container mx-auto px-md py-3xl">
+      <div className="max-w-5xl mx-auto px-md py-3xl">
         {/* Main Footer Content */}
-        <div className="grid md:grid-cols-3 gap-2xl mb-2xl">
+        <div className="grid md:grid-cols-3 gap-3xl md:gap-2xl mb-2xl">
           {/* Business Info */}
-          <div className="space-y-md">
-            <h3 className="text-xl font-bold text-neutral-900">
+          <div className="space-y-lg text-center md:text-left">
+            <h3 className="text-2xl md:text-3xl font-bold text-neutral-900 tracking-tight">
               {t('businessName')}
             </h3>
-            <p className="text-neutral-700 leading-relaxed">
+            <p className="text-base md:text-lg text-neutral-600 font-medium leading-relaxed">
               {t('description')}
             </p>
-            <p className="text-sm text-neutral-500">
+            <p className="text-sm text-neutral-500 mt-xl">
               {t('developedBy')}{' '}
               <a
                 href="https://rudolpho-ai.de"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary-500 hover:text-primary-600 transition-colors"
+                className="text-primary-500 hover:text-primary-600 transition-colors font-medium"
               >
                 rudolpho-ai.de
               </a>
@@ -36,7 +36,7 @@ export const Footer: React.FC<{ locale: string }> = async ({ locale }) => {
           </div>
 
           {/* Service Links */}
-          <div>
+          <div className="text-center md:text-left">
             <h4 className="text-lg font-semibold text-neutral-900 mb-md">
               {t('service.title')}
             </h4>
@@ -59,14 +59,6 @@ export const Footer: React.FC<{ locale: string }> = async ({ locale }) => {
               </li>
               <li>
                 <Link
-                  href="/dashboard"
-                  className="text-neutral-600 hover:text-neutral-900 transition-colors"
-                >
-                  {t('service.dashboard')}
-                </Link>
-              </li>
-              <li>
-                <Link
                   href="/documentation"
                   className="text-neutral-600 hover:text-neutral-900 transition-colors"
                 >
@@ -77,7 +69,7 @@ export const Footer: React.FC<{ locale: string }> = async ({ locale }) => {
           </div>
 
           {/* Legal Links */}
-          <div>
+          <div className="text-center md:text-left">
             <h4 className="text-lg font-semibold text-neutral-900 mb-md">
               {t('legal.title')}
             </h4>

@@ -129,8 +129,8 @@ export function CreateGameSection({
   return (
     <MagicCard
       className="p-8 rounded-2xl shadow-lg"
-      gradientFrom="#FF6B00"
-      gradientTo="#E65F00"
+      gradientFrom="var(--color-primary-500)"
+      gradientTo="var(--color-primary-600)"
       gradientSize={400}
     >
       <div className="flex items-center gap-3 mb-6">
@@ -243,8 +243,8 @@ export function CreateGameSection({
         <ShimmerButton
           onClick={handleCreateGame}
           disabled={!isSpotifyLinked || isCreating}
-          background="#FF6B00"
-          shimmerColor="#ffffff"
+          background="var(--color-primary-500)"
+          shimmerColor="var(--color-neutral-900)"
           borderRadius="9999px"
           className="w-full h-12 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >

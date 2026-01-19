@@ -81,8 +81,8 @@ export function UserListCard({
   return (
     <MagicCard
       className="p-4 md:p-6 rounded-2xl shadow-lg border border-neutral-300"
-      gradientFrom="#FF6B00"
-      gradientTo="#E65F00"
+      gradientFrom="var(--color-primary-500)"
+      gradientTo="var(--color-primary-600)"
       gradientSize={400}
     >
       <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
@@ -120,8 +120,8 @@ export function UserListCard({
             />
             <ShimmerButton
               onClick={handleCopyLink}
-              background="#FF6B00"
-              shimmerColor="#ffffff"
+              background="var(--color-primary-500)"
+              shimmerColor="var(--color-neutral-900)"
               borderRadius="9999px"
               className="px-4 md:px-6 h-9 md:h-10"
               title={copied ? t("linkCopied") : t("copyLink")}

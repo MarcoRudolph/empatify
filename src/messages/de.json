@@ -26,7 +26,7 @@
     "subtitle": "Nutze deine Empathie und Spotify. Triff den Geschmack der Gruppe und gewinn das Ding.",
     "about": {
       "title": "About",
-      "description": "Empatify ist ein Multiplayer-Musik-Ratespiel, bei dem du dich mit Freunden durch gemeinsame musikalische Erfahrungen verbindest."
+      "description": "Empatify ist ein Spiel, wo du den Musikgeschmack der Gruppe treffen musst, um zu gewinnen. Wer die besten Ratings holt, gewinnt."
     },
     "howTo": {
       "title": "How to",
@@ -66,7 +66,13 @@
     "gameModeSingleDevice": "Nur auf diesem Gerät spielen",
     "gameModeMultiDevice": "Jeder spielt auf seinem Gerät mit",
     "gameModeSingleDeviceDescription": "Alle Spieler nutzen dieses Gerät gemeinsam",
-    "gameModeMultiDeviceDescription": "Jeder Spieler tritt mit seinem eigenen Gerät bei"
+    "gameModeMultiDeviceDescription": "Jeder Spieler tritt mit seinem eigenen Gerät bei",
+    "lobbyRunning": "Läuft",
+    "lobbyFinished": "Beendet",
+    "lobbyNotStarted": "Nicht gestartet",
+    "currentRound": "Aktuelle Runde",
+    "selectSongForRound": "Song für diese Runde auswählen",
+    "copyInviteLink": "Invite-Link kopieren"
   },
   "lobby": {
     "create": "Lobby erstellen",
@@ -112,6 +118,15 @@
     "roundsLabel": "Runden",
     "waitingForSong": "waiting for song",
     "selectSong": "Song auswählen",
+    "addSong": "Song hinzufügen",
+    "editSong": "Bearbeiten",
+    "deleteSong": "Löschen",
+    "confirmDeleteSong": "Möchtest du diesen Song wirklich löschen?",
+    "songDeleted": "Song gelöscht",
+    "songAdded": "Song hinzugefügt",
+    "myTop5": "My Top 5",
+    "hideTop5": "Top 5 ausblenden",
+    "stopPlaying": "Wiedergabe stoppen",
     "noScores": "No Scores",
     "noScoresDescription": "Noch keine Runde abgeschlossen. Sobald Songs bewertet wurden, erscheinen hier die Ergebnisse."
   },
@@ -150,7 +165,11 @@
     "unlinkSpotify": "Spotify-Verknüpfung lösen",
     "unlinkSpotifyConfirm": "Möchtest du die Spotify-Verknüpfung wirklich lösen? Du kannst sie später jederzeit wiederherstellen.",
     "unlinkSpotifySuccess": "Spotify-Verknüpfung erfolgreich gelöst",
-    "unlinkSpotifyError": "Fehler beim Lösen der Spotify-Verknüpfung"
+    "unlinkSpotifyError": "Fehler beim Lösen der Spotify-Verknüpfung",
+    "nameRequired": "Der Name darf nicht leer sein",
+    "nameAlreadyTaken": "Dieser Name ist bereits vergeben. Bitte wähle einen anderen Namen.",
+    "nameUpdateSuccess": "Name erfolgreich gespeichert",
+    "nameUpdateError": "Fehler beim Speichern des Namens"
   },
   "stats": {
     "title": "Statistiken",
@@ -175,14 +194,13 @@
     "lobbyInvitation": "Du wurdest eingeladen, einer Lobby beizutreten!"
   },
   "footer": {
-    "businessName": "rudolpho-chat",
-    "description": "KI-gestützte Automatisierung für Ihre Instagram-Interaktionen. Lassen Sie den Bot die Arbeit für Sie erledigen.",
+    "businessName": "Empatify",
+    "description": "Multiplayer Online Game",
     "developedBy": "Entwickelt von",
     "service": {
       "title": "Service",
       "pricing": "Preise",
       "proFeatures": "Pro Features",
-      "dashboard": "Dashboard",
       "documentation": "Dokumentation"
     },
     "legal": {
@@ -192,7 +210,7 @@
       "cookiePolicy": "Cookie-Richtlinie",
       "privacy": "Datenschutz"
     },
-    "copyright": "© 2025 rudolpho-chat. Alle Rechte vorbehalten.",
+    "copyright": "© 2025 rudolpho-ai - Alle Rechte vorbehalten.",
     "privacy": "Datenschutz",
     "imprint": "Impressum",
     "terms": "AGB",

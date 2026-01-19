@@ -1,6 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
+import { ArrowLeft } from "lucide-react"
 import { UserListCard } from "./UserListCard"
 import { SongsCard } from "./SongsCard"
 import { LeaderboardCard } from "./LeaderboardCard"
@@ -37,10 +40,25 @@ export function LobbyPageClient({
   participants: initialParticipants,
   currentUserId,
 }: LobbyPageClientProps) {
+  const router = useRouter()
+  const t = useTranslations("common")
+  const tDashboard = useTranslations("dashboard")
   const [participants, setParticipants] = useState(initialParticipants)
   const [songs, setSongs] = useState<any[]>([])
   const [ratings, setRatings] = useState<any[]>([])
   const [leaderboard, setLeaderboard] = useState<any[]>([])
+
+  // Get locale from cookie or default to 'de'
+  const getLocale = () => {
+    if (typeof document !== 'undefined') {
+      const cookies = document.cookie.split(';')
+      const localeCookie = cookies.find(c => c.trim().startsWith('NEXT_LOCALE='))
+      if (localeCookie) {
+        return localeCookie.split('=')[1] || 'de'
+      }
+    }
+    return 'de'
+  }
 
   // Poll for updates
   useEffect(() => {
@@ -62,9 +80,24 @@ export function LobbyPageClient({
     return () => clearInterval(interval)
   }, [lobby.id])
 
+  const handleBackToDashboard = () => {
+    const locale = getLocale()
+    router.push(`/${locale}/dashboard`)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-neutral-100 to-neutral-200 p-4 md:p-8">
       <div className="max-w-4xl mx-auto space-y-4 md:space-y-6">
+        {/* Back Button */}
+        <button
+          onClick={handleBackToDashboard}
+          className="flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-900 transition-colors duration-200 mb-4 group"
+          aria-label={t("back")}
+        >
+          <ArrowLeft className="size-4 transition-transform duration-200 group-hover:-translate-x-1" />
+          <span>{t("back")} {tDashboard("title")}</span>
+        </button>
+
         {/* Header */}
         <div className="text-center">
           <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-2">

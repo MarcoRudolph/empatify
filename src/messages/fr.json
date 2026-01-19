@@ -25,7 +25,7 @@
     "subtitle": "Use your empathy and spotify to win the crowd",
     "about": {
       "title": "À propos d'Empatify",
-      "description": "Empatify est un jeu multijoueur de devinette et d'évaluation musicale où vous vous connectez avec des amis à travers des expériences musicales partagées."
+      "description": "Empatify est un jeu où tu dois deviner le goût musical du groupe pour gagner. Celui qui obtient les meilleures notes gagne."
     },
     "howTo": {
       "title": "How to",
@@ -61,7 +61,13 @@
     "gameModeSingleDevice": "Jouer uniquement sur cet appareil",
     "gameModeMultiDevice": "Chacun joue sur son propre appareil",
     "gameModeSingleDeviceDescription": "Tous les joueurs utilisent cet appareil ensemble",
-    "gameModeMultiDeviceDescription": "Chaque joueur rejoint avec son propre appareil"
+    "gameModeMultiDeviceDescription": "Chaque joueur rejoint avec son propre appareil",
+    "lobbyRunning": "En cours",
+    "lobbyFinished": "Terminé",
+    "lobbyNotStarted": "Non démarré",
+    "currentRound": "Tour actuel",
+    "selectSongForRound": "Sélectionner une chanson pour ce tour",
+    "copyInviteLink": "Copier le lien d'invitation"
   },
   "lobby": {
     "create": "Créer un salon",
@@ -104,6 +110,15 @@
     "host": "Hôte",
     "waitingForSong": "en attente de chanson",
     "selectSong": "Sélectionner une chanson",
+    "addSong": "Ajouter une chanson",
+    "editSong": "Modifier",
+    "deleteSong": "Supprimer",
+    "confirmDeleteSong": "Êtes-vous sûr de vouloir supprimer cette chanson ?",
+    "songDeleted": "Chanson supprimée",
+    "songAdded": "Chanson ajoutée",
+    "myTop5": "Mes Top 5",
+    "hideTop5": "Masquer Top 5",
+    "stopPlaying": "Arrêter la lecture",
     "noScores": "Aucun Score",
     "noScoresDescription": "Aucune manche terminée pour le moment. Une fois que les chansons auront été notées, les résultats apparaîtront ici."
   },
@@ -130,7 +145,19 @@
     "freePlan": "Plan gratuit",
     "proPlan": "Plan Pro",
     "upgradeToPro": "Passer à Pro",
-    "currentPlan": "Plan actuel"
+    "currentPlan": "Plan actuel",
+    "spotifyConnection": "Connexion Spotify",
+    "spotifyConnected": "Spotify est connecté",
+    "spotifyNotConnected": "Spotify n'est pas connecté",
+    "spotifyNotConnectedDescription": "Liez votre compte Spotify dans le tableau de bord pour rechercher et lire des chansons.",
+    "unlinkSpotify": "Délier Spotify",
+    "unlinkSpotifyConfirm": "Êtes-vous sûr de vouloir délier Spotify ? Vous pourrez le reconnecter plus tard.",
+    "unlinkSpotifySuccess": "Connexion Spotify supprimée avec succès",
+    "unlinkSpotifyError": "Erreur lors de la déliaison de Spotify",
+    "nameRequired": "Le nom ne peut pas être vide",
+    "nameAlreadyTaken": "Ce nom est déjà pris. Veuillez choisir un autre nom.",
+    "nameUpdateSuccess": "Nom enregistré avec succès",
+    "nameUpdateError": "Erreur lors de l'enregistrement du nom"
   },
   "stats": {
     "title": "Statistiques",
@@ -155,14 +182,13 @@
     "lobbyInvitation": "Vous avez été invité à rejoindre un salon !"
   },
   "footer": {
-    "businessName": "rudolpho-chat",
-    "description": "Automatisation alimentée par l'IA pour vos interactions Instagram. Laissez le bot faire le travail pour vous.",
+    "businessName": "Empatify",
+    "description": "Jeu en Ligne Multijoueur",
     "developedBy": "Développé par",
     "service": {
       "title": "Service",
       "pricing": "Tarifs",
       "proFeatures": "Fonctionnalités Pro",
-      "dashboard": "Tableau de bord",
       "documentation": "Documentation"
     },
     "legal": {
@@ -172,7 +198,7 @@
       "cookiePolicy": "Politique des cookies",
       "privacy": "Politique de confidentialité"
     },
-    "copyright": "© 2025 rudolpho-chat. Tous droits réservés.",
+    "copyright": "© 2025 rudolpho-ai - Tous droits réservés.",
     "privacy": "Politique de confidentialité",
     "imprint": "Mentions légales",
     "terms": "Conditions d'utilisation",

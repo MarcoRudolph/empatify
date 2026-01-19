@@ -7,11 +7,14 @@ import { DotPattern } from '@/components/ui/dot-pattern';
 import { Navbar } from '@/components/ui/Navbar';
 import { SpotifyLinkButton } from '@/components/spotify/SpotifyLinkButton';
 import { CreateGameSection } from './CreateGameSection';
+import { CreateGameButton } from './CreateGameButton';
+import { LobbyMenu } from './LobbyMenu';
 import { Users, Music, Search, UserPlus, TrendingUp } from 'lucide-react';
 import { Link } from '@/i18n/routing';
+import NextLink from 'next/link';
 import { db } from '@/lib/db';
-import { users } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { users, lobbies, lobbyParticipants, songs, ratings } from '@/lib/db/schema';
+import { eq, or, desc, and, inArray } from 'drizzle-orm';
 
 /**
  * Dashboard page - Main hub for users after login
@@ -26,6 +29,7 @@ export default async function DashboardPage({
   const t = await getTranslations('dashboard');
   const tCommon = await getTranslations('common');
   const tFriends = await getTranslations('friends');
+  const tLobby = await getTranslations('lobby');
 
   // Check authentication
   const supabase = await createClient();
@@ -229,12 +233,195 @@ export default async function DashboardPage({
   // Check if user has Pro Plan
   const isProPlan = dbUser?.proPlan || false;
 
-  // TODO: Fetch actual data from database
-  // For now, we'll show placeholder content
-  const lobbies: any[] = [];
+  // Fetch lobbies where user is host or participant
+  let userLobbies: any[] = [];
+  try {
+    if (dbUser?.id) {
+      // Get lobbies where user is host
+      const hostedLobbies = await db
+        .select({
+          id: lobbies.id,
+          hostId: lobbies.hostId,
+          category: lobbies.category,
+          maxRounds: lobbies.maxRounds,
+          gameMode: lobbies.gameMode,
+          createdAt: lobbies.createdAt,
+        })
+        .from(lobbies)
+        .where(eq(lobbies.hostId, dbUser.id))
+        .orderBy(desc(lobbies.createdAt))
+
+      // Get lobbies where user is participant
+      const participantLobbies = await db
+        .select({
+          id: lobbies.id,
+          hostId: lobbies.hostId,
+          category: lobbies.category,
+          maxRounds: lobbies.maxRounds,
+          gameMode: lobbies.gameMode,
+          createdAt: lobbies.createdAt,
+        })
+        .from(lobbyParticipants)
+        .innerJoin(lobbies, eq(lobbyParticipants.lobbyId, lobbies.id))
+        .where(eq(lobbyParticipants.userId, dbUser.id))
+        .orderBy(desc(lobbies.createdAt))
+
+      // Combine and deduplicate (user might be both host and participant)
+      const allLobbyIds = new Set<string>()
+      hostedLobbies.forEach(l => allLobbyIds.add(l.id))
+      participantLobbies.forEach(l => {
+        if (!allLobbyIds.has(l.id)) {
+          allLobbyIds.add(l.id)
+        }
+      })
+      
+      // Create map to prioritize hosted lobbies (they appear first)
+      const lobbyMap = new Map<string, any>()
+      hostedLobbies.forEach(l => lobbyMap.set(l.id, l))
+      participantLobbies.forEach(l => {
+        if (!lobbyMap.has(l.id)) {
+          lobbyMap.set(l.id, l)
+        }
+      })
+      
+      userLobbies = Array.from(lobbyMap.values())
+      // Sort by creation date (newest first)
+      userLobbies.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      
+      // Enrich lobbies with additional data: average rating, status, current round, needs song selection
+      for (const lobby of userLobbies) {
+        try {
+          // Get all songs for this lobby
+          const lobbySongs = await db
+            .select({
+              id: songs.id,
+              roundNumber: songs.roundNumber,
+              suggestedBy: songs.suggestedBy,
+            })
+            .from(songs)
+            .where(eq(songs.lobbyId, lobby.id))
+          
+          // Get all ratings for these songs
+          let lobbyRatings: any[] = []
+          if (lobbySongs.length > 0) {
+            const songIds = lobbySongs.map(s => s.id)
+            lobbyRatings = await db
+              .select({
+                ratingValue: ratings.ratingValue,
+              })
+              .from(ratings)
+              .where(inArray(ratings.songId, songIds))
+          }
+          
+          // Calculate average rating
+          const averageRating = lobbyRatings.length > 0
+            ? lobbyRatings.reduce((sum, r) => sum + r.ratingValue, 0) / lobbyRatings.length
+            : 0
+          
+          // Get participants for this lobby
+          const lobbyParticipantsList = await db
+            .select({
+              userId: lobbyParticipants.userId,
+            })
+            .from(lobbyParticipants)
+            .where(eq(lobbyParticipants.lobbyId, lobby.id))
+          
+          const participantIds = lobbyParticipantsList.map(p => p.userId)
+          const participantCount = participantIds.length
+          
+          // Determine current round and status
+          let currentRound = 1
+          let status: 'not_started' | 'running' | 'finished' = 'not_started'
+          let needsSongSelection = false
+          
+          if (lobbySongs.length === 0) {
+            // No songs yet - not started
+            status = 'not_started'
+            currentRound = 1
+            needsSongSelection = true
+          } else {
+            status = 'running'
+            
+            // Find the current round - the lowest round where not all participants have songs
+            for (let round = 1; round <= lobby.maxRounds; round++) {
+              const roundSongs = lobbySongs.filter(s => s.roundNumber === round)
+              const participantsWithSongs = new Set(roundSongs.map(s => s.suggestedBy))
+              
+              // Check if current user needs to select a song for this round
+              if (!participantsWithSongs.has(dbUser.id)) {
+                currentRound = round
+                needsSongSelection = true
+                break
+              }
+              
+              // If all participants have songs for this round
+              if (participantsWithSongs.size === participantCount) {
+                // Check if this is the last round
+                if (round === lobby.maxRounds) {
+                  // Check if all songs have been rated (simplified: if there are ratings, consider it finished)
+                  if (lobbyRatings.length > 0) {
+                    status = 'finished'
+                    currentRound = round
+                    needsSongSelection = false
+                    break
+                  } else {
+                    currentRound = round
+                    needsSongSelection = false
+                    break
+                  }
+                } else {
+                  // Move to next round
+                  currentRound = round + 1
+                  // Check if user already has a song for next round
+                  const nextRoundSongs = lobbySongs.filter(s => s.roundNumber === round + 1)
+                  const nextRoundParticipants = new Set(nextRoundSongs.map(s => s.suggestedBy))
+                  if (!nextRoundParticipants.has(dbUser.id)) {
+                    needsSongSelection = true
+                    break
+                  }
+                }
+              } else {
+                // Not all participants have songs for this round
+                currentRound = round
+                if (!participantsWithSongs.has(dbUser.id)) {
+                  needsSongSelection = true
+                }
+                break
+              }
+            }
+            
+            // If we completed all rounds, mark as finished
+            if (currentRound > lobby.maxRounds || (currentRound === lobby.maxRounds && !needsSongSelection && lobbyRatings.length > 0)) {
+              status = 'finished'
+              currentRound = lobby.maxRounds
+              needsSongSelection = false
+            }
+          }
+          
+          // Add enriched data to lobby
+          lobby.averageRating = averageRating
+          lobby.status = status
+          lobby.currentRound = currentRound
+          lobby.needsSongSelection = needsSongSelection
+          lobby.participantCount = participantCount
+        } catch (error) {
+          console.error(`Error enriching lobby ${lobby.id}:`, error)
+          // Set defaults on error
+          lobby.averageRating = 0
+          lobby.status = 'not_started'
+          lobby.currentRound = 1
+          lobby.needsSongSelection = false
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching lobbies:", error)
+    userLobbies = []
+  }
+
   const friends: any[] = [];
   const miniStats = {
-    gamesPlayed: 0,
+    gamesPlayed: userLobbies.length,
     averageRating: 0,
     songsSuggested: 0,
   };
@@ -268,9 +455,11 @@ export default async function DashboardPage({
 
         {/* Quick Actions */}
         <div className="flex flex-col md:flex-row gap-6 mb-12">
-
           {/* Link Spotify Button */}
           <SpotifyLinkButton locale={locale} />
+          
+          {/* Create Game Button */}
+          <CreateGameButton locale={locale} />
         </div>
 
         {/* Main Grid - Mobile: stacked, Desktop: 2 columns */}
@@ -280,15 +469,15 @@ export default async function DashboardPage({
             {/* Lobbies */}
             <MagicCard
               className="p-8 rounded-2xl shadow-lg"
-              gradientFrom="#FF6B00"
-              gradientTo="#E65F00"
+              gradientFrom="var(--color-primary-500)"
+              gradientTo="var(--color-primary-600)"
               gradientSize={400}
             >
               <h2 className="text-2xl font-bold text-neutral-900 mb-6">
                 {t('lobbies')}
               </h2>
 
-              {lobbies.length === 0 ? (
+              {userLobbies.length === 0 ? (
                 <div className="text-center py-12">
                   <Music className="size-12 text-neutral-400 mx-auto mb-4" />
                   <p className="text-neutral-500">
@@ -297,16 +486,121 @@ export default async function DashboardPage({
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {/* Lobby cards would go here */}
+                  {userLobbies.map((lobby) => {
+                    // Map category to translation key
+                    const getCategoryLabel = (cat: string | null) => {
+                      if (!cat) return tLobby('categoryAll');
+                      // Handle special cases like "hiphop-rnb"
+                      const categoryMap: Record<string, string> = {
+                        'hiphop-rnb': 'categoryHipHopRnB',
+                        '60s': 'category60s',
+                        '70s': 'category70s',
+                        '80s': 'category80s',
+                        '90s': 'category90s',
+                        '2000s': 'category2000s',
+                        '2010s': 'category2010s',
+                        '2020s': 'category2020s',
+                      };
+                      const key = categoryMap[cat] || `category${cat.charAt(0).toUpperCase() + cat.slice(1)}`;
+                      return tLobby(key as any) || cat;
+                    };
+                    
+                    // Get status label and color
+                    const getStatusInfo = (status: string) => {
+                      switch (status) {
+                        case 'running':
+                          return { label: t('lobbyRunning'), bgColor: 'bg-green-500', textColor: 'text-white' }
+                        case 'finished':
+                          return { label: t('lobbyFinished'), bgColor: 'bg-neutral-500', textColor: 'text-white' }
+                        default:
+                          return { label: t('lobbyNotStarted'), bgColor: 'bg-yellow-500', textColor: '!text-neutral-900' }
+                      }
+                    }
+                    
+                    const statusInfo = getStatusInfo(lobby.status || 'not_started')
+                    
+                    return (
+                      <NextLink
+                        key={lobby.id}
+                        href={`/lobby/${lobby.id}`}
+                        className="block p-4 bg-neutral-100 hover:bg-neutral-200 rounded-lg border border-neutral-300 transition-all duration-200 group"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                              <h3 className="font-semibold text-neutral-900 group-hover:text-primary-500 transition-colors">
+                                {getCategoryLabel(lobby.category)} • {lobby.maxRounds} {tLobby('rounds')}
+                              </h3>
+                              {lobby.hostId === dbUser?.id && (
+                                <span className="px-2 py-1 text-xs font-medium bg-primary-500 text-neutral-900 rounded shrink-0">
+                                  {tLobby('host')}
+                                </span>
+                              )}
+                              <span 
+                                className={`px-2 py-1 text-xs font-medium rounded shrink-0 ${statusInfo.bgColor}`}
+                                style={statusInfo.bgColor === 'bg-yellow-500' ? { color: '#171717' } : { color: '#ffffff' }}
+                              >
+                                {statusInfo.label}
+                              </span>
+                            </div>
+                            
+                            {/* Status and Round Info */}
+                            <div className="flex items-center gap-4 flex-wrap text-sm text-neutral-600 mb-2">
+                              {lobby.status === 'running' && (
+                                <span className="flex items-center gap-1">
+                                  <span className="font-medium">{t('currentRound')}:</span>
+                                  <span>{lobby.currentRound || 1} / {lobby.maxRounds}</span>
+                                </span>
+                              )}
+                              {lobby.averageRating > 0 && (
+                                <span className="flex items-center gap-1">
+                                  <span className="font-medium">{t('averageRating')}:</span>
+                                  <span>{(lobby.averageRating || 0).toFixed(1)} / 10</span>
+                                </span>
+                              )}
+                            </div>
+                            
+                            <p className="text-xs text-neutral-500">
+                              {new Date(lobby.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                          
+                          {/* Icons and Menu */}
+                          <div className="flex items-center gap-2 shrink-0">
+                            {/* Icon - Only one icon: yellow if song selection needed, grey music note otherwise */}
+                            {lobby.needsSongSelection ? (
+                              <div className="text-yellow-500" title={t('selectSongForRound')}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                  <path fillRule="evenodd" d="M8.544 1.056a3 3 0 0 1-3 3v1a3 3 0 0 1 3 3h1a3 3 0 0 1 3-3v-1a3 3 0 0 1-3-3zm-4.1 7.056v1.944H6.39v2H4.445V14h-2v-1.944H.5v-2h1.944V8.112zm4.579 1.444v5.979a4 4 0 1 0 2 3.465v-8.28l10-3.333v5.148a4 4 0 1 0 2 3.465V1.113l-8.979 2.992v2.451h-1.5a1.5 1.5 0 0 0-1.5 1.5v1.5z" clipRule="evenodd"/>
+                                </svg>
+                              </div>
+                            ) : (
+                              <Music className="size-5 text-neutral-400 group-hover:text-primary-500 transition-colors" />
+                            )}
+                            
+                            {/* Menu */}
+                            <LobbyMenu
+                              lobbyId={lobby.id}
+                              isHost={lobby.hostId === dbUser?.id}
+                              participantCount={lobby.participantCount || 0}
+                              locale={locale}
+                            />
+                          </div>
+                        </div>
+                      </NextLink>
+                    );
+                  })}
                 </div>
               )}
             </MagicCard>
 
             {/* Create Game Section */}
-            <CreateGameSection 
-              isSpotifyLinked={isSpotifyLinked}
-              isProPlan={isProPlan}
-            />
+            <div id="create-game" className="scroll-mt-24">
+              <CreateGameSection 
+                isSpotifyLinked={isSpotifyLinked}
+                isProPlan={isProPlan}
+              />
+            </div>
           </div>
 
           {/* Right Sidebar */}
@@ -314,8 +608,8 @@ export default async function DashboardPage({
             {/* Mini Stats */}
             <MagicCard
               className="p-8 rounded-2xl shadow-lg"
-              gradientFrom="#2DB4FF"
-              gradientTo="#1A8FCC"
+              gradientFrom="var(--color-accent-blue)"
+              gradientTo="var(--color-accent-blue)"
               gradientSize={300}
             >
               <div className="flex items-center gap-3 mb-6">
@@ -355,8 +649,8 @@ export default async function DashboardPage({
             {/* Friends */}
             <MagicCard
               className="p-8 rounded-2xl shadow-lg"
-              gradientFrom="#FF6B00"
-              gradientTo="#E65F00"
+              gradientFrom="var(--color-primary-500)"
+              gradientTo="var(--color-primary-600)"
               gradientSize={300}
             >
               <div className="flex items-center justify-between mb-6">

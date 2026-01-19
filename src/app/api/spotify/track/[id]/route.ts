@@ -5,20 +5,22 @@ import { users } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 
 /**
- * GET /api/spotify/search
- * Searches for tracks on Spotify using the user's access token
+ * GET /api/spotify/track/[id]
+ * Fetches track details from Spotify API
  */
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const requestUrl = new URL(request.url)
-    const query = requestUrl.searchParams.get("q")
+    const { id: trackId } = await params
 
-    if (!query) {
+    if (!trackId) {
       return NextResponse.json(
         {
           error: {
             code: "VALIDATION_ERROR",
-            message: "Query parameter 'q' is required",
+            message: "Track ID is required",
             status: 400,
           },
         },
@@ -68,10 +70,8 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Check if token is expired and refresh if needed
-    const accessToken = dbUser.spotifyAccessToken
+    // Check if token is expired
     if (dbUser.spotifyTokenExpiresAt && new Date(dbUser.spotifyTokenExpiresAt) <= new Date()) {
-      // TODO: Implement token refresh
       return NextResponse.json(
         {
           error: {
@@ -84,40 +84,40 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Search Spotify
-    const searchResponse = await fetch(
-      `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=20`,
+    // Fetch track details from Spotify
+    const trackResponse = await fetch(
+      `https://api.spotify.com/v1/tracks/${trackId}`,
       {
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${dbUser.spotifyAccessToken}`,
         },
       }
     )
 
-    if (!searchResponse.ok) {
-      const errorText = await searchResponse.text()
+    if (!trackResponse.ok) {
+      const errorText = await trackResponse.text()
       console.error("Spotify API error:", errorText)
       return NextResponse.json(
         {
           error: {
             code: "SPOTIFY_API_ERROR",
-            message: "Failed to search Spotify",
-            status: searchResponse.status,
+            message: "Failed to fetch track from Spotify",
+            status: trackResponse.status,
           },
         },
-        { status: searchResponse.status }
+        { status: trackResponse.status }
       )
     }
 
-    const data = await searchResponse.json()
-    return NextResponse.json(data)
+    const trackData = await trackResponse.json()
+    return NextResponse.json(trackData)
   } catch (error: any) {
-    console.error("Error searching Spotify:", error)
+    console.error("Error fetching track:", error)
     return NextResponse.json(
       {
         error: {
           code: "INTERNAL_ERROR",
-          message: error?.message || "Failed to search Spotify",
+          message: error?.message || "Failed to fetch track",
           status: 500,
         },
       },
@@ -125,4 +125,3 @@ export async function GET(request: NextRequest) {
     )
   }
 }
-

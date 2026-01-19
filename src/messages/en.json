@@ -26,7 +26,7 @@
     "subtitle": "Use your empathy and spotify to win the crowd",
     "about": {
       "title": "About Empatify",
-      "description": "Empatify is a multiplayer music guessing and rating game where you connect with friends through shared musical experiences."
+      "description": "Empatify is a game where you need to match the group's music taste to win. Whoever gets the best ratings wins."
     },
     "howTo": {
       "title": "How to",
@@ -66,7 +66,13 @@
     "gameModeSingleDevice": "Play on this device only",
     "gameModeMultiDevice": "Everyone plays on their own device",
     "gameModeSingleDeviceDescription": "All players use this device together",
-    "gameModeMultiDeviceDescription": "Each player joins with their own device"
+    "gameModeMultiDeviceDescription": "Each player joins with their own device",
+    "lobbyRunning": "Running",
+    "lobbyFinished": "Finished",
+    "lobbyNotStarted": "Not started",
+    "currentRound": "Current Round",
+    "selectSongForRound": "Select song for this round",
+    "copyInviteLink": "Copy Invite Link"
   },
   "lobby": {
     "create": "Create Lobby",
@@ -109,6 +115,15 @@
     "host": "Host",
     "waitingForSong": "waiting for song",
     "selectSong": "Select Song",
+    "addSong": "Add Song",
+    "editSong": "Edit",
+    "deleteSong": "Delete",
+    "confirmDeleteSong": "Are you sure you want to delete this song?",
+    "songDeleted": "Song deleted",
+    "songAdded": "Song added",
+    "myTop5": "My Top 5",
+    "hideTop5": "Hide Top 5",
+    "stopPlaying": "Stop playing",
     "noScores": "No Scores",
     "noScoresDescription": "No rounds completed yet. Once songs have been rated, results will appear here."
   },
@@ -147,7 +162,11 @@
     "unlinkSpotify": "Unlink Spotify",
     "unlinkSpotifyConfirm": "Are you sure you want to unlink Spotify? You can reconnect it anytime later.",
     "unlinkSpotifySuccess": "Spotify connection removed successfully",
-    "unlinkSpotifyError": "Error unlinking Spotify"
+    "unlinkSpotifyError": "Error unlinking Spotify",
+    "nameRequired": "Name cannot be empty",
+    "nameAlreadyTaken": "This name is already taken. Please choose another name.",
+    "nameUpdateSuccess": "Name saved successfully",
+    "nameUpdateError": "Error saving name"
   },
   "stats": {
     "title": "Statistics",
@@ -172,14 +191,13 @@
     "lobbyInvitation": "You've been invited to join a lobby!"
   },
   "footer": {
-    "businessName": "rudolpho-chat",
-    "description": "AI-powered automation for your Instagram interactions. Let the bot do the work for you.",
+    "businessName": "Empatify",
+    "description": "Multiplayer Online Game",
     "developedBy": "Developed by",
     "service": {
       "title": "Service",
       "pricing": "Pricing",
       "proFeatures": "Pro Features",
-      "dashboard": "Dashboard",
       "documentation": "Documentation"
     },
     "legal": {
@@ -189,7 +207,7 @@
       "cookiePolicy": "Cookie Policy",
       "privacy": "Privacy Policy"
     },
-    "copyright": "© 2025 rudolpho-chat. All rights reserved.",
+    "copyright": "© 2025 rudolpho-ai - All rights reserved.",
     "privacy": "Privacy Policy",
     "imprint": "Imprint",
     "terms": "Terms of Service",
