@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { db, postgresClient } from "@/lib/db"
-import { lobbies, lobbyParticipants, users } from "@/lib/db/schema"
-import { eq, and } from "drizzle-orm"
+import { lobbies, lobbyParticipants, users, userMessages } from "@/lib/db/schema"
+import { eq, and, ne } from "drizzle-orm"
 
 /**
  * POST /api/lobby/create
@@ -30,17 +30,43 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { rounds, category, gameMode } = body
+    const { rounds, category, gameMode, copyFromLobbyId } = body
 
-    console.log("Received lobby creation request:", { rounds, category, gameMode })
+    console.log("Received lobby creation request:", { rounds, category, gameMode, copyFromLobbyId })
 
-    // Validate rounds (1-10)
-    const maxRounds = Math.max(1, Math.min(10, rounds || 5))
-    // Category can be null (for "all")
-    const lobbyCategory = category === "all" || !category ? null : category
-    // Validate game mode (default to multi-device)
-    const lobbyGameMode =
-      gameMode === "single-device" ? "single-device" : "multi-device"
+    let maxRounds: number
+    let lobbyCategory: string | null
+    let lobbyGameMode: string
+
+    // If copying from an existing lobby, fetch its settings
+    if (copyFromLobbyId) {
+      console.log("Copying settings from lobby:", copyFromLobbyId)
+      const [existingLobby] = await db
+        .select()
+        .from(lobbies)
+        .where(eq(lobbies.id, copyFromLobbyId))
+        .limit(1)
+
+      if (existingLobby) {
+        maxRounds = existingLobby.maxRounds
+        lobbyCategory = existingLobby.category
+        lobbyGameMode = existingLobby.gameMode || "multi-device"
+        console.log("Copied settings:", { maxRounds, lobbyCategory, lobbyGameMode })
+      } else {
+        // Fallback to defaults if lobby not found
+        console.warn("Lobby to copy not found, using defaults")
+        maxRounds = Math.max(1, Math.min(10, rounds || 5))
+        lobbyCategory = category === "all" || !category ? null : category
+        lobbyGameMode = gameMode === "single-device" ? "single-device" : "multi-device"
+      }
+    } else {
+      // Validate rounds (1-10)
+      maxRounds = Math.max(1, Math.min(10, rounds || 5))
+      // Category can be null (for "all")
+      lobbyCategory = category === "all" || !category ? null : category
+      // Validate game mode (default to multi-device)
+      lobbyGameMode = gameMode === "single-device" ? "single-device" : "multi-device"
+    }
 
     console.log("Processed values:", {
       maxRounds,
@@ -176,8 +202,63 @@ export async function POST(request: NextRequest) {
       `
     }
 
+    // If this is a "Play Again" (copy from existing lobby), invite all previous players
+    if (copyFromLobbyId) {
+      try {
+        console.log("Inviting previous players from lobby:", copyFromLobbyId)
+        
+        // Get all participants from the old lobby (except the current host)
+        const previousParticipants = await db
+          .select({
+            userId: lobbyParticipants.userId,
+            userName: users.name,
+          })
+          .from(lobbyParticipants)
+          .innerJoin(users, eq(lobbyParticipants.userId, users.id))
+          .where(
+            and(
+              eq(lobbyParticipants.lobbyId, copyFromLobbyId),
+              ne(lobbyParticipants.userId, userId) // Exclude current host
+            )
+          )
+
+        console.log("Previous participants found:", previousParticipants.length)
+
+        // Send Play Again invitation to each previous participant
+        if (previousParticipants.length > 0) {
+          const hostName = dbUser[0].name
+          
+          // Get category display name
+          const categoryDisplay = lobbyCategory || "all"
+          
+          // Format: __PLAY_AGAIN_INVITE__:hostName:lobbyId:maxRounds:category
+          const inviteMessage = `__PLAY_AGAIN_INVITE__:${hostName}:${newLobby.id}:${maxRounds}:${categoryDisplay}`
+
+          for (const participant of previousParticipants) {
+            try {
+              // Send invitation message
+              await db.insert(userMessages).values({
+                senderId: userId,
+                recipientId: participant.userId,
+                content: inviteMessage,
+                lobbyId: newLobby.id,
+              })
+              console.log(`Sent Play Again invite to ${participant.userName} (${participant.userId})`)
+            } catch (msgError) {
+              console.error(`Failed to send invite to ${participant.userName}:`, msgError)
+              // Continue with other invites even if one fails
+            }
+          }
+        }
+      } catch (inviteError) {
+        console.error("Error inviting previous players:", inviteError)
+        // Don't fail the lobby creation if invites fail
+      }
+    }
+
     return NextResponse.json(
       {
+        lobbyId: newLobby.id,
         lobby: {
           id: newLobby.id,
           hostId: newLobby.hostId,

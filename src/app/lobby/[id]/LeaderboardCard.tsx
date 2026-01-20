@@ -10,18 +10,24 @@ interface LeaderboardEntry {
   avatarUrl: string | null
   averageRating: number
   songsSuggested: number
+  bestSong: {
+    name: string
+    artist: string
+    rating: number
+  } | null
 }
 
 interface LeaderboardCardProps {
   leaderboard: LeaderboardEntry[]
   hasScores?: boolean // Whether any rounds have been completed with ratings
+  isGameFinished?: boolean
 }
 
 /**
  * Leaderboard Card
  * Displays player rankings based on average ratings
  */
-export function LeaderboardCard({ leaderboard, hasScores = false }: LeaderboardCardProps) {
+export function LeaderboardCard({ leaderboard, hasScores = false, isGameFinished = false }: LeaderboardCardProps) {
   const t = useTranslations("lobby")
   const tGame = useTranslations("game")
 
@@ -90,23 +96,40 @@ export function LeaderboardCard({ leaderboard, hasScores = false }: LeaderboardC
 
       <div className="space-y-2 md:space-y-3">
         {leaderboard.map((entry, index) => (
-          <div
-            key={entry.userId}
-            className={`
-              flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-lg border transition-all
-              ${
-                index === 0
-                  ? "bg-yellow-50 border-yellow-200"
-                  : index === 1
-                  ? "bg-gray-50 border-gray-200"
-                  : index === 2
-                  ? "bg-orange-50 border-orange-200"
-                  : "bg-neutral-50 border-neutral-200"
+          <div key={entry.userId}>
+            {/* Winner Badge - Only for first place when game is finished */}
+            {index === 0 && isGameFinished && (
+              <div className="text-center mb-2">
+                <h3 
+                  className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 bg-clip-text text-transparent animate-pulse inline-block"
+                  style={{ fontFamily: "'Pacifico', cursive" }}
+                >
+                  👑 Winner 👑
+                </h3>
+              </div>
+            )}
+            
+            <div
+              className={`
+                flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-lg border transition-all
+                ${
+                  index === 0
+                    ? "bg-yellow-50 border-yellow-200"
+                    : index === 1
+                    ? "bg-gray-50 border-gray-200"
+                    : index === 2
+                    ? "bg-orange-50 border-orange-200"
+                    : "bg-neutral-50 border-neutral-200"
+                }
+              `}
+              style={
+                index === 0 && isGameFinished
+                  ? { boxShadow: '0 0 20px rgba(234, 179, 8, 0.5)', border: '2px solid #fbbf24' }
+                  : undefined
               }
-            `}
-          >
-            {/* Rank Icon */}
-            <div className="flex-shrink-0">{getRankIcon(index)}</div>
+            >
+              {/* Rank Icon */}
+              <div className="shrink-0">{getRankIcon(index)}</div>
 
             {/* Avatar */}
             {entry.avatarUrl ? (
@@ -121,23 +144,46 @@ export function LeaderboardCard({ leaderboard, hasScores = false }: LeaderboardC
               </div>
             )}
 
-            {/* Name and Stats */}
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-neutral-900 text-sm md:text-base truncate">
-                {entry.name}
-              </p>
-              <p className="text-xs md:text-sm text-neutral-500">
-                {entry.songsSuggested} {tGame("song")}
-                {entry.songsSuggested !== 1 ? "s" : ""}
-              </p>
-            </div>
+            {/* Name, Best Song, and Rating - Horizontal Layout */}
+            <div className="flex-1 min-w-0 flex items-center gap-4 md:gap-6" style={{ color: '#171717' }}>
+              {/* Username - Fixed width for vertical alignment */}
+              <div className="w-24 md:w-32 shrink-0">
+                <p 
+                  className="font-medium text-sm md:text-base truncate" 
+                  style={{ 
+                    color: '#171717',
+                    WebkitTextFillColor: '#171717',
+                    opacity: 1
+                  }}
+                >
+                  {entry.name}
+                </p>
+              </div>
 
-            {/* Rating */}
-            <div className="text-right">
-              <p className="text-lg md:text-xl font-bold text-neutral-900">
-                {entry.averageRating.toFixed(1)}
-              </p>
-              <p className="text-xs md:text-sm text-neutral-500">/ 10</p>
+              {/* Best Song */}
+              {entry.bestSong ? (
+                <div className="flex-1 min-w-0 text-xs md:text-sm">
+                  <span style={{ color: '#525252' }} className="font-medium">{t("bestSong")}: </span>
+                  <span style={{ color: '#171717' }}>{entry.bestSong.name}</span>
+                  {entry.bestSong.artist && (
+                    <span style={{ color: '#737373' }}> - {entry.bestSong.artist}</span>
+                  )}
+                  <span style={{ color: '#525252' }} className="ml-2">
+                    ({entry.bestSong.rating.toFixed(1)}/10)
+                  </span>
+                </div>
+              ) : (
+                <div className="flex-1 min-w-0"></div>
+              )}
+
+              {/* Average Rating */}
+              <div className="shrink-0 text-right">
+                <p className="text-lg md:text-xl font-bold" style={{ color: '#171717' }}>
+                  {entry.averageRating > 0 ? entry.averageRating.toFixed(1) : "—"}
+                </p>
+                <p className="text-xs md:text-sm" style={{ color: '#737373' }}>/ 10</p>
+              </div>
+            </div>
             </div>
           </div>
         ))}

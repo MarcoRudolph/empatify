@@ -97,6 +97,38 @@ export const messages = pgTable('messages', {
 }));
 
 /**
+ * User Messages table
+ * Stores private messages between users
+ */
+export const userMessages = pgTable('user_messages', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  senderId: uuid('sender_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  recipientId: uuid('recipient_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  content: text('content').notNull(),
+  lobbyId: uuid('lobby_id').references(() => lobbies.id, { onDelete: 'set null' }), // Optional: link to lobby if it's an invitation
+  sentAt: timestamp('sent_at', { withTimezone: true }).defaultNow().notNull(),
+}, (table) => ({
+  senderIdIdx: index('idx_user_messages_sender_id').on(table.senderId),
+  recipientIdIdx: index('idx_user_messages_recipient_id').on(table.recipientId),
+  lobbyIdIdx: index('idx_user_messages_lobby_id').on(table.lobbyId),
+}));
+
+/**
+ * Message Read Status table
+ * Tracks which messages have been read by recipients
+ */
+export const messageReadStatus = pgTable('message_read_status', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  messageId: uuid('message_id').notNull().references(() => userMessages.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  readAt: timestamp('read_at', { withTimezone: true }).defaultNow().notNull(),
+}, (table) => ({
+  uniqueMessageUser: unique().on(table.messageId, table.userId),
+  messageIdIdx: index('idx_message_read_status_message_id').on(table.messageId),
+  userIdIdx: index('idx_message_read_status_user_id').on(table.userId),
+}));
+
+/**
  * Friends table
  * Many-to-many relationship between users (friendship)
  */
@@ -119,6 +151,9 @@ export const usersRelations = relations(users, ({ many }) => ({
   sentMessages: many(messages),
   friends: many(friends, { relationName: 'userFriends' }),
   friendOf: many(friends, { relationName: 'friendOfUsers' }),
+  sentUserMessages: many(userMessages, { relationName: 'sentMessages' }),
+  receivedUserMessages: many(userMessages, { relationName: 'receivedMessages' }),
+  messageReadStatuses: many(messageReadStatus),
 }));
 
 export const lobbiesRelations = relations(lobbies, ({ one, many }) => ({
@@ -189,6 +224,35 @@ export const friendsRelations = relations(friends, ({ one }) => ({
   }),
 }));
 
+export const userMessagesRelations = relations(userMessages, ({ one, many }) => ({
+  sender: one(users, {
+    fields: [userMessages.senderId],
+    references: [users.id],
+    relationName: 'sentMessages',
+  }),
+  recipient: one(users, {
+    fields: [userMessages.recipientId],
+    references: [users.id],
+    relationName: 'receivedMessages',
+  }),
+  lobby: one(lobbies, {
+    fields: [userMessages.lobbyId],
+    references: [lobbies.id],
+  }),
+  readStatuses: many(messageReadStatus),
+}));
+
+export const messageReadStatusRelations = relations(messageReadStatus, ({ one }) => ({
+  message: one(userMessages, {
+    fields: [messageReadStatus.messageId],
+    references: [userMessages.id],
+  }),
+  user: one(users, {
+    fields: [messageReadStatus.userId],
+    references: [users.id],
+  }),
+}));
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -204,4 +268,8 @@ export type Message = typeof messages.$inferSelect;
 export type NewMessage = typeof messages.$inferInsert;
 export type Friend = typeof friends.$inferSelect;
 export type NewFriend = typeof friends.$inferInsert;
+export type UserMessage = typeof userMessages.$inferSelect;
+export type NewUserMessage = typeof userMessages.$inferInsert;
+export type MessageReadStatus = typeof messageReadStatus.$inferSelect;
+export type NewMessageReadStatus = typeof messageReadStatus.$inferInsert;
 

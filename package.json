@@ -17,7 +17,10 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "db:migrate:messaging": "node scripts/run-messaging-migration.js",
+    "db:activate-pro-plan": "node scripts/activate-pro-plan.js",
+    "db:check-pro-plan": "node scripts/check-pro-plan-column.js"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",

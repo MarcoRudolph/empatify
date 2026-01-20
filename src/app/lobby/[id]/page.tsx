@@ -36,18 +36,38 @@ export default async function LobbyPage({ params }: LobbyPageProps) {
 
   try {
     // Get lobby (including gameMode)
-    const [lobby] = await db
-      .select({
-        id: lobbies.id,
-        hostId: lobbies.hostId,
-        category: lobbies.category,
-        maxRounds: lobbies.maxRounds,
-        gameMode: lobbies.gameMode,
-        createdAt: lobbies.createdAt,
+    let lobby
+    try {
+      const lobbyResult = await db
+        .select({
+          id: lobbies.id,
+          hostId: lobbies.hostId,
+          category: lobbies.category,
+          maxRounds: lobbies.maxRounds,
+          gameMode: lobbies.gameMode,
+          createdAt: lobbies.createdAt,
+        })
+        .from(lobbies)
+        .where(eq(lobbies.id, id))
+        .limit(1)
+      
+      lobby = lobbyResult[0]
+    } catch (dbError: any) {
+      console.error("Database error fetching lobby:", {
+        lobbyId: id,
+        error: dbError?.message,
+        cause: dbError?.cause,
+        query: dbError?.query,
+        params: dbError?.params,
       })
-      .from(lobbies)
-      .where(eq(lobbies.id, id))
-      .limit(1)
+      // Check if it's a connection error
+      const errorMessage = dbError?.message || dbError?.cause?.message || ""
+      if (errorMessage.includes("MaxClientsInSessionMode") || errorMessage.includes("max clients")) {
+        // Return a user-friendly error page or redirect with error message
+        redirect("/de/dashboard?error=connection_limit")
+      }
+      throw dbError
+    }
 
     if (!lobby) {
       redirect("/de/dashboard")
@@ -183,8 +203,27 @@ export default async function LobbyPage({ params }: LobbyPageProps) {
         />
       </NextIntlClientProvider>
     )
-  } catch (error) {
-    console.error("Error loading lobby:", error)
+  } catch (error: any) {
+    console.error("Error loading lobby:", {
+      lobbyId: id,
+      error: error?.message,
+      cause: error?.cause,
+      query: error?.query,
+      params: error?.params,
+      fullError: error,
+    })
+    
+    // Check for max clients error
+    const errorMessage = error?.message || error?.cause?.message || ""
+    const isMaxClientsError =
+      errorMessage.includes("MaxClientsInSessionMode") ||
+      errorMessage.includes("max clients reached") ||
+      errorMessage.includes("too many clients")
+    
+    if (isMaxClientsError) {
+      redirect("/de/dashboard?error=connection_limit")
+    }
+    
     redirect("/de/dashboard")
   }
 }

@@ -127,17 +127,18 @@ export function LobbyMenu({ lobbyId, isHost, participantCount, locale }: LobbyMe
               e.stopPropagation()
               handleCopyLink()
             }}
-            className="w-full px-4 py-2 text-left text-sm hover:bg-neutral-100 flex items-center gap-2 transition-colors group"
+            className="w-full px-4 py-2 text-left text-sm hover:bg-neutral-100 flex items-center gap-2 transition-colors"
+            style={{ color: '#171717' }}
           >
             {copied ? (
               <>
                 <Check className="size-4 text-green-500" />
-                <span className="text-neutral-900 group-hover:text-neutral-500">Link kopiert!</span>
+                <span style={{ color: '#171717' }}>Link kopiert!</span>
               </>
             ) : (
               <>
-                <Copy className="size-4 text-neutral-900 group-hover:text-neutral-500" />
-                <span className="text-neutral-900 group-hover:text-neutral-500">{t("copyInviteLink")}</span>
+                <Copy className="size-4" style={{ color: '#171717' }} />
+                <span style={{ color: '#171717' }}>{t("copyInviteLink")}</span>
               </>
             )}
           </button>

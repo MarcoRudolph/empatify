@@ -8,6 +8,8 @@ import { User, Settings, LogOut, ChevronDown, ArrowLeft } from "lucide-react"
 import Image from "next/image"
 import { Link } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
+import { MessagesIcon } from "@/components/messaging/MessagesIcon"
+import { LanguagePicker } from "@/components/ui/LanguagePicker"
 
 /**
  * Navbar component for authenticated pages
@@ -92,23 +94,31 @@ export function Navbar({ locale }: { locale: string }) {
             </Link>
           </div>
 
-          {/* User Dropdown - Right */}
-          <div className="relative" ref={dropdownRef}>
-            <button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-neutral-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-all duration-200"
-              aria-label="User menu"
-              aria-expanded={isDropdownOpen}
-              aria-haspopup="true"
-            >
-              <User className="size-5 text-neutral-900" />
-              <ChevronDown
-                className={cn(
-                  "size-4 text-neutral-500 transition-transform duration-200",
-                  isDropdownOpen && "rotate-180"
-                )}
-              />
-            </button>
+          {/* Right Side - Messages Icon + Language Picker + User Dropdown */}
+          <div className="flex items-center gap-2">
+            {/* Messages Icon */}
+            <MessagesIcon locale={locale} />
+
+            {/* Language Picker */}
+            <LanguagePicker locale={locale} />
+
+            {/* User Dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-neutral-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-all duration-200"
+                aria-label="User menu"
+                aria-expanded={isDropdownOpen}
+                aria-haspopup="true"
+              >
+                <User className="size-5 text-neutral-900" />
+                <ChevronDown
+                  className={cn(
+                    "size-4 text-neutral-500 transition-transform duration-200",
+                    isDropdownOpen && "rotate-180"
+                  )}
+                />
+              </button>
 
             {/* Dropdown Menu */}
             {isDropdownOpen && (
@@ -130,6 +140,7 @@ export function Navbar({ locale }: { locale: string }) {
                 </button>
               </div>
             )}
+            </div>
           </div>
         </div>
       </div>

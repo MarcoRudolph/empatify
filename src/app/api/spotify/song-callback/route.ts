@@ -78,8 +78,8 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Redirect back to lobby
-    return NextResponse.redirect(new URL(`/lobby/${lobbyId}`, requestUrl.origin))
+    // Redirect back to lobby with the round number as query parameter
+    return NextResponse.redirect(new URL(`/lobby/${lobbyId}?round=${roundNumber}`, requestUrl.origin))
   } catch (error: any) {
     console.error("Error in song callback:", error)
     const lobbyId = new URL(request.url).searchParams.get("lobbyId") || ""

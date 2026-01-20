@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
-import { db } from "@/lib/db"
-import { users } from "@/lib/db/schema"
-import { eq } from "drizzle-orm"
+import { getClientCredentialsToken } from "@/lib/spotify/client-credentials"
 
 /**
  * GET /api/spotify/search
- * Searches for tracks on Spotify using the user's access token
+ * Searches for tracks on Spotify using Client Credentials flow (no user login required)
  */
 export async function GET(request: NextRequest) {
   try {
@@ -26,61 +23,19 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    // Get access token using Client Credentials flow
+    const accessToken = await getClientCredentialsToken()
+    
+    if (!accessToken) {
       return NextResponse.json(
         {
           error: {
-            code: "UNAUTHORIZED",
-            message: "Authentication required",
-            status: 401,
+            code: "CONFIG_ERROR",
+            message: "Spotify credentials not configured. Please set NEXT_PUBLIC_SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET.",
+            status: 500,
           },
         },
-        { status: 401 }
-      )
-    }
-
-    // Get user's Spotify access token
-    const [dbUser] = await db
-      .select({
-        spotifyAccessToken: users.spotifyAccessToken,
-        spotifyTokenExpiresAt: users.spotifyTokenExpiresAt,
-      })
-      .from(users)
-      .where(eq(users.email, user.email!))
-      .limit(1)
-
-    if (!dbUser?.spotifyAccessToken) {
-      return NextResponse.json(
-        {
-          error: {
-            code: "SPOTIFY_NOT_LINKED",
-            message: "Spotify account not linked",
-            status: 403,
-          },
-        },
-        { status: 403 }
-      )
-    }
-
-    // Check if token is expired and refresh if needed
-    const accessToken = dbUser.spotifyAccessToken
-    if (dbUser.spotifyTokenExpiresAt && new Date(dbUser.spotifyTokenExpiresAt) <= new Date()) {
-      // TODO: Implement token refresh
-      return NextResponse.json(
-        {
-          error: {
-            code: "TOKEN_EXPIRED",
-            message: "Spotify token expired. Please reconnect your account.",
-            status: 401,
-          },
-        },
-        { status: 401 }
+        { status: 500 }
       )
     }
 

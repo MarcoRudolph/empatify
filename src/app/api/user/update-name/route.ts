@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { db } from "@/lib/db"
-import { users } from "@/lib/db/schema"
-import { eq, and, ne } from "drizzle-orm"
+import { users, userMessages } from "@/lib/db/schema"
+import { eq, and, ne, or, sql } from "drizzle-orm"
 
 /**
  * PUT /api/user/update-name
@@ -101,6 +101,9 @@ export async function PUT(request: NextRequest) {
       )
     }
 
+    // Store old name before updating
+    const oldName = currentDbUser.name
+    
     // Update name in database
     await db
       .update(users)
@@ -112,8 +115,52 @@ export async function PUT(request: NextRequest) {
       data: { display_name: trimmedName },
     })
 
+    // Send system message to all chat partners about name change
+    try {
+      // Find all unique users who have had conversations with this user
+      const conversationPartners = await db
+        .selectDistinct({ 
+          partnerId: sql<string>`CASE 
+            WHEN ${userMessages.senderId} = ${currentDbUser.id} THEN ${userMessages.recipientId}
+            ELSE ${userMessages.senderId}
+          END`.as('partnerId')
+        })
+        .from(userMessages)
+        .where(
+          or(
+            eq(userMessages.senderId, currentDbUser.id),
+            eq(userMessages.recipientId, currentDbUser.id)
+          )
+        )
+
+      // Send a system message to each conversation partner
+      // System message format: "[oldname] renamed to [newname]"
+      const systemMessage = `__SYSTEM_RENAME__:${oldName}:${trimmedName}`
+      
+      for (const partner of conversationPartners) {
+        if (partner.partnerId) {
+          // Send from current user to partner (will appear in their conversation)
+          await db.insert(userMessages).values({
+            senderId: currentDbUser.id,
+            recipientId: partner.partnerId,
+            content: systemMessage,
+          })
+          
+          // Also send reverse direction so it appears in both sides of conversation
+          await db.insert(userMessages).values({
+            senderId: partner.partnerId,
+            recipientId: currentDbUser.id,
+            content: systemMessage,
+          })
+        }
+      }
+    } catch (messageError) {
+      // Log error but don't fail the name update
+      console.error("Error sending rename notifications:", messageError)
+    }
+
     return NextResponse.json(
-      { success: true, message: "Name updated successfully" },
+      { success: true, message: "Name updated successfully", oldName, newName: trimmedName },
       { status: 200 }
     )
   } catch (error: any) {

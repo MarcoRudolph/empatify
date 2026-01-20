@@ -33,8 +33,10 @@ export function DotPattern({
   const id = useId()
   const containerRef = useRef<SVGSVGElement>(null)
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     const updateDimensions = () => {
       if (containerRef.current) {
         const { width, height } = containerRef.current.getBoundingClientRect()
@@ -47,23 +49,26 @@ export function DotPattern({
     return () => window.removeEventListener("resize", updateDimensions)
   }, [])
 
-  const dots = Array.from(
-    {
-      length:
-        Math.ceil(dimensions.width / width) *
-        Math.ceil(dimensions.height / height),
-    },
-    (_, i) => {
-      const col = i % Math.ceil(dimensions.width / width)
-      const row = Math.floor(i / Math.ceil(dimensions.width / width))
-      return {
-        x: col * width + cx,
-        y: row * height + cy,
-        delay: Math.random() * 5,
-        duration: Math.random() * 3 + 2,
-      }
-    }
-  )
+  // Only calculate dots after mount to prevent hydration mismatch
+  const dots = mounted
+    ? Array.from(
+        {
+          length:
+            Math.ceil(dimensions.width / width) *
+            Math.ceil(dimensions.height / height),
+        },
+        (_, i) => {
+          const col = i % Math.ceil(dimensions.width / width)
+          const row = Math.floor(i / Math.ceil(dimensions.width / width))
+          return {
+            x: col * width + cx,
+            y: row * height + cy,
+            delay: Math.random() * 5,
+            duration: Math.random() * 3 + 2,
+          }
+        }
+      )
+    : []
 
   return (
     <svg

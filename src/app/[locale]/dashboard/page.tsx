@@ -5,15 +5,14 @@ import { MagicCard } from '@/components/ui/magic-card';
 import { ShimmerButton } from '@/components/ui/shimmer-button';
 import { DotPattern } from '@/components/ui/dot-pattern';
 import { Navbar } from '@/components/ui/Navbar';
-import { SpotifyLinkButton } from '@/components/spotify/SpotifyLinkButton';
 import { CreateGameSection } from './CreateGameSection';
 import { CreateGameButton } from './CreateGameButton';
 import { LobbyMenu } from './LobbyMenu';
-import { Users, Music, Search, UserPlus, TrendingUp } from 'lucide-react';
+import { Users, Music, Search, UserPlus, TrendingUp, Calendar, Star, Trophy, Filter } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import NextLink from 'next/link';
 import { db } from '@/lib/db';
-import { users, lobbies, lobbyParticipants, songs, ratings } from '@/lib/db/schema';
+import { users, lobbies, lobbyParticipants, songs, ratings, friends } from '@/lib/db/schema';
 import { eq, or, desc, and, inArray } from 'drizzle-orm';
 
 /**
@@ -42,12 +41,10 @@ export default async function DashboardPage({
   }
 
   // Get or create user record from database
-  // Select only basic columns first to avoid Spotify column errors
   let dbUser: any = null;
-  let isSpotifyLinked = false;
 
   try {
-    // First, try to get basic user info
+    // Get basic user info
     const userRecord = await db
       .select({
         id: users.id,
@@ -87,41 +84,6 @@ export default async function DashboardPage({
     } else {
       dbUser = userRecord[0];
     }
-
-    // Try to check Spotify columns separately (they might not exist)
-    if (dbUser) {
-      try {
-        const spotifyRecord = await db
-          .select({
-            spotifyAccessToken: users.spotifyAccessToken,
-            spotifyRefreshToken: users.spotifyRefreshToken,
-          })
-          .from(users)
-          .where(eq(users.id, dbUser.id))
-          .limit(1);
-
-        if (spotifyRecord.length > 0 && spotifyRecord[0]) {
-          const spotify = spotifyRecord[0];
-          // User is linked if they have both access and refresh tokens
-          isSpotifyLinked =
-            !!spotify.spotifyAccessToken && !!spotify.spotifyRefreshToken;
-        }
-      } catch (spotifyError: any) {
-        // Spotify columns don't exist, so Spotify is not linked
-        if (
-          spotifyError.message?.includes("spotify") ||
-          spotifyError.message?.includes("column")
-        ) {
-          console.warn(
-            "Spotify columns not found. Please run the migration."
-          );
-          isSpotifyLinked = false;
-        } else {
-          // Re-throw other errors
-          throw spotifyError;
-        }
-      }
-    }
   } catch (error: any) {
     // DrizzleQueryError has a 'cause' property with the actual PostgreSQL error
     const pgError = error?.cause || error;
@@ -153,6 +115,22 @@ export default async function DashboardPage({
     const errorMessage = pgMessage || drizzleMessage;
     const errorCode = pgError?.code || error?.code;
     
+    // Check for max clients / connection pool errors
+    const isMaxClientsError =
+      errorMessage.includes("MaxClientsInSessionMode") ||
+      errorMessage.includes("max clients reached") ||
+      errorMessage.includes("too many clients") ||
+      errorCode === "53300"; // too_many_connections
+    
+    if (isMaxClientsError) {
+      console.error(
+        "Database connection pool exhausted - too many concurrent connections"
+      );
+      throw new Error(
+        `Database connection limit reached. Please wait a moment and try again. The system is handling too many requests simultaneously.`
+      );
+    }
+
     // Check for connection errors
     const isConnectionError =
       errorMessage.includes("timeout") ||
@@ -215,7 +193,6 @@ export default async function DashboardPage({
           .where(eq(users.email, user.email!))
           .limit(1);
         dbUser = userRecord.length > 0 ? userRecord[0] : null;
-        isSpotifyLinked = false;
       } catch (retryError: any) {
         console.error("Failed to fetch user on retry:", retryError);
         throw new Error(
@@ -307,7 +284,9 @@ export default async function DashboardPage({
             const songIds = lobbySongs.map(s => s.id)
             lobbyRatings = await db
               .select({
+                songId: ratings.songId,
                 ratingValue: ratings.ratingValue,
+                givenBy: ratings.givenBy,
               })
               .from(ratings)
               .where(inArray(ratings.songId, songIds))
@@ -318,16 +297,90 @@ export default async function DashboardPage({
             ? lobbyRatings.reduce((sum, r) => sum + r.ratingValue, 0) / lobbyRatings.length
             : 0
           
-          // Get participants for this lobby
+          // Get participants for this lobby with user details
           const lobbyParticipantsList = await db
             .select({
               userId: lobbyParticipants.userId,
+              userName: users.name,
+              userAvatarUrl: users.avatarUrl,
             })
             .from(lobbyParticipants)
+            .innerJoin(users, eq(lobbyParticipants.userId, users.id))
             .where(eq(lobbyParticipants.lobbyId, lobby.id))
           
           const participantIds = lobbyParticipantsList.map(p => p.userId)
           const participantCount = participantIds.length
+          
+          // Calculate leaderboard
+          const leaderboardMap = new Map<
+            string,
+            { userId: string; name: string; avatarUrl: string | null; totalRating: number; count: number }
+          >()
+          
+          // Initialize leaderboard entries for all participants
+          lobbyParticipantsList.forEach((participant) => {
+            leaderboardMap.set(participant.userId, {
+              userId: participant.userId,
+              name: participant.userName,
+              avatarUrl: participant.userAvatarUrl,
+              totalRating: 0,
+              count: 0,
+            })
+          })
+          
+          // Calculate ratings per user
+          lobbySongs.forEach((song) => {
+            const songRatings = lobbyRatings.filter((r) => r.songId === song.id)
+            songRatings.forEach((rating) => {
+              const entry = leaderboardMap.get(song.suggestedBy)
+              if (entry) {
+                entry.totalRating += rating.ratingValue
+                entry.count++
+              }
+            })
+          })
+          
+          // Convert to array and calculate averages, sort by average rating
+          const leaderboard = Array.from(leaderboardMap.values())
+            .map((entry) => ({
+              userId: entry.userId,
+              name: entry.name,
+              avatarUrl: entry.avatarUrl,
+              averageRating: entry.count > 0 ? entry.totalRating / entry.count : 0,
+            }))
+            .sort((a, b) => b.averageRating - a.averageRating)
+          
+          // Get top 3 (or top 2 if only 2 participants)
+          const topPlayers = participantCount >= 3 
+            ? leaderboard.slice(0, 3) 
+            : participantCount >= 2 
+            ? leaderboard.slice(0, 2)
+            : []
+          
+          // Find the round where user still needs to rate songs
+          // Check each round for songs that the user hasn't rated yet
+          let roundToRate: number | null = null
+          if (lobbySongs.length > 0 && participantCount > 1) {
+            // Get all songs the user has rated
+            const userRatings = lobbyRatings.filter(r => r.givenBy === dbUser.id)
+            const ratedSongIds = new Set(userRatings.map(r => r.songId))
+            
+            // Find the lowest round where there are songs the user hasn't rated
+            for (let round = 1; round <= lobby.maxRounds; round++) {
+              const roundSongs = lobbySongs.filter(s => s.roundNumber === round)
+              
+              // Check if there are songs in this round that the user hasn't rated
+              // and that are not the user's own songs
+              const songsToRate = roundSongs.filter(song => 
+                !ratedSongIds.has(song.id) && song.suggestedBy !== dbUser.id
+              )
+              
+              if (songsToRate.length > 0) {
+                roundToRate = round
+                break
+              }
+            }
+          }
           
           // Determine current round and status
           let currentRound = 1
@@ -339,7 +392,13 @@ export default async function DashboardPage({
             status = 'not_started'
             currentRound = 1
             needsSongSelection = true
+          } else if (participantCount <= 1) {
+            // Not enough players - not started
+            status = 'not_started'
+            currentRound = 1
+            needsSongSelection = true
           } else {
+            // At least one song and more than 1 player - running
             status = 'running'
             
             // Find the current round - the lowest round where not all participants have songs
@@ -404,6 +463,8 @@ export default async function DashboardPage({
           lobby.currentRound = currentRound
           lobby.needsSongSelection = needsSongSelection
           lobby.participantCount = participantCount
+          lobby.topPlayers = topPlayers
+          lobby.roundToRate = roundToRate // Round where user still needs to rate songs
         } catch (error) {
           console.error(`Error enriching lobby ${lobby.id}:`, error)
           // Set defaults on error
@@ -411,6 +472,8 @@ export default async function DashboardPage({
           lobby.status = 'not_started'
           lobby.currentRound = 1
           lobby.needsSongSelection = false
+          lobby.topPlayers = []
+          lobby.roundToRate = null
         }
       }
     }
@@ -419,11 +482,88 @@ export default async function DashboardPage({
     userLobbies = []
   }
 
-  const friends: any[] = [];
+  // Fetch friends
+  let userFriends: any[] = []
+  try {
+    if (dbUser?.id) {
+      // Get all friendships where current user is involved (bidirectional)
+      const friendships = await db
+        .select({
+          friendId: friends.friendId,
+          userId: friends.userId,
+        })
+        .from(friends)
+        .where(
+          or(
+            eq(friends.userId, dbUser.id),
+            eq(friends.friendId, dbUser.id)
+          )
+        )
+
+      // Extract all friend IDs (the ones that are not the current user)
+      const friendIds = friendships.map(f => 
+        f.userId === dbUser.id ? f.friendId : f.userId
+      )
+
+      if (friendIds.length > 0) {
+        // Get friend user details
+        userFriends = await db
+          .select({
+            id: users.id,
+            name: users.name,
+            email: users.email,
+            avatarUrl: users.avatarUrl,
+          })
+          .from(users)
+          .where(inArray(users.id, friendIds))
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching friends:", error)
+    userFriends = []
+  }
+  // Calculate mini statistics - only count finished games
+  const finishedLobbies = userLobbies.filter(lobby => lobby.status === 'finished')
+  
+  // Calculate total songs suggested by the user across all lobbies
+  let totalSongsSuggested = 0
+  let totalRatingsReceived = 0
+  let totalRatingSum = 0
+  
+  try {
+    if (dbUser?.id) {
+      // Get all songs suggested by the user across all lobbies
+      const userSongs = await db
+        .select({
+          id: songs.id,
+        })
+        .from(songs)
+        .where(eq(songs.suggestedBy, dbUser.id))
+      
+      totalSongsSuggested = userSongs.length
+      
+      // Get all ratings for those songs
+      if (userSongs.length > 0) {
+        const songIds = userSongs.map(s => s.id)
+        const userRatings = await db
+          .select({
+            ratingValue: ratings.ratingValue,
+          })
+          .from(ratings)
+          .where(inArray(ratings.songId, songIds))
+        
+        totalRatingsReceived = userRatings.length
+        totalRatingSum = userRatings.reduce((sum, r) => sum + r.ratingValue, 0)
+      }
+    }
+  } catch (error) {
+    console.error("Error calculating user stats:", error)
+  }
+  
   const miniStats = {
-    gamesPlayed: userLobbies.length,
-    averageRating: 0,
-    songsSuggested: 0,
+    gamesPlayed: finishedLobbies.length,
+    averageRating: totalRatingsReceived > 0 ? totalRatingSum / totalRatingsReceived : 0,
+    songsSuggested: totalSongsSuggested,
   };
 
   return (
@@ -455,8 +595,8 @@ export default async function DashboardPage({
 
         {/* Quick Actions */}
         <div className="flex flex-col md:flex-row gap-6 mb-12">
-          {/* Link Spotify Button */}
-          <SpotifyLinkButton locale={locale} />
+          {/* Link Spotify Button - Hidden, using Client Credentials Flow instead */}
+          {/* <SpotifyLinkButton locale={locale} /> */}
           
           {/* Create Game Button */}
           <CreateGameButton locale={locale} />
@@ -473,9 +613,18 @@ export default async function DashboardPage({
               gradientTo="var(--color-primary-600)"
               gradientSize={400}
             >
-              <h2 className="text-2xl font-bold text-neutral-900 mb-6">
-                {t('lobbies')}
-              </h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-neutral-900">
+                  {t('lobbies')}
+                </h2>
+                {userLobbies.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <button className="p-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors" title="Filter">
+                      <Filter className="size-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
 
               {userLobbies.length === 0 ? (
                 <div className="text-center py-12">
@@ -509,21 +658,46 @@ export default async function DashboardPage({
                     const getStatusInfo = (status: string) => {
                       switch (status) {
                         case 'running':
-                          return { label: t('lobbyRunning'), bgColor: 'bg-green-500', textColor: 'text-white' }
+                          return { 
+                            label: t('lobbyRunning'), 
+                            bgColor: 'bg-green-500', 
+                            textColor: 'text-white',
+                            borderColor: 'border-l-green-500' 
+                          }
                         case 'finished':
-                          return { label: t('lobbyFinished'), bgColor: 'bg-neutral-500', textColor: 'text-white' }
+                          return { 
+                            label: t('lobbyFinished'), 
+                            bgColor: 'bg-neutral-500', 
+                            textColor: 'text-white',
+                            borderColor: 'border-l-neutral-500' 
+                          }
                         default:
-                          return { label: t('lobbyNotStarted'), bgColor: 'bg-yellow-500', textColor: '!text-neutral-900' }
+                          return { 
+                            label: t('lobbyNotStarted'), 
+                            bgColor: 'bg-yellow-500', 
+                            textColor: '!text-neutral-900',
+                            borderColor: 'border-l-yellow-500' 
+                          }
                       }
                     }
                     
                     const statusInfo = getStatusInfo(lobby.status || 'not_started')
+                    const isWinner = lobby.status === 'finished' && lobby.topPlayers && lobby.topPlayers.length > 0 && lobby.topPlayers[0].userId === dbUser?.id
+                    
+                    // Determine which round to show when entering the lobby
+                    // Priority: round where user needs to rate songs > current round > round 1
+                    const roundToShow = lobby.roundToRate || lobby.currentRound || 1
+                    const lobbyUrl = lobby.roundToRate 
+                      ? `/lobby/${lobby.id}?round=${lobby.roundToRate}`
+                      : lobby.currentRound 
+                      ? `/lobby/${lobby.id}?round=${lobby.currentRound}`
+                      : `/lobby/${lobby.id}`
                     
                     return (
                       <NextLink
                         key={lobby.id}
-                        href={`/lobby/${lobby.id}`}
-                        className="block p-4 bg-neutral-100 hover:bg-neutral-200 rounded-lg border border-neutral-300 transition-all duration-200 group"
+                        href={lobbyUrl}
+                        className={`block p-4 bg-neutral-100 hover:bg-neutral-200 rounded-lg border-2 border-neutral-300 border-l-4 ${statusInfo.borderColor} transition-all duration-200 group`}
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1 min-w-0">
@@ -542,31 +716,67 @@ export default async function DashboardPage({
                               >
                                 {statusInfo.label}
                               </span>
+                              {/* Winner Badge - Show if game is finished and user is first place */}
+                              {isWinner && (
+                                <span className="px-2 py-1 text-xs font-bold bg-gradient-to-r from-yellow-400 to-yellow-500 text-yellow-900 rounded shrink-0 flex items-center gap-1 animate-pulse">
+                                  <Trophy className="size-3" />
+                                  Winner
+                                </span>
+                              )}
                             </div>
                             
                             {/* Status and Round Info */}
-                            <div className="flex items-center gap-4 flex-wrap text-sm text-neutral-600 mb-2">
+                            <div className="flex items-center gap-4 flex-wrap text-sm mb-2">
                               {lobby.status === 'running' && (
-                                <span className="flex items-center gap-1">
+                                <span className="flex items-center gap-1.5 text-neutral-700">
+                                  <Music className="size-3.5 text-neutral-500" />
                                   <span className="font-medium">{t('currentRound')}:</span>
                                   <span>{lobby.currentRound || 1} / {lobby.maxRounds}</span>
                                 </span>
                               )}
                               {lobby.averageRating > 0 && (
-                                <span className="flex items-center gap-1">
-                                  <span className="font-medium">{t('averageRating')}:</span>
-                                  <span>{(lobby.averageRating || 0).toFixed(1)} / 10</span>
+                                <span className="flex items-center gap-1.5 text-neutral-700">
+                                  <Star className="size-3.5 text-yellow-500 fill-yellow-500" />
+                                  <span className="font-medium">{(lobby.averageRating || 0).toFixed(1)} / 10</span>
                                 </span>
                               )}
+                              <span className="flex items-center gap-1.5 text-neutral-600">
+                                <Calendar className="size-3.5 text-neutral-500" />
+                                <span className="text-xs">{new Date(lobby.createdAt).toLocaleDateString()}</span>
+                              </span>
                             </div>
-                            
-                            <p className="text-xs text-neutral-500">
-                              {new Date(lobby.createdAt).toLocaleDateString()}
-                            </p>
                           </div>
                           
                           {/* Icons and Menu */}
                           <div className="flex items-center gap-2 shrink-0">
+                            {/* Mini Leaderboard - Only on large screens, show when running or finished */}
+                            {(lobby.status === 'running' || lobby.status === 'finished') && lobby.topPlayers && lobby.topPlayers.length > 0 && (
+                              <div className="hidden lg:flex flex-col gap-0.5 mr-2 text-xs">
+                                {lobby.topPlayers.map((player: any, index: number) => {
+                                  const medalColors = [
+                                    { text: 'text-yellow-900', bg: 'bg-yellow-200', nameText: 'text-yellow-900' }, // Gold - darker for better contrast
+                                    { text: 'text-neutral-800', bg: 'bg-neutral-200', nameText: 'text-neutral-800' }, // Silver - darker for better contrast
+                                    { text: 'text-amber-900', bg: 'bg-amber-200', nameText: 'text-amber-900' }, // Bronze - darker for better contrast
+                                  ]
+                                  const medalColor = medalColors[index] || { text: 'text-neutral-800', bg: 'bg-neutral-200', nameText: 'text-neutral-800' }
+                                  
+                                  return (
+                                    <div 
+                                      key={player.userId}
+                                      className={`flex items-center gap-1 px-2 py-0.5 rounded ${medalColor.bg}`}
+                                    >
+                                      <span className={`font-semibold ${medalColor.text}`}>
+                                        {index + 1}.
+                                      </span>
+                                      <span className={`${medalColor.nameText} truncate max-w-[100px] font-medium`}>
+                                        {player.name}
+                                      </span>
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            )}
+                            
                             {/* Icon - Only one icon: yellow if song selection needed, grey music note otherwise */}
                             {lobby.needsSongSelection ? (
                               <div className="text-yellow-500" title={t('selectSongForRound')}>
@@ -597,8 +807,8 @@ export default async function DashboardPage({
             {/* Create Game Section */}
             <div id="create-game" className="scroll-mt-24">
               <CreateGameSection 
-                isSpotifyLinked={isSpotifyLinked}
                 isProPlan={isProPlan}
+                currentUserName={dbUser?.name || "User"}
               />
             </div>
           </div>
@@ -665,19 +875,71 @@ export default async function DashboardPage({
                 </button>
               </div>
 
-              {friends.length === 0 ? (
+              {userFriends.length === 0 ? (
                 <div className="text-center py-8">
-                  <Users className="size-10 text-neutral-400 mx-auto mb-3" />
-                  <p className="text-sm text-neutral-500 mb-4">
+                  <div className="relative mb-6">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="size-16 rounded-full bg-gradient-to-br from-primary-500/20 to-primary-600/20 blur-xl"></div>
+                    </div>
+                    <Users className="relative size-12 text-neutral-400 mx-auto" />
+                  </div>
+                  <p className="text-sm text-neutral-600 mb-6 font-medium">
                     {tFriends('noFriends')}
                   </p>
-                  <button className="text-sm text-primary-500 hover:text-primary-600 font-medium transition-colors duration-200">
-                    {t('userSearch')}
+                  <button className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors duration-200 flex items-center gap-2 mx-auto">
+                    <UserPlus className="size-4" />
+                    {tFriends('findFriends') || t('userSearch')}
                   </button>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {/* Friend cards would go here */}
+                  {userFriends.map((friend) => (
+                    <div
+                      key={friend.id}
+                      className="flex items-center gap-3 p-3 bg-neutral-50 hover:bg-neutral-100 rounded-lg border border-neutral-200 transition-colors"
+                    >
+                      {friend.avatarUrl ? (
+                        <img
+                          src={friend.avatarUrl}
+                          alt={friend.name}
+                          className="size-10 rounded-full shrink-0"
+                        />
+                      ) : (
+                        <div className="size-10 rounded-full bg-primary-500 flex items-center justify-center text-white font-semibold text-sm shrink-0">
+                          {friend.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-neutral-900 text-sm truncate">
+                          {friend.name}
+                        </p>
+                        <p className="text-xs text-neutral-500 truncate">
+                          {friend.email}
+                        </p>
+                      </div>
+                      
+                      {/* Message Button */}
+                      <NextLink
+                        href={`/${locale}/messages/${friend.id}`}
+                        className="p-2 text-primary-500 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors shrink-0"
+                        title={tFriends('sendMessage') || 'Send Message'}
+                      >
+                        <svg 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          width="20" 
+                          height="20" 
+                          viewBox="0 0 24 24" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          strokeWidth="2" 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round"
+                        >
+                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                      </NextLink>
+                    </div>
+                  ))}
                 </div>
               )}
             </MagicCard>

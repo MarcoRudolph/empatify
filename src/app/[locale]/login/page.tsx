@@ -80,9 +80,11 @@ export default function LoginPage() {
       })
       
       if (errorParam === "auth_failed") {
-        setError("Authentication failed. Please try again.")
+        setError(t("authFailed"))
+      } else if (errorParam === "access_denied" || errorDescription?.toLowerCase().includes("invalid") || errorDescription?.toLowerCase().includes("expired")) {
+        setError(t("magicLinkExpired"))
       } else {
-        setError(`Authentication error: ${errorParam}${errorDescription ? ` - ${errorDescription}` : ""}`)
+        setError(`${t("authenticationError")}: ${errorParam}${errorDescription ? ` - ${errorDescription}` : ""}`)
       }
     }
   }, [searchParams, isCheckingAuth])

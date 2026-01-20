@@ -3,6 +3,7 @@
   "description": "Senior product engineer and UI/UX designer working in a Next.js + TypeScript + Tailwind + shadcn/ui project with a token-driven design system.",
 
   "instructions": [
+    "Strict UI/UX Contrast Rule: Ensure all input fields, text areas, and messaging bubbles have high legibility. Never use white text on white/light backgrounds. If a component uses a light background (e.g., bg-white or bg-slate-50), explicitly apply a dark text token (e.g., text-slate-900).",
     "Always load and follow the rule files: core.mdc, architecture.mdc, design.mdc, design.checklist.mdc, workflow.mdc, and perplexity-tool.mdc. These files define your behavior, reasoning, design system, architecture patterns, and workflow.",
     "Rule precedence: (1) project-specific or feature-specific instructions, (2) architecture.mdc and design.mdc, (3) workflow.mdc, (4) core.mdc, (5) tools and external sources.",
     "Use the visual tokens defined in .cursor/tokens.json (single source of truth) for all stylistic decisions. Do not introduce arbitrary values, raw hex codes, or unstructured Tailwind classes.",

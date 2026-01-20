@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams, useParams } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { Search, Music, Loader2, ArrowLeft, TrendingUp, X } from "lucide-react"
+import { Search, Music, Loader2, ArrowLeft, X, AlertCircle } from "lucide-react"
 import { MagicCard } from "@/components/ui/magic-card"
 import { ShimmerButton } from "@/components/ui/shimmer-button"
 
@@ -20,6 +20,11 @@ interface SpotifyTrack {
   }
 }
 
+interface ErrorMessage {
+  message: string
+  category?: string
+}
+
 export function SelectSongPageClient() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -27,32 +32,41 @@ export function SelectSongPageClient() {
   const t = useTranslations("lobby")
   const tCommon = useTranslations("common")
   const lobbyId = params.id as string
+  const [mounted, setMounted] = useState(false)
   const [roundNumber, setRoundNumber] = useState<number>(1)
   const [searchQuery, setSearchQuery] = useState("")
   const [tracks, setTracks] = useState<SpotifyTrack[]>([])
-  const [topTracks, setTopTracks] = useState<SpotifyTrack[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [isLoadingTopTracks, setIsLoadingTopTracks] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [spotifyLinked, setSpotifyLinked] = useState<boolean | null>(null)
-  const [showTopTracks, setShowTopTracks] = useState(false)
+  const [error, setError] = useState<ErrorMessage | null>(null)
+  const [category, setCategory] = useState<string | null>(null)
 
-  // Check Spotify status on mount
+  // Prevent hydration mismatch
   useEffect(() => {
-    const checkSpotifyStatus = async () => {
+    setMounted(true)
+  }, [])
+
+  // Fetch lobby data to get category
+  useEffect(() => {
+    const fetchLobbyData = async () => {
       try {
-        const response = await fetch("/api/spotify/status")
+        const response = await fetch(`/api/lobby/${lobbyId}`)
         if (response.ok) {
           const data = await response.json()
-          setSpotifyLinked(data.linked || false)
+          console.log("🎵 Lobby data fetched:", data)
+          console.log("🎯 Category value:", data.lobby?.category)
+          setCategory(data.lobby?.category || null)
+        } else {
+          console.error("Failed to fetch lobby data:", response.status)
         }
       } catch (error) {
-        console.error("Error checking Spotify status:", error)
-        setSpotifyLinked(false)
+        console.error("Error fetching lobby data:", error)
       }
     }
-    checkSpotifyStatus()
-  }, [])
+    if (mounted) {
+      fetchLobbyData()
+    }
+  }, [lobbyId, mounted])
 
   useEffect(() => {
     const round = searchParams.get("round")
@@ -65,17 +79,6 @@ export function SelectSongPageClient() {
     e.preventDefault()
     if (!searchQuery.trim()) return
 
-    // Check if Spotify is linked before searching
-    if (spotifyLinked === false) {
-      const linkSpotify = confirm(
-        "Du musst zuerst dein Spotify-Konto verknüpfen, um Songs zu suchen. Möchtest du zu den Einstellungen gehen?"
-      )
-      if (linkSpotify) {
-        router.push("/de/settings")
-      }
-      return
-    }
-
     setIsLoading(true)
     try {
       const response = await fetch(`/api/spotify/search?q=${encodeURIComponent(searchQuery)}`)
@@ -85,37 +88,8 @@ export function SelectSongPageClient() {
         setTracks(data.tracks?.items || [])
       } else {
         console.error("Search failed:", data)
-        // Show user-friendly error message
         const errorMessage = data.error?.message || "Fehler bei der Suche"
-        if (data.error?.code === "SPOTIFY_NOT_LINKED") {
-          const linkSpotify = confirm(
-            "Bitte verknüpfe zuerst dein Spotify-Konto in den Einstellungen. Möchtest du zu den Einstellungen gehen?"
-          )
-          if (linkSpotify) {
-            router.push("/de/settings")
-          }
-        } else if (data.error?.code === "TOKEN_EXPIRED") {
-          // Automatically unlink expired token
-          try {
-            const unlinkResponse = await fetch("/api/spotify/unlink", {
-              method: "DELETE",
-            })
-            if (unlinkResponse.ok) {
-              setSpotifyLinked(false)
-              alert("Dein Spotify-Token ist abgelaufen und wurde automatisch entfernt. Bitte verknüpfe dein Spotify-Konto erneut in den Einstellungen.")
-              router.push("/de/settings")
-            } else {
-              alert("Dein Spotify-Token ist abgelaufen. Bitte verknüpfe dein Spotify-Konto erneut in den Einstellungen.")
-              router.push("/de/settings")
-            }
-          } catch (unlinkError) {
-            console.error("Error unlinking Spotify:", unlinkError)
-            alert("Dein Spotify-Token ist abgelaufen. Bitte verknüpfe dein Spotify-Konto erneut in den Einstellungen.")
-            router.push("/de/settings")
-          }
-        } else {
-          alert(`Fehler: ${errorMessage}`)
-        }
+        alert(`Fehler: ${errorMessage}`)
       }
     } catch (error) {
       console.error("Error searching:", error)
@@ -127,6 +101,8 @@ export function SelectSongPageClient() {
 
   const handleSelectSong = async (track: SpotifyTrack) => {
     setIsSaving(true)
+    setError(null) // Clear any previous errors
+    
     try {
       const response = await fetch(`/api/lobby/${lobbyId}/song`, {
         method: "POST",
@@ -140,84 +116,128 @@ export function SelectSongPageClient() {
       })
 
       if (response.ok) {
-        // Navigate back to lobby
-        router.push(`/lobby/${lobbyId}`)
+        // Navigate back to lobby with the round number as query parameter
+        // This ensures the user lands on the correct round after selecting a song
+        router.push(`/lobby/${lobbyId}?round=${roundNumber}`)
       } else {
-        console.error("Failed to save song")
+        const data = await response.json()
+        const errorCode = data.error?.code
+        
+        // Handle category mismatch error specifically
+        if (errorCode === "CATEGORY_MISMATCH") {
+          setError({
+            message: data.error?.message || t("categoryMismatch"),
+            category: data.error?.category,
+          })
+        } else {
+          // Handle other errors
+          setError({
+            message: data.error?.message || t("songSaveError"),
+          })
+        }
         setIsSaving(false)
       }
     } catch (error) {
       console.error("Error saving song:", error)
+      setError({
+        message: t("songSaveError"),
+      })
       setIsSaving(false)
     }
   }
 
-  const handleLoadTopTracks = async () => {
-    if (showTopTracks) {
-      // Collapse if already shown
-      setShowTopTracks(false)
-      return
+  // Auto-dismiss error after 5 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null)
+      }, 5000)
+      return () => clearTimeout(timer)
     }
+  }, [error])
 
-    // Check if Spotify is linked before loading top tracks
-    if (spotifyLinked === false) {
-      const linkSpotify = confirm(
-        "Du musst zuerst dein Spotify-Konto verknüpfen, um deine Top-Tracks zu sehen. Möchtest du zu den Einstellungen gehen?"
-      )
-      if (linkSpotify) {
-        router.push("/de/settings")
-      }
-      return
+  // Helper function to get category translation key
+  const getCategoryTranslationKey = (cat: string | null): string => {
+    console.log("🔍 getCategoryTranslationKey called with:", cat)
+    if (!cat) {
+      console.log("⚠️ Category is null/undefined, returning categoryAll")
+      return "categoryAll"
     }
+    
+    // Map category values to translation keys
+    const categoryMap: Record<string, string> = {
+      "all": "categoryAll",
+      "60s": "category60s",
+      "70s": "category70s",
+      "80s": "category80s",
+      "90s": "category90s",
+      "2000s": "category2000s",
+      "2010s": "category2010s",
+      "2020s": "category2020s",
+      "schlager": "categorySchlager",
+      "techno": "categoryTechno",
+      "hiphop-rnb": "categoryHipHopRnB",
+      "rock": "categoryRock",
+      "dubstep": "categoryDubstep",
+      "pop": "categoryPop",
+      "jazz": "categoryJazz",
+      "country": "categoryCountry",
+      "electronic": "categoryElectronic",
+      "indie": "categoryIndie",
+    }
+    
+    const result = categoryMap[cat] || "categoryAll"
+    console.log("✅ Translation key result:", result)
+    return result
+  }
 
-    setIsLoadingTopTracks(true)
-    try {
-      const response = await fetch("/api/spotify/top-tracks")
-      const data = await response.json()
-      
-      if (response.ok) {
-        setTopTracks(data.tracks || [])
-        setShowTopTracks(true)
-      } else {
-        console.error("Failed to load top tracks:", data)
-        const errorMessage = data.error?.message || "Fehler beim Laden der Top-Tracks"
-        if (data.error?.code === "SPOTIFY_NOT_LINKED") {
-          const linkSpotify = confirm(
-            "Bitte verknüpfe zuerst dein Spotify-Konto in den Einstellungen. Möchtest du zu den Einstellungen gehen?"
-          )
-          if (linkSpotify) {
-            router.push("/de/settings")
-          }
-        } else if (data.error?.code === "TOKEN_EXPIRED") {
-          // Automatically unlink expired token
-          try {
-            const unlinkResponse = await fetch("/api/spotify/unlink", {
-              method: "DELETE",
-            })
-            if (unlinkResponse.ok) {
-              setSpotifyLinked(false)
-              alert("Dein Spotify-Token ist abgelaufen und wurde automatisch entfernt. Bitte verknüpfe dein Spotify-Konto erneut in den Einstellungen.")
-              router.push("/de/settings")
-            }
-          } catch (unlinkError) {
-            console.error("Error unlinking Spotify:", unlinkError)
-            alert("Dein Spotify-Token ist abgelaufen. Bitte verknüpfe dein Spotify-Konto erneut in den Einstellungen.")
-            router.push("/de/settings")
-          }
-        } else {
-          alert(`Fehler: ${errorMessage}`)
-        }
-      }
-    } catch (error) {
-      console.error("Error loading top tracks:", error)
-      alert("Ein Fehler ist aufgetreten. Bitte versuche es erneut.")
-    } finally {
-      setIsLoadingTopTracks(false)
-    }
+
+  // Show loading state during hydration to prevent mismatch
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-neutral-100 to-neutral-200 p-4 md:p-8 flex items-center justify-center">
+        <Loader2 className="size-8 animate-spin text-primary-500" />
+      </div>
+    )
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-neutral-100 to-neutral-200 p-4 md:p-8">
+      {/* Fixed Error Toast - Always visible at top */}
+      {error && (
+        <div className="fixed top-4 left-4 right-4 z-50 animate-in slide-in-from-top-2 duration-300">
+          <div className="max-w-2xl mx-auto">
+            <MagicCard
+              className="p-4 bg-red-50 border-2 border-red-300 rounded-xl shadow-2xl"
+              gradientFrom="#fca5a5"
+              gradientTo="#ef4444"
+              gradientSize={300}
+            >
+              <div className="flex items-start gap-3">
+                <AlertCircle className="size-6 text-red-600 shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm md:text-base font-bold text-red-900 break-words">
+                    {error.message}
+                  </p>
+                  {error.category && (
+                    <p className="text-xs md:text-sm text-red-800 mt-1 font-medium">
+                      {t("category")}: {error.category}
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={() => setError(null)}
+                  className="text-red-600 hover:text-red-800 transition-colors shrink-0 p-1 hover:bg-red-100 rounded-lg"
+                  aria-label={tCommon("close")}
+                >
+                  <X className="size-5" />
+                </button>
+              </div>
+            </MagicCard>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-2xl mx-auto">
         <MagicCard
           className="p-4 md:p-6 rounded-2xl shadow-lg border border-neutral-300"
@@ -237,27 +257,22 @@ export function SelectSongPageClient() {
             <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-2">
               {t("selectSong")}
             </h1>
-            <p className="text-sm text-neutral-600">
+            <p className="text-sm text-neutral-600 mb-3">
               Runde {roundNumber}
             </p>
+            
+            {/* Category Badge - Very Prominent */}
+            <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl shadow-lg border-2 border-primary-400 animate-pulse">
+              <Music className="size-5 text-white shrink-0" />
+              <span className="text-base md:text-lg font-bold text-white">
+                {t("category")}: {t(getCategoryTranslationKey(category) as any)}
+              </span>
+            </div>
           </div>
 
           {/* Search Form */}
-          {spotifyLinked === false && (
-            <div className="mb-6 p-4 bg-neutral-100 border border-neutral-300 rounded-lg">
-              <p className="text-sm text-neutral-700 mb-3">
-                Du musst zuerst dein Spotify-Konto verknüpfen, um Songs zu suchen.
-              </p>
-              <button
-                onClick={() => router.push("/de/settings")}
-                className="px-4 py-2 bg-primary-500 text-neutral-900 rounded-lg hover:bg-primary-600 transition-colors font-medium"
-              >
-                Zu den Einstellungen
-              </button>
-            </div>
-          )}
           <form onSubmit={handleSearch} className="mb-6">
-            <div className="flex gap-2 mb-3">
+            <div className="flex gap-2">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 size-5 pointer-events-none" />
                 <input
@@ -266,12 +281,12 @@ export function SelectSongPageClient() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Song suchen..."
                   className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg bg-neutral-50 text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:border-transparent"
-                  disabled={isLoading || spotifyLinked === false}
+                  disabled={isLoading}
                 />
               </div>
               <ShimmerButton
                 type="submit"
-                disabled={isLoading || !searchQuery.trim() || spotifyLinked === false}
+                disabled={isLoading || !searchQuery.trim()}
                 background="var(--color-primary-500)"
                 shimmerColor="var(--color-neutral-900)"
                 borderRadius="9999px"
@@ -284,78 +299,7 @@ export function SelectSongPageClient() {
                 )}
               </ShimmerButton>
             </div>
-            {/* My Top 5 Button */}
-            <ShimmerButton
-              type="button"
-              onClick={handleLoadTopTracks}
-              disabled={isLoadingTopTracks || spotifyLinked === false}
-              background="var(--color-accent-spotify)"
-              shimmerColor="var(--color-neutral-900)"
-              borderRadius="9999px"
-              className="w-full px-4 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              style={{ backgroundColor: "#1DB954" }}
-            >
-              {isLoadingTopTracks ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" />
-                  <span className="text-sm font-medium">{tCommon("loading")}</span>
-                </>
-              ) : showTopTracks ? (
-                <>
-                  <X className="size-4" />
-                  <span className="text-sm font-medium">{t("hideTop5")}</span>
-                </>
-              ) : (
-                <>
-                  <TrendingUp className="size-4" />
-                  <span className="text-sm font-medium">{t("myTop5")}</span>
-                </>
-              )}
-            </ShimmerButton>
           </form>
-
-          {/* Top Tracks Section */}
-          {showTopTracks && topTracks.length > 0 && (
-            <div className="mb-6 p-4 bg-gradient-to-br from-accent-spotify/10 to-accent-spotify/5 border border-accent-spotify/20 rounded-lg">
-              <div className="flex items-center gap-2 mb-3">
-                <TrendingUp className="size-5 text-accent-spotify" style={{ color: "#1DB954" }} />
-                <h3 className="text-lg font-semibold text-neutral-900">{t("myTop5")}</h3>
-              </div>
-              <div className="space-y-2">
-                {topTracks.map((track, index) => (
-                  <button
-                    key={track.id}
-                    onClick={() => handleSelectSong(track)}
-                    disabled={isSaving}
-                    className="w-full flex items-center gap-3 p-3 bg-neutral-50 hover:bg-neutral-100 rounded-lg border border-neutral-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <div className="flex items-center justify-center size-8 rounded-full bg-accent-spotify/20 text-accent-spotify font-bold text-sm shrink-0" style={{ backgroundColor: "rgba(29, 185, 84, 0.2)", color: "#1DB954" }}>
-                      {index + 1}
-                    </div>
-                    {track.album.images[0] && (
-                      <img
-                        src={track.album.images[0].url}
-                        alt={track.album.name}
-                        className="size-12 md:size-16 rounded object-cover"
-                      />
-                    )}
-                    <div className="flex-1 text-left min-w-0">
-                      <div className="font-medium text-neutral-900 truncate">
-                        {track.name}
-                      </div>
-                      <div className="text-sm text-neutral-500 truncate">
-                        {track.artists.map((a) => a.name).join(", ")}
-                      </div>
-                      <div className="text-xs text-neutral-400 truncate">
-                        {track.album.name}
-                      </div>
-                    </div>
-                    <Music className="size-5 text-accent-spotify shrink-0" style={{ color: "#1DB954" }} />
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Results */}
           {tracks.length > 0 && (
@@ -394,7 +338,7 @@ export function SelectSongPageClient() {
           {isSaving && (
             <div className="mt-4 text-center">
               <Loader2 className="size-6 animate-spin mx-auto text-primary-500" />
-              <p className="text-sm text-neutral-600 mt-2">Song wird gespeichert...</p>
+              <p className="text-sm text-neutral-600 mt-2">{t("savingSong")}</p>
             </div>
           )}
         </MagicCard>

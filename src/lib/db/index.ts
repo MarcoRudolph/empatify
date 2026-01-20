@@ -9,10 +9,12 @@ if (!process.env.DATABASE_URL) {
 const connectionString = process.env.DATABASE_URL;
 
 // Configure postgres client with better connection settings
+// Increased max connections to handle concurrent requests better
 const client = postgres(connectionString, {
-  max: 10, // Maximum number of connections in the pool
-  idle_timeout: 20, // Close idle connections after 20 seconds
+  max: 20, // Maximum number of connections in the pool (increased from 10)
+  idle_timeout: 10, // Close idle connections after 10 seconds (reduced to free up connections faster)
   connect_timeout: 10, // Connection timeout in seconds
+  max_lifetime: 60 * 30, // Maximum lifetime of a connection in seconds (30 minutes)
   onnotice: () => {}, // Suppress notices
   transform: {
     undefined: null, // Transform undefined to null
