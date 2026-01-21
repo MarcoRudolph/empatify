@@ -94,28 +94,28 @@ export default function LoginPage() {
     setIsLoading(true)
     setError(null)
 
-    try {
-      // Get redirect parameter from URL
-      const redirectParam = searchParams.get("redirect")
-      const redirectPath = redirectParam || "/dashboard"
-      
-      // Get base URL - use IP address in development instead of localhost
-      const getBaseUrl = () => {
-        if (process.env.NODE_ENV === "production") {
-          return window.location.origin
-        }
-        // In development, use IP address if available, otherwise use origin
-        const envUrl = process.env.NEXT_PUBLIC_APP_URL
-        if (envUrl && !envUrl.includes("localhost") && !envUrl.includes("127.0.0.1")) {
-          return envUrl
-        }
-        // Fallback to IP address for OAuth redirects
-        return "http://192.168.178.180:3000"
+    // Define variables outside try-catch so they're accessible in catch block
+    const redirectParam = searchParams.get("redirect")
+    const redirectPath = redirectParam || "/dashboard"
+    
+    // Get base URL - use IP address in development instead of localhost
+    const getBaseUrl = () => {
+      if (process.env.NODE_ENV === "production") {
+        return window.location.origin
       }
-      
-      const baseUrl = getBaseUrl()
-      const emailRedirectTo = `${baseUrl}/auth/callback?next=${encodeURIComponent(redirectPath)}`
+      // In development, use IP address if available, otherwise use origin
+      const envUrl = process.env.NEXT_PUBLIC_APP_URL
+      if (envUrl && !envUrl.includes("localhost") && !envUrl.includes("127.0.0.1")) {
+        return envUrl
+      }
+      // Fallback to IP address for OAuth redirects
+      return "http://192.168.178.180:3000"
+    }
+    
+    const baseUrl = getBaseUrl()
+    const emailRedirectTo = `${baseUrl}/auth/callback?next=${encodeURIComponent(redirectPath)}`
 
+    try {
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
@@ -147,34 +147,36 @@ export default function LoginPage() {
     setIsLoading(true)
     setError(null)
 
-    try {
-      // Get redirect parameter from URL
-      const redirectParam = searchParams.get("redirect")
-      const redirectPath = redirectParam || "/dashboard"
-      
-      // Get base URL - use IP address in development instead of localhost
-      const getBaseUrl = () => {
-        if (process.env.NODE_ENV === "production") {
-          return window.location.origin
-        }
-        // In development, use IP address if available, otherwise use origin
-        const envUrl = process.env.NEXT_PUBLIC_APP_URL
-        if (envUrl && !envUrl.includes("localhost") && !envUrl.includes("127.0.0.1")) {
-          return envUrl
-        }
-        // Fallback to IP address for OAuth redirects
-        return "http://192.168.178.180:3000"
+    // Define variables outside try-catch so they're accessible in catch block
+    // Get redirect parameter from URL
+    const redirectParam = searchParams.get("redirect")
+    const redirectPath = redirectParam || "/dashboard"
+    
+    // Get base URL - use IP address in development instead of localhost
+    const getBaseUrl = () => {
+      if (process.env.NODE_ENV === "production") {
+        return window.location.origin
       }
-      
-      const baseUrl = getBaseUrl()
-      
-      // IMPORTANT: Supabase uses the Site URL as the base for PKCE code verifier storage
-      // If the Site URL doesn't match where the code lands, the code verifier won't match
-      // We need to ensure the redirectTo URL matches what Supabase expects
-      
-      // Build redirect URL - use absolute URL to ensure Supabase stores code verifier correctly
-      // The redirectTo MUST match the Site URL or be in the Redirect URLs list in Supabase
-      const redirectTo = `${baseUrl}/auth/callback?next=${encodeURIComponent(redirectPath)}`
+      // In development, use IP address if available, otherwise use origin
+      const envUrl = process.env.NEXT_PUBLIC_APP_URL
+      if (envUrl && !envUrl.includes("localhost") && !envUrl.includes("127.0.0.1")) {
+        return envUrl
+      }
+      // Fallback to IP address for OAuth redirects
+      return "http://192.168.178.180:3000"
+    }
+    
+    const baseUrl = getBaseUrl()
+    
+    // IMPORTANT: Supabase uses the Site URL as the base for PKCE code verifier storage
+    // If the Site URL doesn't match where the code lands, the code verifier won't match
+    // We need to ensure the redirectTo URL matches what Supabase expects
+    
+    // Build redirect URL - use absolute URL to ensure Supabase stores code verifier correctly
+    // The redirectTo MUST match the Site URL or be in the Redirect URLs list in Supabase
+    const redirectTo = `${baseUrl}/auth/callback?next=${encodeURIComponent(redirectPath)}`
+
+    try {
       
       // Log for debugging (remove in production)
       if (process.env.NODE_ENV === "development") {

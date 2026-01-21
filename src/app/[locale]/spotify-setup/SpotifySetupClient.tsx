@@ -152,7 +152,7 @@ export function SpotifySetupClient({ locale }: { locale: string }) {
             <ol className="list-decimal list-inside text-sm text-blue-800 space-y-1">
               <li>Gehe zu <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noopener noreferrer" className="underline font-medium">Spotify Developer Dashboard</a></li>
               <li>Wähle deine App aus</li>
-              <li>Klicke auf "Edit Settings"</li>
+              <li>Klicke auf &quot;Edit Settings&quot;</li>
               <li>Füge die oben angezeigte Redirect URI hinzu</li>
               <li>Speichere die Änderungen</li>
             </ol>

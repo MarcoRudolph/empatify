@@ -264,10 +264,9 @@ export async function GET(
       lobby: {
         id: lobby.id,
         hostId: lobby.hostId,
-        rounds: lobby.rounds,
+        maxRounds: lobby.maxRounds,
         category: lobby.category,
         gameMode: lobby.gameMode,
-        status: lobby.status,
         createdAt: lobby.createdAt.toISOString(),
       },
       participants: participants.map((p) => ({

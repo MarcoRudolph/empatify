@@ -7,8 +7,7 @@
 
 // Import from tokens.json (which should be synced from .cursor/tokens.json)
 // The single source of truth is .cursor/tokens.json - update that file and sync here
-// Use require for CommonJS compatibility (needed for Tailwind config)
-const tokensData = require('./tokens.json')
+import tokensData from './tokens.json'
 const tokens = tokensData as any
 
 // Helper functions for type-safe token access
