@@ -76,7 +76,7 @@ export const Footer: React.FC<{ locale: string }> = async ({ locale }) => {
             <ul className="space-y-xs">
               <li>
                 <Link
-                  href="/imprint"
+                  href="/impressum"
                   className="text-neutral-600 hover:text-neutral-900 transition-colors"
                 >
                   {t('legal.imprint')}
@@ -84,23 +84,7 @@ export const Footer: React.FC<{ locale: string }> = async ({ locale }) => {
               </li>
               <li>
                 <Link
-                  href="/terms-of-use"
-                  className="text-neutral-600 hover:text-neutral-900 transition-colors"
-                >
-                  {t('legal.termsOfUse')}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/cookie-policy"
-                  className="text-neutral-600 hover:text-neutral-900 transition-colors"
-                >
-                  {t('legal.cookiePolicy')}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/privacy"
+                  href="/datenschutz"
                   className="text-neutral-600 hover:text-neutral-900 transition-colors"
                 >
                   {t('legal.privacy')}

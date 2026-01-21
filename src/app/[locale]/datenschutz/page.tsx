@@ -26,17 +26,7 @@ export default function DatenschutzPage() {
               {t('subtitle')}
             </p>
             
-            {/* PDF Download Section */}
-            <div className="mt-8">
-              <a 
-                href="/datenschutzerklaerung_date_talk_de_de.pdf" 
-                download
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
-                <Download className="w-5 h-5" />
-                {t('downloadPDF')}
-              </a>
-            </div>
+            {/* PDF Download Section - Removed for now */}
           </div>
         </div>
       </div>
@@ -102,24 +92,34 @@ export default function DatenschutzPage() {
 
                 <section className="mb-8">
                   <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                    2. Hosting
+                    2. Hosting und externe Dienste
                   </h2>
+                  
+                  <h3 className="text-lg font-semibold text-gray-700 mb-3">Vercel</h3>
                   <p className="text-gray-600 mb-4">
-                    Wir hosten die Inhalte unserer Website bei folgendem Anbieter:
-                  </p>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-3">Strato</h3>
-                  <p className="text-gray-600 mb-4">
-                    Anbieter ist die Strato AG, Otto-Ostrowski-Straße 7, 10249 Berlin (nachfolgend &ldquo;Strato&rdquo;). Wenn Sie unsere Website besuchen, erfasst Strato verschiedene Logfiles inklusive Ihrer IP-Adressen.
+                    Wir hosten die Inhalte unserer Website bei Vercel Inc., 340 S Lemon Ave #4133, Walnut, CA 91789, USA (nachfolgend &ldquo;Vercel&rdquo;). Wenn Sie unsere Website besuchen, erfasst Vercel verschiedene Logfiles inklusive Ihrer IP-Adressen zur technischen Bereitstellung und Sicherheit der Website.
                   </p>
                   <p className="text-gray-600 mb-4">
-                    Weitere Informationen entnehmen Sie der Datenschutzerklärung von Strato: <a href="https://www.strato.de/datenschutz/" className="text-purple-600 hover:text-purple-700 underline">https://www.strato.de/datenschutz/</a>.
+                    Weitere Informationen entnehmen Sie der Datenschutzerklärung von Vercel: <a href="https://vercel.com/legal/privacy-policy" className="text-purple-600 hover:text-purple-700 underline">https://vercel.com/legal/privacy-policy</a>.
                   </p>
                   <p className="text-gray-600 mb-4">
-                    Die Verwendung von Strato erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. Wir haben ein berechtigtes Interesse an einer möglichst zuverlässigen Darstellung unserer Website. Sofern eine entsprechende Einwilligung abgefragt wurde, erfolgt die Verarbeitung ausschließlich auf Grundlage von Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TDDDG, soweit die Einwilligung die Speicherung von Cookies oder den Zugriff auf Informationen im Endgerät des Nutzers (z. B. Device-Fingerprinting) im Sinne des TDDDG umfasst. Die Einwilligung ist jederzeit widerrufbar.
+                    Die Verwendung von Vercel erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. Wir haben ein berechtigtes Interesse an einer möglichst zuverlässigen und schnellen Darstellung unserer Website.
                   </p>
-                  <h4 className="text-md font-semibold text-gray-700 mb-2">Auftragsverarbeitung</h4>
+
+                  <h3 className="text-lg font-semibold text-gray-700 mb-3">Supabase</h3>
                   <p className="text-gray-600 mb-4">
-                    Wir haben einen Vertrag über Auftragsverarbeitung (AVV) zur Nutzung des oben genannten Dienstes geschlossen. Hierbei handelt es sich um einen datenschutzrechtlich vorgeschriebenen Vertrag, der gewährleistet, dass dieser die personenbezogenen Daten unserer Websitebesucher nur nach unseren Weisungen und unter Einhaltung der DSGVO verarbeitet.
+                    Für die Benutzer-Authentifizierung und Datenspeicherung nutzen wir Supabase (Supabase Inc., USA). Hierbei werden personenbezogene Daten wie E-Mail-Adressen, Benutzernamen und Spielinformationen verarbeitet und auf Servern von Supabase gespeichert.
+                  </p>
+                  <p className="text-gray-600 mb-4">
+                    Weitere Informationen: <a href="https://supabase.com/privacy" className="text-purple-600 hover:text-purple-700 underline">https://supabase.com/privacy</a>.
+                  </p>
+
+                  <h3 className="text-lg font-semibold text-gray-700 mb-3">Spotify Web API</h3>
+                  <p className="text-gray-600 mb-4">
+                    Empatify nutzt die Spotify Web API (Spotify AB, Regeringsgatan 19, 111 53 Stockholm, Schweden) zur Anzeige und Wiedergabe von Musiktiteln. Wenn Sie Songs suchen oder abspielen, werden Ihre Suchanfragen und Interaktionen an Spotify übermittelt. Die Verarbeitung erfolgt auf Grundlage Ihrer Einwilligung (Art. 6 Abs. 1 lit. a DSGVO).
+                  </p>
+                  <p className="text-gray-600 mb-4">
+                    Weitere Informationen: <a href="https://www.spotify.com/de/legal/privacy-policy/" className="text-purple-600 hover:text-purple-700 underline">https://www.spotify.com/de/legal/privacy-policy/</a>.
                   </p>
                 </section>
 
@@ -239,116 +239,29 @@ export default function DatenschutzPage() {
                   <div id="CookieDeclaration"></div>
                 </section>
 
-                <section className="mb-8">
-                  <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                    5. Soziale Medien
-                  </h2>
-                  
-                  <h3 className="text-lg font-semibold text-gray-700 mb-3">Instagram</h3>
-                  <p className="text-gray-600 mb-4">
-                    Auf dieser Website sind Funktionen des Dienstes Instagram eingebunden. Diese Funktionen werden angeboten durch die Meta Platforms Ireland Limited, Merrion Road, Dublin 4, D04 X2K5, Irland.
-                  </p>
-                  <p className="text-gray-600 mb-4">
-                    Wenn das Social-Media-Element aktiv ist, wird eine direkte Verbindung zwischen Ihrem Endgerät und dem Instagram-Server hergestellt. Instagram erhält dadurch Informationen über den Besuch dieser Website durch Sie.
-                  </p>
-                  <p className="text-gray-600 mb-4">
-                    Wenn Sie in Ihrem Instagram-Account eingeloggt sind, können Sie durch Anklicken des Instagram-Buttons die Inhalte dieser Website mit Ihrem Instagram-Profil verlinken. Dadurch kann Instagram den Besuch dieser Website Ihrem Benutzerkonto zuordnen. Wir weisen darauf hin, dass wir als Anbieter der Seiten keine Kenntnis vom Inhalt der übermittelten Daten sowie deren Nutzung durch Instagram erhalten.
-                  </p>
-                  <p className="text-gray-600 mb-4">
-                    Die Nutzung dieses Dienstes erfolgt auf Grundlage Ihrer Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TDDDG. Die Einwilligung ist jederzeit widerrufbar.
-                  </p>
-                  <p className="text-gray-600 mb-4">
-                    Soweit mit Hilfe des hier beschriebenen Tools personenbezogene Daten auf unserer Website erfasst und an Facebook bzw. Instagram weitergeleitet werden, sind wir und die Meta Platforms Ireland Limited, 4 Grand Canal Square, Grand Canal Harbour, Dublin 2, Irland gemeinsam für diese Datenverarbeitung verantwortlich (Art. 26 DSGVO). Die gemeinsame Verantwortlichkeit beschränkt sich dabei ausschließlich auf die Erfassung der Daten und deren Weitergabe an Facebook bzw. Instagram. Die nach der Weiterleitung erfolgende Verarbeitung durch Facebook bzw. Instagram ist nicht Teil der gemeinsamen Verantwortlichkeit.
-                  </p>
-                  <p className="text-gray-600 mb-4">
-                    Die uns gemeinsam obliegenden Verpflichtungen wurden in einer Vereinbarung über gemeinsame Verarbeitung festgehalten. Den Wortlaut der Vereinbarung finden Sie unter: <a href="https://www.facebook.com/legal/controller_addendum" className="text-purple-600 hover:text-purple-700 underline">https://www.facebook.com/legal/controller_addendum</a>. Laut dieser Vereinbarung sind wir für die Erteilung der Datenschutzinformationen beim Einsatz des Facebook- bzw. Instagram-Tools und für die datenschutzrechtlich sichere Implementierung des Tools auf unserer Website verantwortlich. Für die Datensicherheit der Facebook bzw. Instagram-Produkte ist Facebook verantwortlich. Betroffenenrechte (z. B. Auskunftsersuchen) hinsichtlich der bei Facebook bzw. Instagram verarbeiteten Daten können Sie direkt bei Facebook geltend machen. Wenn Sie die Betroffenenrechte bei uns geltend machen, sind wir verpflichtet, diese an Facebook weiterzuleiten.
-                  </p>
-                  <p className="text-gray-600 mb-4">
-                    Die Datenübertragung in die USA wird auf die Standardvertragsklauseln der EU-Kommission gestützt. Details finden Sie hier:
-                  </p>
-                  <ul className="list-disc pl-6 space-y-2 text-gray-600 mb-4">
-                    <li><a href="https://www.facebook.com/legal/EU_data_transfer_addendum" className="text-purple-600 hover:text-purple-700 underline">https://www.facebook.com/legal/EU_data_transfer_addendum</a></li>
-                    <li><a href="https://privacycenter.instagram.com/policy/" className="text-purple-600 hover:text-purple-700 underline">https://privacycenter.instagram.com/policy/</a></li>
-                    <li><a href="https://de-de.facebook.com/help/566994660333381" className="text-purple-600 hover:text-purple-700 underline">https://de-de.facebook.com/help/566994660333381</a></li>
-                  </ul>
-                  <p className="text-gray-600 mb-4">
-                    Weitere Informationen hierzu finden Sie in der Datenschutzerklärung von Instagram: <a href="https://privacycenter.instagram.com/policy/" className="text-purple-600 hover:text-purple-700 underline">https://privacycenter.instagram.com/policy/</a>.
-                  </p>
-                  <p className="text-gray-600 mb-4">
-                    Das Unternehmen verfügt über eine Zertifizierung nach dem &ldquo;EU-US Data Privacy Framework&rdquo; (DPF). Der DPF ist ein Übereinkommen zwischen der Europäischen Union und den USA, der die Einhaltung europäischer Datenschutzstandards bei Datenverarbeitungen in den USA gewährleisten soll. Jedes nach dem DPF zertifizierte Unternehmen verpflichtet sich, diese Datenschutzstandards einzuhalten. Weitere Informationen hierzu erhalten Sie vom Anbieter unter folgendem Link: <a href="https://www.dataprivacyframework.gov/participant/4452" className="text-purple-600 hover:text-purple-700 underline">https://www.dataprivacyframework.gov/participant/4452</a>.
-                  </p>
-                </section>
 
                 <section className="mb-8">
                   <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                    6. Plugins und Tools
+                    5. Plugins und Tools
                   </h2>
                   
-                  <h3 className="text-lg font-semibold text-gray-700 mb-3">Google Fonts</h3>
+                  <h3 className="text-lg font-semibold text-gray-700 mb-3">OpenAI API (ChatGPT)</h3>
                   <p className="text-gray-600 mb-4">
-                    Diese Seite nutzt zur einheitlichen Darstellung von Schriftarten so genannte Google Fonts, die von Google bereitgestellt werden. Beim Aufruf einer Seite lädt Ihr Browser die benötigten Fonts in ihren Browsercache, um Texte und Schriftarten korrekt anzuzeigen.
+                    Empatify setzt die OpenAI API (OpenAI, L.L.C., 3180 18th St, San Francisco, CA 94110, USA) ein, um Song-Vorschläge automatisch auf die Übereinstimmung mit der Spiel-Kategorie zu überprüfen. Dabei werden Song-Metadaten (Titel, Künstler, Genre) und die gewählte Kategorie an die Server von OpenAI übertragen. Die Verarbeitung erfolgt zur Sicherstellung eines fairen Spielablaufs.
                   </p>
                   <p className="text-gray-600 mb-4">
-                    Zu diesem Zweck muss der von Ihnen verwendete Browser Verbindung zu den Servern von Google aufnehmen. Hierdurch erlangt Google Kenntnis darüber, dass über Ihre IP-Adresse diese Website aufgerufen wurde. Die Nutzung von Google Fonts erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. Der Websitebetreiber hat ein berechtigtes Interesse an der einheitlichen Darstellung des Schriftbildes auf seiner Website. Sofern eine entsprechende Einwilligung abgefragt wurde, erfolgt die Verarbeitung ausschließlich auf Grundlage von Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TDDDG, soweit die Einwilligung die Speicherung von Cookies oder den Zugriff auf Informationen im Endgerät des Nutzers (z. B. Device-Fingerprinting) im Sinne des TDDDG umfasst. Die Einwilligung ist jederzeit widerrufbar.
-                  </p>
-                  <p className="text-gray-600 mb-4">
-                    Wenn Ihr Browser Google Fonts nicht unterstützt, wird eine Standardschrift von Ihrem Computer genutzt.
-                  </p>
-                  <p className="text-gray-600 mb-4">
-                    Weitere Informationen zu Google Fonts finden Sie unter <a href="https://developers.google.com/fonts/faq" className="text-purple-600 hover:text-purple-700 underline">https://developers.google.com/fonts/faq</a> und in der Datenschutzerklärung von Google: <a href="https://policies.google.com/privacy?hl=de" className="text-purple-600 hover:text-purple-700 underline">https://policies.google.com/privacy?hl=de</a>.
-                  </p>
-                  <p className="text-gray-600 mb-4">
-                    Das Unternehmen verfügt über eine Zertifizierung nach dem &ldquo;EU-US Data Privacy Framework&rdquo; (DPF). Der DPF ist ein Übereinkommen zwischen der Europäischen Union und den USA, der die Einhaltung europäischer Datenschutzstandards bei Datenverarbeitungen in den USA gewährleisten soll. Jedes nach dem DPF zertifizierte Unternehmen verpflichtet sich, diese Datenschutzstandards einzuhalten. Weitere Informationen hierzu erhalten Sie vom Anbieter unter folgendem Link: <a href="https://www.dataprivacyframework.gov/participant/5780" className="text-purple-600 hover:text-purple-700 underline">https://www.dataprivacyframework.gov/participant/5780</a>.
-                  </p>
-
-                  <h3 className="text-lg font-semibold text-gray-700 mb-3">Cloudflare</h3>
-                  <p className="text-gray-600 mb-4">
-                    Unsere Website nutzt die Dienste von Cloudflare (Cloudflare Inc., 101 Townsend St, San Francisco, CA 94107, USA) zur Absicherung und Optimierung der Ladezeiten. Cloudflare fungiert als Content Delivery Network (CDN) und bietet Schutz vor DDoS-Angriffen. Hierbei werden personenbezogene Daten, wie Ihre IP-Adresse, an Server von Cloudflare übertragen und dort verarbeitet.
-                  </p>
-                  <p className="text-gray-600 mb-4">
-                    Weitere Informationen finden Sie in der Datenschutzerklärung von Cloudflare: <a href="https://www.cloudflare.com/privacypolicy/" className="text-purple-600 hover:text-purple-700 underline">https://www.cloudflare.com/privacypolicy/</a>.
-                  </p>
-
-                  <h3 className="text-lg font-semibold text-gray-700 mb-3">Einsatz von Künstlicher Intelligenz (KI)</h3>
-                  <p className="text-gray-600 mb-4">
-                    Auf unserer Website setzen wir Funktionen ein, die auf Künstlicher Intelligenz (KI) basieren, um Ihnen personalisierte Inhalte, Empfehlungen oder eine automatisierte Interaktion (z.B. Chatbot) zu ermöglichen. Hierbei können personenbezogene Daten wie Interaktionen, Texteingaben und Nutzungsverhalten verarbeitet und anonymisiert an externe KI-Dienstleister übertragen werden. Die Verarbeitung erfolgt ausschließlich auf Grundlage Ihrer Einwilligung und dient der Verbesserung unserer Dienste.
-                  </p>
-
-                  <h3 className="text-lg font-semibold text-gray-700 mb-3">Google Analytics</h3>
-                  <p className="text-gray-600 mb-4">
-                    Diese Website benutzt Google Analytics, einen Webanalysedienst der Google Ireland Limited (&ldquo;Google&rdquo;), Gordon House, Barrow Street, Dublin 4, Irland. Google Analytics verwendet Cookies, die eine Analyse Ihrer Benutzung der Website ermöglichen. Die durch das Cookie erzeugten Informationen über Ihre Benutzung dieser Website werden in der Regel an einen Server von Google in den USA übertragen und dort gespeichert. Wir nutzen die IP-Anonymisierung, sodass Ihre IP-Adresse von Google innerhalb der Europäischen Union zuvor gekürzt wird.
-                  </p>
-                  <p className="text-gray-600 mb-4">
-                    Nähere Informationen finden Sie unter: <a href="https://policies.google.com/privacy" className="text-purple-600 hover:text-purple-700 underline">https://policies.google.com/privacy</a>.
-                  </p>
-
-                  <h3 className="text-lg font-semibold text-gray-700 mb-3">Meta Conversion API (Facebook Conversion API)</h3>
-                  <p className="text-gray-600 mb-4">
-                    Unsere Website verwendet die Meta Conversion API, einen Dienst der Meta Platforms Ireland Ltd., 4 Grand Canal Square, Grand Canal Harbour, Dublin 2, Irland. Mit der Conversion API werden Daten wie Ihre IP-Adresse, Nutzerverhalten oder Bestellungen direkt von unseren Servern an Meta übermittelt, um die Effektivität unserer Werbemaßnahmen auf Facebook und Instagram zu messen.
-                  </p>
-                  <p className="text-gray-600 mb-4">
-                    Weitere Informationen zur Datenverarbeitung durch Meta finden Sie unter: <a href="https://www.facebook.com/about/privacy/" className="text-purple-600 hover:text-purple-700 underline">https://www.facebook.com/about/privacy/</a>.
-                  </p>
-
-                  <h3 className="text-lg font-semibold text-gray-700 mb-3">TikTok Pixel</h3>
-                  <p className="text-gray-600 mb-4">
-                    Wir verwenden auf unserer Website das TikTok Pixel, einen Analysedienst der TikTok Technology Limited, 10 Earlsfort Terrace, Dublin, D02 T380, Irland. Mithilfe des Pixels können wir das Verhalten der Nutzer nachverfolgen, nachdem diese durch einen Klick auf eine TikTok-Werbeanzeige auf unsere Website weitergeleitet wurden. TikTok erhält dadurch Informationen, wie etwa Ihre IP-Adresse und Interaktionen auf der Website.
-                  </p>
-                  <p className="text-gray-600 mb-4">
-                    Weitere Informationen finden Sie unter: <a href="https://www.tiktok.com/legal/privacy-policy?lang=de" className="text-purple-600 hover:text-purple-700 underline">https://www.tiktok.com/legal/privacy-policy?lang=de</a>.
-                  </p>
-
-                  <h3 className="text-lg font-semibold text-gray-700 mb-3">ChatGPT</h3>
-                  <p className="text-gray-600 mb-4">
-                    Wir setzen auf unserer Website ChatGPT von OpenAI (OpenAI, L.L.C., 3180 18th St, San Francisco, CA 94110, USA) ein, um Ihnen eine interaktive Beratung bzw. Chatfunktion bereitzustellen. Dabei können eingegebene Daten wie Textnachrichten und Interaktionen an die Server von OpenAI übertragen werden. Die Verarbeitung erfolgt zur Erbringung der jeweiligen Chat-Dienstleistung und zur Verbesserung unseres Angebots.
+                    Es werden keine personenbezogenen Benutzerdaten an OpenAI übermittelt. Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Gewährleistung eines regelkonformen Spielablaufs).
                   </p>
                   <p className="text-gray-600 mb-4">
                     Weitere Informationen: <a href="https://openai.com/policies/privacy-policy" className="text-purple-600 hover:text-purple-700 underline">https://openai.com/policies/privacy-policy</a>.
                   </p>
 
-                  <h3 className="text-lg font-semibold text-gray-700 mb-3">Einsatz von Zahlungsdienstleistern</h3>
+                  <h3 className="text-lg font-semibold text-gray-700 mb-3">Zahlungsabwicklung (Stripe)</h3>
                   <p className="text-gray-600 mb-4">
-                    Für die Abwicklung von Zahlungen bieten wir verschiedene Zahlungsdienstleister an (z.B. PayPal, Stripe, Klarna). Im Rahmen des Zahlungsvorgangs werden Ihre Zahlungsdaten wie Name, Adresse, E-Mail-Adresse und Zahlungsinformationen an den jeweiligen Zahlungsdienstleister übermittelt. Die Verarbeitung dieser Daten erfolgt ausschließlich zur Zahlungsabwicklung. Weitere Informationen entnehmen Sie bitte der Datenschutzerklärung des jeweiligen Anbieters.
+                    Für die Abwicklung von Zahlungen für den Pro-Plan nutzen wir Stripe (Stripe, Inc., 510 Townsend Street, San Francisco, CA 94103, USA). Im Rahmen des Zahlungsvorgangs werden Ihre Zahlungsdaten wie Name, E-Mail-Adresse und Zahlungsinformationen direkt an Stripe übermittelt. Empatify speichert keine Kreditkartendaten. Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung).
+                  </p>
+                  <p className="text-gray-600 mb-4">
+                    Weitere Informationen: <a href="https://stripe.com/de/privacy" className="text-purple-600 hover:text-purple-700 underline">https://stripe.com/de/privacy</a>.
                   </p>
                 </section>
 
