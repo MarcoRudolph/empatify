@@ -9,6 +9,12 @@ import { eq, and, ne } from "drizzle-orm"
  * Creates a new game lobby
  */
 export async function POST(request: NextRequest) {
+  // Declare variables outside try-catch for error logging access
+  let maxRounds: number = 5
+  let lobbyCategory: string | null = null
+  let lobbyGameMode: string = "multi-device"
+  let userId: string | undefined
+
   try {
     const supabase = await createClient()
     const {
@@ -33,10 +39,6 @@ export async function POST(request: NextRequest) {
     const { rounds, category, gameMode, copyFromLobbyId } = body
 
     console.log("Received lobby creation request:", { rounds, category, gameMode, copyFromLobbyId })
-
-    let maxRounds: number
-    let lobbyCategory: string | null
-    let lobbyGameMode: string
 
     // If copying from an existing lobby, fetch its settings
     if (copyFromLobbyId) {
@@ -107,7 +109,7 @@ export async function POST(request: NextRequest) {
       dbUser = [newUser]
     }
 
-    const userId = dbUser[0].id
+    userId = dbUser[0].id
 
     // Check if game_mode column exists before inserting
     let gameModeColumnExists = false
@@ -301,7 +303,7 @@ export async function POST(request: NextRequest) {
       line: pgError?.line,
     })
     console.error("📋 Request Data:", {
-      rounds,
+      maxRounds,
       category: lobbyCategory,
       gameMode: lobbyGameMode,
       userId,

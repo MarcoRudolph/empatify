@@ -302,8 +302,9 @@ export async function GET(request: NextRequest) {
     console.error("Unexpected error in Spotify callback:", error)
     const cookieStore = await cookies()
     const locale = cookieStore.get("NEXT_LOCALE")?.value || routing.locales[0]
+    const origin = new URL(request.url).origin
     return NextResponse.redirect(
-      new URL(`/${locale}/dashboard?spotify_error=unexpected_error`, requestUrl.origin)
+      new URL(`/${locale}/dashboard?spotify_error=unexpected_error`, origin)
     )
   }
 }

@@ -15,6 +15,7 @@ const eslintConfig = [
     rules: {
       "@typescript-eslint/no-explicit-any": "warn", // Allow 'any' type but show warning
       "@typescript-eslint/no-unused-vars": "warn", // Allow unused vars but show warning
+      "prefer-const": "warn", // Allow let instead of const
     },
   },
 ];
