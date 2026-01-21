@@ -14,6 +14,27 @@ export async function POST(
 ) {
   try {
     const { id: lobbyId } = await params
+
+    // Validate UUID formats
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    if (!lobbyId || !uuidRegex.test(lobbyId)) {
+      console.error("❌ Invalid lobby ID format in rating route:", {
+        lobbyId,
+        lobbyIdType: typeof lobbyId,
+        lobbyIdLength: lobbyId?.length,
+      })
+      return NextResponse.json(
+        {
+          error: {
+            code: "INVALID_ID",
+            message: "Invalid lobby ID format",
+            status: 400,
+          },
+        },
+        { status: 400 }
+      )
+    }
+
     const supabase = await createClient()
     const {
       data: { user },
@@ -49,6 +70,25 @@ export async function POST(
       )
     }
 
+    // Validate songId UUID format
+    if (!uuidRegex.test(songId)) {
+      console.error("❌ Invalid song ID format in rating route:", {
+        songId,
+        songIdType: typeof songId,
+        songIdLength: songId?.length,
+      })
+      return NextResponse.json(
+        {
+          error: {
+            code: "INVALID_ID",
+            message: "Invalid song ID format",
+            status: 400,
+          },
+        },
+        { status: 400 }
+      )
+    }
+
     // Validate rating value (1-10)
     if (ratingValue < 1 || ratingValue > 10) {
       return NextResponse.json(
@@ -63,14 +103,41 @@ export async function POST(
       )
     }
 
-    // Verify song belongs to this lobby
-    const [song] = await db
-      .select()
-      .from(songs)
-      .where(and(eq(songs.id, songId), eq(songs.lobbyId, lobbyId)))
-      .limit(1)
+    // Verify song belongs to this lobby with detailed logging
+    console.log("🔍 Verifying song in lobby:", {
+      songId,
+      songIdLength: songId.length,
+      lobbyId,
+      lobbyIdLength: lobbyId.length,
+    })
+
+    let song
+    try {
+      const songResult = await db
+        .select()
+        .from(songs)
+        .where(and(eq(songs.id, songId), eq(songs.lobbyId, lobbyId)))
+        .limit(1)
+      
+      song = songResult[0]
+      console.log("✅ Song verification result:", song ? "Found" : "Not found")
+    } catch (dbError: any) {
+      console.error("❌ Database error verifying song:", {
+        error: dbError?.message,
+        cause: dbError?.cause,
+        songId,
+        lobbyId,
+        query: dbError?.query,
+        params: dbError?.params,
+      })
+      throw dbError
+    }
 
     if (!song) {
+      console.error("❌ Song not found in lobby:", {
+        songId,
+        lobbyId,
+      })
       return NextResponse.json(
         {
           error: {
@@ -91,6 +158,9 @@ export async function POST(
       .limit(1)
 
     if (!dbUser) {
+      console.error("❌ User not found in database:", {
+        email: user.email,
+      })
       return NextResponse.json(
         {
           error: {
@@ -104,6 +174,11 @@ export async function POST(
     }
 
     // Check if user already rated this song
+    console.log("🔍 Checking existing rating:", {
+      songId,
+      userId: dbUser.id,
+    })
+
     const existingRating = await db
       .select()
       .from(ratings)
@@ -117,6 +192,11 @@ export async function POST(
 
     if (existingRating.length > 0) {
       // Update existing rating
+      console.log("✅ Updating existing rating:", {
+        ratingId: existingRating[0].id,
+        oldValue: existingRating[0].ratingValue,
+        newValue: ratingValue,
+      })
       await db
         .update(ratings)
         .set({
@@ -125,6 +205,11 @@ export async function POST(
         .where(eq(ratings.id, existingRating[0].id))
     } else {
       // Create new rating
+      console.log("✅ Creating new rating:", {
+        songId,
+        userId: dbUser.id,
+        ratingValue,
+      })
       await db.insert(ratings).values({
         songId,
         givenBy: dbUser.id,
@@ -132,9 +217,16 @@ export async function POST(
       })
     }
 
+    console.log("✅ Rating saved successfully")
     return NextResponse.json({ success: true }, { status: 200 })
   } catch (error: any) {
-    console.error("Error saving rating:", error)
+    console.error("❌ Error saving rating:", {
+      error: error?.message,
+      cause: error?.cause,
+      stack: error?.stack,
+      query: error?.query,
+      params: error?.params,
+    })
     return NextResponse.json(
       {
         error: {

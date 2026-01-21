@@ -288,9 +288,10 @@ export function SelectSongPageClient() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Song suchen..."
-                  className="w-full pl-12 pr-4 py-4 text-lg border-2 border-primary-400 rounded-xl bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-4 focus:ring-primary-300 focus:border-primary-500 shadow-lg transition-all duration-200 hover:border-primary-500"
+                  className="w-full pl-12 pr-4 py-4 text-lg border-2 border-primary-400 rounded-xl bg-white !text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-4 focus:ring-primary-300 focus:border-primary-500 shadow-lg transition-all duration-200 hover:border-primary-500"
                   disabled={isLoading}
                   autoComplete="off"
+                  style={{ color: '#171717' }}
                 />
               </div>
               <ShimmerButton

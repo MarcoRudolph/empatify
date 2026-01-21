@@ -619,12 +619,12 @@ export function SongsCard({
                               />
                             )}
                             <div className="flex-1 min-w-0">
-                              {/* Song Title - Truncate only on mobile, full text on desktop */}
-                              <div className="font-medium text-xs md:text-sm text-neutral-900 truncate md:whitespace-normal">
+                              {/* Song Title - Show on desktop, truncate on mobile */}
+                              <div className="font-medium text-xs md:text-sm text-neutral-900 truncate md:line-clamp-2 md:max-w-xs">
                                 {track.name}
                               </div>
-                              {/* Artist Names - Truncate only on mobile */}
-                              <div className="text-xs text-neutral-500 truncate md:whitespace-normal">
+                              {/* Artist Names - Always truncate for compact layout */}
+                              <div className="text-xs text-neutral-500 truncate">
                                 {track.artists.map((a) => a.name).join(", ")}
                               </div>
                               {/* Duration */}
