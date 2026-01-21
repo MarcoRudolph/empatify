@@ -98,18 +98,15 @@ export default function LoginPage() {
     const redirectParam = searchParams.get("redirect")
     const redirectPath = redirectParam || "/dashboard"
     
-    // Get base URL - use IP address in development instead of localhost
+    // Get base URL - prioritize NEXT_PUBLIC_APP_URL, then window.location.origin
     const getBaseUrl = () => {
-      if (process.env.NODE_ENV === "production") {
-        return window.location.origin
-      }
-      // In development, use IP address if available, otherwise use origin
+      // 1. Check if NEXT_PUBLIC_APP_URL is set (for both dev and prod)
       const envUrl = process.env.NEXT_PUBLIC_APP_URL
-      if (envUrl && !envUrl.includes("localhost") && !envUrl.includes("127.0.0.1")) {
+      if (envUrl) {
         return envUrl
       }
-      // Fallback to IP address for OAuth redirects
-      return "http://192.168.178.180:3000"
+      // 2. Fallback to window.location.origin (works everywhere)
+      return window.location.origin
     }
     
     const baseUrl = getBaseUrl()
@@ -152,18 +149,15 @@ export default function LoginPage() {
     const redirectParam = searchParams.get("redirect")
     const redirectPath = redirectParam || "/dashboard"
     
-    // Get base URL - use IP address in development instead of localhost
+    // Get base URL - prioritize NEXT_PUBLIC_APP_URL, then window.location.origin
     const getBaseUrl = () => {
-      if (process.env.NODE_ENV === "production") {
-        return window.location.origin
-      }
-      // In development, use IP address if available, otherwise use origin
+      // 1. Check if NEXT_PUBLIC_APP_URL is set (for both dev and prod)
       const envUrl = process.env.NEXT_PUBLIC_APP_URL
-      if (envUrl && !envUrl.includes("localhost") && !envUrl.includes("127.0.0.1")) {
+      if (envUrl) {
         return envUrl
       }
-      // Fallback to IP address for OAuth redirects
-      return "http://192.168.178.180:3000"
+      // 2. Fallback to window.location.origin (works everywhere)
+      return window.location.origin
     }
     
     const baseUrl = getBaseUrl()
