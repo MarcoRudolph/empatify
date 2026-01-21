@@ -19,9 +19,14 @@ const client = postgres(connectionString, {
   transform: {
     undefined: null, // Transform undefined to null
   },
+  // Add better error handling
+  debug: process.env.NODE_ENV === 'development',
 });
 
-export const db = drizzle(client, { schema });
+export const db = drizzle(client, { 
+  schema,
+  logger: process.env.NODE_ENV === 'development' 
+});
 // Export the postgres client for raw SQL queries when needed
 export { client as postgresClient };
 

@@ -16,6 +16,22 @@ export async function GET(
   try {
     const { id } = await params
 
+    // Validate UUID format
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    if (!id || !uuidRegex.test(id)) {
+      console.error("Invalid lobby ID format:", id)
+      return NextResponse.json(
+        {
+          error: {
+            code: "INVALID_ID",
+            message: "Invalid lobby ID format",
+            status: 400,
+          },
+        },
+        { status: 400 }
+      )
+    }
+
     const supabase = await createClient()
     const {
       data: { user },
@@ -38,16 +54,19 @@ export async function GET(
     // Get lobby with error handling
     let lobby
     try {
+      console.log("🔍 Fetching lobby with ID:", id)
       const lobbyResult = await db
         .select()
         .from(lobbies)
         .where(eq(lobbies.id, id))
         .limit(1)
       
+      console.log("✅ Lobby query result:", lobbyResult.length > 0 ? "Found" : "Not found")
       lobby = lobbyResult[0]
     } catch (dbError: any) {
       console.error("Database error fetching lobby in GET API:", {
         lobbyId: id,
+        lobbyIdLength: id?.length,
         error: dbError?.message,
         cause: dbError?.cause,
         query: dbError?.query,
