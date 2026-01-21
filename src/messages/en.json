@@ -260,6 +260,58 @@
     "imprint": "Imprint",
     "terms": "Terms of Service",
     "termsOfUse": "Terms of Use"
+  },
+  "impressum": {
+    "backToHome": "Back to Home",
+    "title": "Imprint",
+    "subtitle": "Legal information about Empatify",
+    "legalInfo": "Information according to § 5 TMG",
+    "companyInfo": {
+      "title": "Provider",
+      "name": "Name",
+      "description": "Description",
+      "address": "Address",
+      "phone": "Phone",
+      "email": "Email"
+    },
+    "professional": {
+      "title": "Professional Title",
+      "profession": "Professional Title",
+      "location": "Place of Practice"
+    },
+    "insurance": {
+      "title": "Professional Liability Insurance",
+      "insurer": "Insurer",
+      "coverage": "Coverage Area"
+    },
+    "content": {
+      "title": "Responsible for Content"
+    },
+    "dispute": {
+      "title": "Dispute Resolution",
+      "content": "The European Commission provides a platform for online dispute resolution (ODR): https://ec.europa.eu/consumers/odr/. You can find our email address in the imprint above.",
+      "emailNote": "We are not willing or obligated to participate in dispute resolution proceedings before a consumer arbitration board."
+    },
+    "consumerDispute": {
+      "title": "Consumer Dispute Resolution",
+      "content": "We are not willing or obligated to participate in dispute resolution proceedings before a consumer arbitration board."
+    },
+    "dsa": {
+      "title": "Contact according to Digital Services Act (DSA)",
+      "description": "According to Art. 24 DSA, you can reach us at the following contact details:",
+      "languages": "Communication languages:"
+    },
+    "disclaimer": {
+      "title": "Disclaimer",
+      "content": "Despite careful content control, we assume no liability for the content of external links. The operators of the linked pages are solely responsible for their content.",
+      "additional": "The contents of our pages have been created with the greatest care. However, we cannot guarantee the accuracy, completeness, and timeliness of the content."
+    },
+    "contact": {
+      "title": "Contact",
+      "description": "If you have any questions or concerns about Empatify, you can contact us at any time:",
+      "email": "Email",
+      "phone": "Phone"
+    }
   }
 }
 

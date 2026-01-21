@@ -262,6 +262,58 @@
     "imprint": "Impressum",
     "terms": "AGB",
     "termsOfUse": "Nutzungsbedingungen"
+  },
+  "impressum": {
+    "backToHome": "Zurück zur Startseite",
+    "title": "Impressum",
+    "subtitle": "Rechtliche Informationen über Empatify",
+    "legalInfo": "Angaben gemäß § 5 TMG",
+    "companyInfo": {
+      "title": "Anbieter",
+      "name": "Name",
+      "description": "Beschreibung",
+      "address": "Adresse",
+      "phone": "Telefon",
+      "email": "E-Mail"
+    },
+    "professional": {
+      "title": "Berufsbezeichnung",
+      "profession": "Berufsbezeichnung",
+      "location": "Ausübungsort"
+    },
+    "insurance": {
+      "title": "Berufshaftpflichtversicherung",
+      "insurer": "Versicherer",
+      "coverage": "Geltungsbereich"
+    },
+    "content": {
+      "title": "Verantwortlich für den Inhalt"
+    },
+    "dispute": {
+      "title": "Streitschlichtung",
+      "content": "Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: https://ec.europa.eu/consumers/odr/. Unsere E-Mail-Adresse finden Sie oben im Impressum.",
+      "emailNote": "Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen."
+    },
+    "consumerDispute": {
+      "title": "Verbraucherstreitbeilegung",
+      "content": "Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen."
+    },
+    "dsa": {
+      "title": "Kontakt gemäß Digital Services Act (DSA)",
+      "description": "Gemäß Art. 24 DSA können Sie uns unter folgenden Kontaktdaten erreichen:",
+      "languages": "Kommunikationssprachen:"
+    },
+    "disclaimer": {
+      "title": "Haftungsausschluss",
+      "content": "Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber verantwortlich.",
+      "additional": "Die Inhalte unserer Seiten wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen."
+    },
+    "contact": {
+      "title": "Kontakt",
+      "description": "Bei Fragen oder Anliegen zu Empatify können Sie uns jederzeit kontaktieren:",
+      "email": "E-Mail",
+      "phone": "Telefon"
+    }
   }
 }
 

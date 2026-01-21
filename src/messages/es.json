@@ -254,6 +254,58 @@
     "imprint": "Aviso legal",
     "terms": "Términos de servicio",
     "termsOfUse": "Términos de uso"
+  },
+  "impressum": {
+    "backToHome": "Volver al inicio",
+    "title": "Aviso Legal",
+    "subtitle": "Información legal sobre Empatify",
+    "legalInfo": "Información según § 5 TMG",
+    "companyInfo": {
+      "title": "Proveedor",
+      "name": "Nombre",
+      "description": "Descripción",
+      "address": "Dirección",
+      "phone": "Teléfono",
+      "email": "Correo electrónico"
+    },
+    "professional": {
+      "title": "Título Profesional",
+      "profession": "Título Profesional",
+      "location": "Lugar de Práctica"
+    },
+    "insurance": {
+      "title": "Seguro de Responsabilidad Profesional",
+      "insurer": "Asegurador",
+      "coverage": "Área de Cobertura"
+    },
+    "content": {
+      "title": "Responsable del Contenido"
+    },
+    "dispute": {
+      "title": "Resolución de Disputas",
+      "content": "La Comisión Europea proporciona una plataforma para la resolución de disputas en línea (ODR): https://ec.europa.eu/consumers/odr/. Puede encontrar nuestra dirección de correo electrónico en el aviso legal anterior.",
+      "emailNote": "No estamos dispuestos ni obligados a participar en procedimientos de resolución de disputas ante una junta de arbitraje de consumidores."
+    },
+    "consumerDispute": {
+      "title": "Resolución de Disputas de Consumidores",
+      "content": "No estamos dispuestos ni obligados a participar en procedimientos de resolución de disputas ante una junta de arbitraje de consumidores."
+    },
+    "dsa": {
+      "title": "Contacto según la Ley de Servicios Digitales (DSA)",
+      "description": "Según el Art. 24 DSA, puede contactarnos en los siguientes datos de contacto:",
+      "languages": "Idiomas de comunicación:"
+    },
+    "disclaimer": {
+      "title": "Descargo de Responsabilidad",
+      "content": "A pesar del control cuidadoso del contenido, no asumimos ninguna responsabilidad por el contenido de enlaces externos. Los operadores de las páginas vinculadas son los únicos responsables de su contenido.",
+      "additional": "Los contenidos de nuestras páginas se han creado con el mayor cuidado. Sin embargo, no podemos garantizar la exactitud, integridad y actualidad del contenido."
+    },
+    "contact": {
+      "title": "Contacto",
+      "description": "Si tiene alguna pregunta o inquietud sobre Empatify, puede contactarnos en cualquier momento:",
+      "email": "Correo electrónico",
+      "phone": "Teléfono"
+    }
   }
 }
 

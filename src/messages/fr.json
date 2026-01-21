@@ -254,6 +254,58 @@
     "imprint": "Mentions légales",
     "terms": "Conditions d'utilisation",
     "termsOfUse": "Conditions d'utilisation"
+  },
+  "impressum": {
+    "backToHome": "Retour à l'accueil",
+    "title": "Mentions Légales",
+    "subtitle": "Informations légales sur Empatify",
+    "legalInfo": "Informations selon § 5 TMG",
+    "companyInfo": {
+      "title": "Fournisseur",
+      "name": "Nom",
+      "description": "Description",
+      "address": "Adresse",
+      "phone": "Téléphone",
+      "email": "Email"
+    },
+    "professional": {
+      "title": "Titre Professionnel",
+      "profession": "Titre Professionnel",
+      "location": "Lieu d'exercice"
+    },
+    "insurance": {
+      "title": "Assurance Responsabilité Professionnelle",
+      "insurer": "Assureur",
+      "coverage": "Zone de Couverture"
+    },
+    "content": {
+      "title": "Responsable du Contenu"
+    },
+    "dispute": {
+      "title": "Règlement des Litiges",
+      "content": "La Commission européenne fournit une plateforme pour le règlement des litiges en ligne (ODR) : https://ec.europa.eu/consumers/odr/. Vous pouvez trouver notre adresse e-mail dans les mentions légales ci-dessus.",
+      "emailNote": "Nous ne sommes pas disposés ni obligés de participer à des procédures de règlement des litiges devant un conseil d'arbitrage des consommateurs."
+    },
+    "consumerDispute": {
+      "title": "Règlement des Litiges de Consommateurs",
+      "content": "Nous ne sommes pas disposés ni obligés de participer à des procédures de règlement des litiges devant un conseil d'arbitrage des consommateurs."
+    },
+    "dsa": {
+      "title": "Contact selon le Digital Services Act (DSA)",
+      "description": "Selon l'Art. 24 DSA, vous pouvez nous joindre aux coordonnées suivantes :",
+      "languages": "Langues de communication :"
+    },
+    "disclaimer": {
+      "title": "Clause de Non-Responsabilité",
+      "content": "Malgré un contrôle attentif du contenu, nous n'assumons aucune responsabilité pour le contenu des liens externes. Les exploitants des pages liées sont seuls responsables de leur contenu.",
+      "additional": "Le contenu de nos pages a été créé avec le plus grand soin. Cependant, nous ne pouvons garantir l'exactitude, l'exhaustivité et l'actualité du contenu."
+    },
+    "contact": {
+      "title": "Contact",
+      "description": "Si vous avez des questions ou des préoccupations concernant Empatify, vous pouvez nous contacter à tout moment :",
+      "email": "Email",
+      "phone": "Téléphone"
+    }
   }
 }
 
