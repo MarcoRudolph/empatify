@@ -114,11 +114,60 @@ export default async function LobbyPage({ params }: LobbyPageProps) {
       .innerJoin(users, eq(lobbyParticipants.userId, users.id))
       .where(eq(lobbyParticipants.lobbyId, id))
 
+    // Check if game is finished before adding new participants
+    // Game is finished when ALL songs have been rated by ALL current participants
+    const lobbySongs = await db
+      .select({
+        id: songs.id,
+        suggestedBy: songs.suggestedBy,
+        roundNumber: songs.roundNumber,
+      })
+      .from(songs)
+      .where(eq(songs.lobbyId, id))
+
+    const lobbyRatings = await db
+      .select({
+        songId: ratings.songId,
+      })
+      .from(ratings)
+      .innerJoin(songs, eq(ratings.songId, songs.id))
+      .where(eq(songs.lobbyId, id))
+
+    let isGameFinished = false
+    if (lobbySongs.length > 0 && participants.length > 1) {
+      const songsPerRound = new Map<number, Set<string>>()
+      lobbySongs.forEach((song) => {
+        if (!songsPerRound.has(song.roundNumber)) {
+          songsPerRound.set(song.roundNumber, new Set())
+        }
+        songsPerRound.get(song.roundNumber)!.add(song.suggestedBy)
+      })
+
+      const lastRoundParticipants = songsPerRound.get(lobby.maxRounds)
+      const lastRoundComplete = lastRoundParticipants && lastRoundParticipants.size === participants.length
+
+      const expectedRatingsPerSong = participants.length - 1
+      const ratingsPerSong = new Map<string, number>()
+      lobbyRatings.forEach((rating) => {
+        const count = ratingsPerSong.get(rating.songId) || 0
+        ratingsPerSong.set(rating.songId, count + 1)
+      })
+
+      const allSongsRated = lobbySongs.every((song) => {
+        const ratingCount = ratingsPerSong.get(song.id) || 0
+        return ratingCount >= expectedRatingsPerSong
+      })
+
+      if (lastRoundComplete && allSongsRated) {
+        isGameFinished = true
+      }
+    }
+
     // Check if user is already a participant (using database ID)
     const isParticipant = currentDbUserId ? participants.some((p) => p.id === currentDbUserId) : false
 
-    // If not a participant, add them
-    if (!isParticipant) {
+    // If not a participant and game is NOT finished, add them
+    if (!isParticipant && !isGameFinished) {
       // Ensure user exists in database
       let dbUser = await db
         .select()
@@ -179,6 +228,7 @@ export default async function LobbyPage({ params }: LobbyPageProps) {
               joinedAt: p.joinedAt.toISOString(),
             }))}
             currentUserId={currentDbUserId || ""}
+            isViewer={false}
           />
         </NextIntlClientProvider>
       )
@@ -200,6 +250,7 @@ export default async function LobbyPage({ params }: LobbyPageProps) {
             joinedAt: p.joinedAt.toISOString(),
           }))}
           currentUserId={currentDbUserId || ""}
+          isViewer={!isParticipant && isGameFinished}
         />
       </NextIntlClientProvider>
     )

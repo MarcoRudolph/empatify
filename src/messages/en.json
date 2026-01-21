@@ -141,7 +141,9 @@
     "noScoresDescription": "No rounds completed yet. Once songs have been rated, results will appear here.",
     "categoryMismatch": "The song does not match. The specified category for this game is: {category}.",
     "songSaveError": "Error saving song",
-    "savingSong": "Saving song..."
+    "savingSong": "Saving song...",
+    "tooLateTitle": "You're too late, unfortunately",
+    "tooLateDescription": "This game has already finished. But you can still view the results and the winner."
   },
   "game": {
     "round": "Round",
@@ -260,6 +262,19 @@
     "imprint": "Imprint",
     "terms": "Terms of Service",
     "termsOfUse": "Terms of Use"
+  },
+  "cookies": {
+    "title": "Cookie Settings",
+    "description": "We use technically necessary cookies for website functionality (login, game sessions). Additionally, we use optional cookies for analytics to improve user experience.",
+    "moreInfo": "More information in our",
+    "privacyPolicy": "Privacy Policy",
+    "essential": "Essential Cookies",
+    "essentialDescription": "Authentication, session management (always active)",
+    "analytics": "Analytics Cookies",
+    "analyticsDescription": "Usage statistics, performance tracking (optional)",
+    "acceptAll": "Accept all",
+    "onlyEssential": "Only essential",
+    "decline": "Decline"
   },
   "impressum": {
     "backToHome": "Back to Home",

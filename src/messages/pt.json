@@ -139,7 +139,9 @@
     "noScoresDescription": "Nenhuma rodada concluída ainda. Assim que as músicas forem avaliadas, os resultados aparecerão aqui.",
     "categoryMismatch": "A música não corresponde. A categoria especificada para este jogo é: {category}.",
     "songSaveError": "Erro ao salvar música",
-    "savingSong": "Salvando música..."
+    "savingSong": "Salvando música...",
+    "tooLateTitle": "Infelizmente, você chegou tarde demais",
+    "tooLateDescription": "Este jogo já terminou. Mas você ainda pode ver os resultados e o vencedor."
   },
   "game": {
     "round": "Rodada",
@@ -254,6 +256,19 @@
     "imprint": "Impresso",
     "terms": "Termos de Serviço",
     "termsOfUse": "Termos de Uso"
+  },
+  "cookies": {
+    "title": "Configurações de cookies",
+    "description": "Usamos cookies tecnicamente necessários para a funcionalidade do site (login, sessões de jogo). Além disso, usamos cookies opcionais para análise para melhorar a experiência do usuário.",
+    "moreInfo": "Mais informações em nossa",
+    "privacyPolicy": "Política de Privacidade",
+    "essential": "Cookies essenciais",
+    "essentialDescription": "Autenticação, gerenciamento de sessão (sempre ativo)",
+    "analytics": "Cookies de análise",
+    "analyticsDescription": "Estatísticas de uso, rastreamento de desempenho (opcional)",
+    "acceptAll": "Aceitar tudo",
+    "onlyEssential": "Apenas essenciais",
+    "decline": "Recusar"
   },
   "impressum": {
     "backToHome": "Voltar ao início",

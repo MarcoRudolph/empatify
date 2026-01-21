@@ -139,7 +139,9 @@
     "noScoresDescription": "Aún no se ha completado ninguna ronda. Una vez que se hayan calificado las canciones, los resultados aparecerán aquí.",
     "categoryMismatch": "La canción no coincide. La categoría especificada para este juego es: {category}.",
     "songSaveError": "Error al guardar la canción",
-    "savingSong": "Guardando canción..."
+    "savingSong": "Guardando canción...",
+    "tooLateTitle": "Lamentablemente llegaste tarde",
+    "tooLateDescription": "Este juego ya ha terminado. Pero aún puedes ver los resultados y al ganador."
   },
   "game": {
     "round": "Ronda",
@@ -254,6 +256,19 @@
     "imprint": "Aviso legal",
     "terms": "Términos de servicio",
     "termsOfUse": "Términos de uso"
+  },
+  "cookies": {
+    "title": "Configuración de cookies",
+    "description": "Utilizamos cookies técnicamente necesarias para la funcionalidad del sitio web (inicio de sesión, sesiones de juego). Además, utilizamos cookies opcionales para análisis para mejorar la experiencia del usuario.",
+    "moreInfo": "Más información en nuestra",
+    "privacyPolicy": "Política de privacidad",
+    "essential": "Cookies esenciales",
+    "essentialDescription": "Autenticación, gestión de sesiones (siempre activo)",
+    "analytics": "Cookies de análisis",
+    "analyticsDescription": "Estadísticas de uso, seguimiento de rendimiento (opcional)",
+    "acceptAll": "Aceptar todo",
+    "onlyEssential": "Solo esenciales",
+    "decline": "Rechazar"
   },
   "impressum": {
     "backToHome": "Volver al inicio",

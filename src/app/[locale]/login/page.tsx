@@ -32,13 +32,13 @@ export default function LoginPage() {
   useEffect(() => {
     async function checkAuth() {
       try {
+        // First, try to get session from cookies (faster than API call)
         const {
-          data: { user },
-          error: authError,
-        } = await supabase.auth.getUser()
+          data: { session },
+        } = await supabase.auth.getSession()
 
-        if (user && !authError) {
-          // User is authenticated, redirect to dashboard
+        // If session exists, user is authenticated - redirect immediately
+        if (session?.user) {
           const redirectParam = searchParams.get("redirect")
           if (redirectParam) {
             router.push(redirectParam)

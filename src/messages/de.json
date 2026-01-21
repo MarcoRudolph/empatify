@@ -143,7 +143,9 @@
     "noScoresDescription": "Noch keine Runde abgeschlossen. Sobald Songs bewertet wurden, erscheinen hier die Ergebnisse.",
     "categoryMismatch": "Der Song passt nicht. Die festgelegte Kategorie für dieses Spiel lautet: {category}.",
     "songSaveError": "Fehler beim Speichern des Songs",
-    "savingSong": "Song wird gespeichert..."
+    "savingSong": "Song wird gespeichert...",
+    "tooLateTitle": "Du bist leider zu spät",
+    "tooLateDescription": "Dieses Spiel ist bereits beendet. Du kannst dir aber die Ergebnisse und den Gewinner ansehen."
   },
   "game": {
     "round": "Runde",
@@ -262,6 +264,19 @@
     "imprint": "Impressum",
     "terms": "AGB",
     "termsOfUse": "Nutzungsbedingungen"
+  },
+  "cookies": {
+    "title": "Cookie-Einstellungen",
+    "description": "Wir verwenden technisch notwendige Cookies für die Funktionalität der Website (Login, Spielsessions). Zusätzlich nutzen wir optionale Cookies für Analytics, um die Nutzererfahrung zu verbessern.",
+    "moreInfo": "Mehr Informationen in unserer",
+    "privacyPolicy": "Datenschutzerklärung",
+    "essential": "Essenzielle Cookies",
+    "essentialDescription": "Authentifizierung, Session-Management (immer aktiv)",
+    "analytics": "Analytics-Cookies",
+    "analyticsDescription": "Nutzungsstatistiken, Performance-Tracking (optional)",
+    "acceptAll": "Alle akzeptieren",
+    "onlyEssential": "Nur essenzielle",
+    "decline": "Ablehnen"
   },
   "impressum": {
     "backToHome": "Zurück zur Startseite",

@@ -29,6 +29,7 @@ interface LobbyPageClientProps {
   lobby: Lobby
   participants: Participant[]
   currentUserId: string
+  isViewer?: boolean
 }
 
 /**
@@ -39,6 +40,7 @@ export function LobbyPageClient({
   lobby,
   participants: initialParticipants,
   currentUserId,
+  isViewer = false,
 }: LobbyPageClientProps) {
   const router = useRouter()
   const t = useTranslations("common")
@@ -184,6 +186,16 @@ export function LobbyPageClient({
 
         {/* Header */}
         <div className="text-center">
+          {isViewer && (
+            <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">
+              <h3 className="text-lg font-bold text-yellow-800 mb-1">
+                ⚠️ {tLobby("tooLateTitle")}
+              </h3>
+              <p className="text-sm text-yellow-700">
+                {tLobby("tooLateDescription")}
+              </p>
+            </div>
+          )}
           {isGameFinished ? (
             <>
               <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-3">

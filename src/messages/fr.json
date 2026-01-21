@@ -139,7 +139,9 @@
     "noScoresDescription": "Aucune manche terminée pour le moment. Une fois que les chansons auront été notées, les résultats apparaîtront ici.",
     "categoryMismatch": "La chanson ne correspond pas. La catégorie spécifiée pour ce jeu est : {category}.",
     "songSaveError": "Erreur lors de l'enregistrement de la chanson",
-    "savingSong": "Enregistrement de la chanson..."
+    "savingSong": "Enregistrement de la chanson...",
+    "tooLateTitle": "Malheureusement, vous arrivez trop tard",
+    "tooLateDescription": "Ce jeu est déjà terminé. Mais vous pouvez toujours consulter les résultats et le gagnant."
   },
   "game": {
     "round": "Tour",
@@ -254,6 +256,19 @@
     "imprint": "Mentions légales",
     "terms": "Conditions d'utilisation",
     "termsOfUse": "Conditions d'utilisation"
+  },
+  "cookies": {
+    "title": "Paramètres des cookies",
+    "description": "Nous utilisons des cookies techniquement nécessaires pour la fonctionnalité du site web (connexion, sessions de jeu). De plus, nous utilisons des cookies facultatifs pour l'analyse afin d'améliorer l'expérience utilisateur.",
+    "moreInfo": "Plus d'informations dans notre",
+    "privacyPolicy": "Politique de confidentialité",
+    "essential": "Cookies essentiels",
+    "essentialDescription": "Authentification, gestion de session (toujours actif)",
+    "analytics": "Cookies d'analyse",
+    "analyticsDescription": "Statistiques d'utilisation, suivi des performances (facultatif)",
+    "acceptAll": "Tout accepter",
+    "onlyEssential": "Seulement essentiels",
+    "decline": "Refuser"
   },
   "impressum": {
     "backToHome": "Retour à l'accueil",
