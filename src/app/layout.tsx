@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Empatify - Build Meaningful Connections",
-  description: "Your platform for building meaningful connections and fostering empathy in the digital age.",
+  title: "Empatify - Rate. Connect. Win.",
+  description: "Pick tracks your friends will love! Match the group's music taste to get the highest ratings for your song choices. The best curator wins!",
 };
 
 export default function RootLayout({
