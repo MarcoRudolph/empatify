@@ -74,11 +74,7 @@ export function LobbyPageClient({
         setLeaderboard(data.leaderboard || [])
         
         // Check if game is finished (must match Dashboard logic)
-        // Game is finished when:
-        // 1. We have at least 2 participants
-        // 2. We have songs in the last round (maxRounds)
-        // 3. All participants have submitted songs in the last round
-        // 4. There are some ratings (at least one rating exists)
+        // Game is finished when ALL songs have been rated by ALL participants (except the song creator)
         const songsData = data.songs || []
         const ratingsData = data.ratings || []
         const participantsData = data.participants || []
@@ -99,10 +95,29 @@ export function LobbyPageClient({
           const lastRoundParticipants = songsPerRound.get(lobby.maxRounds)
           const lastRoundComplete = lastRoundParticipants && lastRoundParticipants.size === participantsData.length
           
+          // Calculate expected number of ratings
+          // For each song: (number of participants - 1) ratings
+          // (everyone except the song creator should rate it)
+          const expectedRatingsPerSong = participantsData.length - 1
+          const totalExpectedRatings = songsData.length * expectedRatingsPerSong
+          
+          // Create a map of actual ratings per song
+          const ratingsPerSong = new Map<string, number>()
+          ratingsData.forEach((rating: any) => {
+            const count = ratingsPerSong.get(rating.songId) || 0
+            ratingsPerSong.set(rating.songId, count + 1)
+          })
+          
+          // Check if ALL songs have been rated by ALL participants (except creator)
+          const allSongsRated = songsData.every((song: any) => {
+            const ratingCount = ratingsPerSong.get(song.id) || 0
+            return ratingCount >= expectedRatingsPerSong
+          })
+          
           // Game is finished if:
           // - Last round has all participants' songs
-          // - There are some ratings
-          if (lastRoundComplete && ratingsData.length > 0) {
+          // - ALL songs have been rated by ALL participants (except creator)
+          if (lastRoundComplete && allSongsRated) {
             isFinished = true
           }
           
@@ -110,12 +125,20 @@ export function LobbyPageClient({
           console.log("🎮 Game Finished Check:", {
             isFinished,
             lastRoundComplete,
-            hasRatings: ratingsData.length > 0,
+            allSongsRated,
             maxRounds: lobby.maxRounds,
             lastRoundParticipantCount: lastRoundParticipants?.size || 0,
             expectedParticipants: participantsData.length,
             totalSongs: songsData.length,
             totalRatings: ratingsData.length,
+            expectedRatingsPerSong,
+            totalExpectedRatings,
+            actualRatings: ratingsData.length,
+            ratingsPerSong: Array.from(ratingsPerSong.entries()).map(([songId, count]) => ({
+              songId,
+              count,
+              expected: expectedRatingsPerSong
+            })),
             songsPerRound: Array.from(songsPerRound.entries()).map(([round, participants]) => ({
               round,
               participantCount: participants.size
@@ -190,10 +213,13 @@ export function LobbyPageClient({
           )}
         </div>
 
-        {/* Cards - Mobile: stacked (Leaderboard first when finished), Desktop: grid */}
+        {/* Cards - Mobile: dynamic order based on game state, Desktop: fixed grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          {/* Leaderboard Card - Mobile order: 1 when finished, 3 when running */}
-          <div className={`md:col-span-2 lg:col-span-4 ${isGameFinished ? 'order-1 md:order-3' : 'order-3'}`}>
+          {/* Leaderboard Card 
+              Mobile: order-1 when finished, order-2 when running
+              Desktop: always same position (order-3)
+          */}
+          <div className={`md:col-span-2 lg:col-span-4 ${isGameFinished ? 'order-1 md:order-3' : 'order-2 md:order-3'}`}>
             <LeaderboardCard 
               leaderboard={leaderboard} 
               hasScores={leaderboard.some(entry => entry.averageRating > 0)}
@@ -201,8 +227,11 @@ export function LobbyPageClient({
             />
           </div>
 
-          {/* Songs Card - Mobile order: 2 when finished, 2 always */}
-          <div className={`md:col-span-1 lg:col-span-3 ${isGameFinished ? 'order-2 md:order-2' : 'order-2'}`}>
+          {/* Songs Card 
+              Mobile: order-2 when finished, order-1 when running
+              Desktop: always same position (order-2)
+          */}
+          <div className={`md:col-span-1 lg:col-span-3 ${isGameFinished ? 'order-2 md:order-2' : 'order-1 md:order-2'}`}>
             <SongsCard
               lobby={lobby}
               participants={participants}
@@ -213,8 +242,11 @@ export function LobbyPageClient({
             />
           </div>
 
-          {/* User List Card - Mobile order: 3 when finished, 1 when running */}
-          <div className={`md:col-span-1 ${isGameFinished ? 'order-3 md:order-1' : 'order-1'}`}>
+          {/* User List Card (Players)
+              Mobile: order-3 always (bottom)
+              Desktop: always same position (order-1)
+          */}
+          <div className="order-3 md:order-1 md:col-span-1">
             <UserListCard
               participants={participants}
               lobbyId={lobby.id}

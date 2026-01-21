@@ -417,8 +417,25 @@ export default async function DashboardPage({
               if (participantsWithSongs.size === participantCount) {
                 // Check if this is the last round
                 if (round === lobby.maxRounds) {
-                  // Check if all songs have been rated (simplified: if there are ratings, consider it finished)
-                  if (lobbyRatings.length > 0) {
+                  // Check if ALL songs have been rated by ALL participants (except creator)
+                  // For each song: (participantCount - 1) ratings expected
+                  const expectedRatingsPerSong = participantCount - 1
+                  const totalExpectedRatings = lobbySongs.length * expectedRatingsPerSong
+                  
+                  // Create a map of actual ratings per song
+                  const ratingsPerSong = new Map<string, number>()
+                  lobbyRatings.forEach((rating) => {
+                    const count = ratingsPerSong.get(rating.songId) || 0
+                    ratingsPerSong.set(rating.songId, count + 1)
+                  })
+                  
+                  // Check if ALL songs have been rated by ALL participants (except creator)
+                  const allSongsRated = lobbySongs.every((song) => {
+                    const ratingCount = ratingsPerSong.get(song.id) || 0
+                    return ratingCount >= expectedRatingsPerSong
+                  })
+                  
+                  if (allSongsRated) {
                     status = 'finished'
                     currentRound = round
                     needsSongSelection = false
@@ -449,11 +466,26 @@ export default async function DashboardPage({
               }
             }
             
-            // If we completed all rounds, mark as finished
-            if (currentRound > lobby.maxRounds || (currentRound === lobby.maxRounds && !needsSongSelection && lobbyRatings.length > 0)) {
-              status = 'finished'
-              currentRound = lobby.maxRounds
-              needsSongSelection = false
+            // If we completed all rounds, verify all songs are rated before marking as finished
+            if (currentRound > lobby.maxRounds || (currentRound === lobby.maxRounds && !needsSongSelection)) {
+              // Double-check: All songs must be fully rated
+              const expectedRatingsPerSong = participantCount - 1
+              const ratingsPerSong = new Map<string, number>()
+              lobbyRatings.forEach((rating) => {
+                const count = ratingsPerSong.get(rating.songId) || 0
+                ratingsPerSong.set(rating.songId, count + 1)
+              })
+              
+              const allSongsRated = lobbySongs.every((song) => {
+                const ratingCount = ratingsPerSong.get(song.id) || 0
+                return ratingCount >= expectedRatingsPerSong
+              })
+              
+              if (allSongsRated) {
+                status = 'finished'
+                currentRound = lobby.maxRounds
+                needsSongSelection = false
+              }
             }
           }
           
@@ -751,24 +783,49 @@ export default async function DashboardPage({
                           <div className="flex items-center gap-2 shrink-0">
                             {/* Mini Leaderboard - Only on large screens, show when running or finished */}
                             {(lobby.status === 'running' || lobby.status === 'finished') && lobby.topPlayers && lobby.topPlayers.length > 0 && (
-                              <div className="hidden lg:flex flex-col gap-0.5 mr-2 text-xs">
+                              <div className="hidden lg:flex flex-col gap-1 mr-2 text-xs">
                                 {lobby.topPlayers.map((player: any, index: number) => {
-                                  const medalColors = [
-                                    { text: 'text-yellow-900', bg: 'bg-yellow-200', nameText: 'text-yellow-900' }, // Gold - darker for better contrast
-                                    { text: 'text-neutral-800', bg: 'bg-neutral-200', nameText: 'text-neutral-800' }, // Silver - darker for better contrast
-                                    { text: 'text-amber-900', bg: 'bg-amber-200', nameText: 'text-amber-900' }, // Bronze - darker for better contrast
+                                  const medalStyles = [
+                                    { 
+                                      emoji: '🥇', 
+                                      text: 'text-yellow-800', 
+                                      bg: 'bg-gradient-to-r from-yellow-100 to-yellow-200', 
+                                      border: 'border border-yellow-400',
+                                      shadow: 'shadow-md shadow-yellow-200'
+                                    }, // 1st Place - Gold
+                                    { 
+                                      emoji: '🥈', 
+                                      text: 'text-gray-800', 
+                                      bg: 'bg-gradient-to-r from-gray-100 to-gray-200', 
+                                      border: 'border border-gray-400',
+                                      shadow: 'shadow-md shadow-gray-200'
+                                    }, // 2nd Place - Silver
+                                    { 
+                                      emoji: '🥉', 
+                                      text: 'text-orange-800', 
+                                      bg: 'bg-gradient-to-r from-orange-100 to-orange-200', 
+                                      border: 'border border-orange-400',
+                                      shadow: 'shadow-md shadow-orange-200'
+                                    }, // 3rd Place - Bronze
                                   ]
-                                  const medalColor = medalColors[index] || { text: 'text-neutral-800', bg: 'bg-neutral-200', nameText: 'text-neutral-800' }
+                                  const medal = medalStyles[index] || { 
+                                    emoji: '', 
+                                    text: 'text-neutral-800', 
+                                    bg: 'bg-neutral-100', 
+                                    border: 'border border-neutral-300',
+                                    shadow: ''
+                                  }
                                   
                                   return (
                                     <div 
                                       key={player.userId}
-                                      className={`flex items-center gap-1 px-2 py-0.5 rounded ${medalColor.bg}`}
+                                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg ${medal.bg} ${medal.border} ${medal.shadow} transition-all hover:scale-105`}
                                     >
-                                      <span className={`font-semibold ${medalColor.text}`}>
+                                      <span className="text-base">{medal.emoji}</span>
+                                      <span className={`font-bold ${medal.text} text-sm`}>
                                         {index + 1}.
                                       </span>
-                                      <span className={`${medalColor.nameText} truncate max-w-[100px] font-medium`}>
+                                      <span className={`${medal.text} truncate max-w-[100px] font-semibold`}>
                                         {player.name}
                                       </span>
                                     </div>

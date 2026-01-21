@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 const intlMiddleware = createMiddleware({
   ...routing,
   localeDetection: true, // Enable automatic locale detection
-  localePrefix: 'as-needed', // Only add locale prefix when needed
+  localePrefix: 'always', // Always add locale prefix for consistency
 });
 
 /**
@@ -98,8 +98,13 @@ export default async function middleware(request: NextRequest) {
 
 export const config = {
   // Match internationalized pathnames, lobby routes, redirect route, and auth routes
+  // IMPORTANT: Include /login explicitly to ensure it gets locale-redirected
   matcher: [
     '/', 
+    '/login',
+    '/dashboard',
+    '/settings',
+    '/messages/:path*',
     '/(de|en|pt|fr|es)/:path*', 
     '/lobby/:path*', 
     '/redirect',

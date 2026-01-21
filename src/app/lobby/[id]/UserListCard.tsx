@@ -1,7 +1,7 @@
 "use client"
 
 import { QRCodeSVG } from "qrcode.react"
-import { Users, Copy, Check } from "lucide-react"
+import { Users, Copy, Check, Loader2 } from "lucide-react"
 import { MagicCard } from "@/components/ui/magic-card"
 import { ShimmerButton } from "@/components/ui/shimmer-button"
 import { useTranslations } from "next-intl"
@@ -43,39 +43,20 @@ export function UserListCard({
   const [addingFriend, setAddingFriend] = useState<string | null>(null)
 
   // Generate invite URL - use redirect route for QR codes
-  // Use NEXT_PUBLIC_APP_URL if set and valid, otherwise fallback to IP address in development
-  const getBaseUrl = () => {
-    if (process.env.NODE_ENV === "production") {
-      return "https://empatify.de"
+  // Always use window.location.origin in browser for accuracy
+  const [inviteUrl, setInviteUrl] = useState("")
+
+  useEffect(() => {
+    // Generate URL client-side to ensure we get the correct origin
+    if (typeof window !== 'undefined') {
+      const origin = window.location.origin
+      const url = `${origin}/redirect?lobbyId=${lobbyId}`
+      setInviteUrl(url)
+      console.log("🔍 Generated Invite URL:", url)
+      console.log("  - Origin:", origin)
+      console.log("  - Lobby ID:", lobbyId)
     }
-    
-    // In development, use NEXT_PUBLIC_APP_URL if set and valid (not 0.0.0.0 or localhost)
-    const envUrl = process.env.NEXT_PUBLIC_APP_URL
-    if (envUrl && 
-        !envUrl.includes("0.0.0.0") && 
-        !envUrl.includes("localhost") && 
-        !envUrl.includes("127.0.0.1")) {
-      return envUrl
-    }
-    
-    // Default to IP address for QR codes
-    return "http://192.168.178.180:3000"
-  }
-  
-  const baseUrl = getBaseUrl()
-  
-  // Use redirect route so users can login first, then join lobby
-  const inviteUrl = `${baseUrl}/redirect?lobbyId=${lobbyId}`
-  
-  // Log for debugging
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔍 QR Code Debug Info:")
-    console.log("  - QR Code URL:", inviteUrl)
-    console.log("  - Base URL:", baseUrl)
-    console.log("  - NEXT_PUBLIC_APP_URL:", process.env.NEXT_PUBLIC_APP_URL)
-    console.log("  - NODE_ENV:", process.env.NODE_ENV)
-    console.log("  - Lobby ID:", lobbyId)
-  }
+  }, [lobbyId])
 
   const handleCopyLink = async () => {
     try {
@@ -218,41 +199,49 @@ export function UserListCard({
           </div>
         ) : (
           <>
-            {/* QR Code */}
-            <div className="flex justify-center">
-              <div className="bg-white p-3 md:p-4 rounded-lg shadow-md border border-neutral-200">
-                <QRCodeSVG
-                  key={inviteUrl} // Force re-render when URL changes
-                  value={inviteUrl}
-                  size={150}
-                  level="M"
-                  includeMargin={true}
-                />
-              </div>
-            </div>
+            {inviteUrl ? (
+              <>
+                {/* QR Code */}
+                <div className="flex justify-center">
+                  <div className="bg-white p-3 md:p-4 rounded-lg shadow-md border border-neutral-200">
+                    <QRCodeSVG
+                      key={inviteUrl} // Force re-render when URL changes
+                      value={inviteUrl}
+                      size={150}
+                      level="M"
+                      includeMargin={true}
+                    />
+                  </div>
+                </div>
 
-            {/* Invite Link Button */}
-            <div className="flex justify-center">
-              <ShimmerButton
-                onClick={handleCopyLink}
-                background="var(--color-primary-500)"
-                shimmerColor="var(--color-neutral-900)"
-                borderRadius="9999px"
-                className="px-6 md:px-8 py-3 md:py-4 flex items-center gap-2 md:gap-3 w-full md:w-auto"
-              >
-                {copied ? (
-                  <>
-                    <Check className="size-4 md:size-5" />
-                    <span className="text-sm md:text-base font-medium">{t("linkCopied")}</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="size-4 md:size-5" />
-                    <span className="text-sm md:text-base font-medium">{t("copyInviteLink")}</span>
-                  </>
-                )}
-              </ShimmerButton>
-            </div>
+                {/* Invite Link Button */}
+                <div className="flex justify-center">
+                  <ShimmerButton
+                    onClick={handleCopyLink}
+                    background="var(--color-primary-500)"
+                    shimmerColor="var(--color-neutral-900)"
+                    borderRadius="9999px"
+                    className="px-6 md:px-8 py-3 md:py-4 flex items-center gap-2 md:gap-3 w-full md:w-auto"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="size-4 md:size-5" />
+                        <span className="text-sm md:text-base font-medium">{t("linkCopied")}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="size-4 md:size-5" />
+                        <span className="text-sm md:text-base font-medium">{t("copyInviteLink")}</span>
+                      </>
+                    )}
+                  </ShimmerButton>
+                </div>
+              </>
+            ) : (
+              <div className="flex justify-center py-8">
+                <Loader2 className="size-8 animate-spin text-primary-500" />
+              </div>
+            )}
           </>
         )}
 

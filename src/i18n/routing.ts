@@ -11,8 +11,8 @@ export const routing = defineRouting({
   // Enable locale detection from Accept-Language header
   localeDetection: true,
   
-  // Only add locale prefix when needed (not for default locale on root)
-  localePrefix: 'as-needed',
+  // Always add locale prefix for consistency
+  localePrefix: 'always',
 });
 
 // Lightweight wrappers around Next.js' navigation APIs

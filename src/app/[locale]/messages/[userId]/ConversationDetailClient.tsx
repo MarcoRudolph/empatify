@@ -38,7 +38,7 @@ export function ConversationDetailClient({
   otherUserId,
 }: ConversationDetailClientProps) {
   const router = useRouter()
-  const t = useTranslations("messaging")
+  const t = useTranslations("messages")
   const tCommon = useTranslations("common")
   const [messages, setMessages] = useState<Message[]>([])
   const [otherUser, setOtherUser] = useState<OtherUser | null>(null)

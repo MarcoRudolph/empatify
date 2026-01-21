@@ -104,12 +104,42 @@ export function SongsCard({
   const [ratingSongId, setRatingSongId] = useState<string | null>(null)
   const [currentRating, setCurrentRating] = useState<number | null>(null)
   const [isSubmittingRating, setIsSubmittingRating] = useState(false)
+  const [isSpotifyLinked, setIsSpotifyLinked] = useState(false)
+  const [isCheckingSpotify, setIsCheckingSpotify] = useState(true)
+  const [isPlayingAll, setIsPlayingAll] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const trackDetailsRef = useRef<Record<string, SpotifyTrack>>({})
 
   // Keep ref in sync with state
   useEffect(() => {
     trackDetailsRef.current = trackDetails
   }, [trackDetails])
+
+  // Mount detection and mobile check (prevents hydration errors)
+  useEffect(() => {
+    setMounted(true)
+    setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
+  }, [])
+
+  // Check Spotify connection status
+  useEffect(() => {
+    const checkSpotifyStatus = async () => {
+      try {
+        const response = await fetch('/api/spotify/status')
+        if (response.ok) {
+          const data = await response.json()
+          setIsSpotifyLinked(data.linked || false)
+        }
+      } catch (error) {
+        console.error('Error checking Spotify status:', error)
+      } finally {
+        setIsCheckingSpotify(false)
+      }
+    }
+
+    checkSpotifyStatus()
+  }, [])
 
   // Get songs for selected round
   const roundSongs = songs.filter((song) => song.roundNumber === selectedRound)
@@ -190,15 +220,13 @@ export function SongsCard({
     const url = spotifyUrl || `https://open.spotify.com/track/${spotifyTrackId}`
     
     // On mobile devices, use direct navigation to avoid blank tab
-    // On desktop, open in new tab
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-    
+    // On desktop, open in named tab (reuses same tab for all songs)
     if (isMobile) {
       // Direct navigation on mobile - opens Spotify app or web player directly
       window.location.href = url
     } else {
-      // Open in new tab on desktop
-      window.open(url, '_blank', 'noopener,noreferrer')
+      // Open in named tab on desktop - reuses the same tab for all Spotify songs
+      window.open(url, 'empatify_spotify', 'noopener,noreferrer')
     }
   }
 
@@ -240,6 +268,34 @@ export function SongsCard({
         // Refresh the page to update ratings
         router.refresh()
         handleCloseRating()
+        
+        // Check if all songs in current round are now rated by current user
+        // and automatically switch to next round with unrated songs
+        const currentRoundSongs = songs.filter(s => s.roundNumber === selectedRound)
+        const songsToRate = currentRoundSongs.filter(s => s.suggestedBy !== currentUserId)
+        
+        // After refresh, check if current round is fully rated
+        setTimeout(() => {
+          const currentRoundRatings = ratings.filter(r => 
+            currentRoundSongs.some(s => s.id === r.songId) && r.givenBy === currentUserId
+          )
+          
+          // If all songs in current round are rated, find next round with unrated songs
+          if (currentRoundRatings.length >= songsToRate.length) {
+            for (let round = selectedRound + 1; round <= lobby.maxRounds; round++) {
+              const roundSongs = songs.filter(s => s.roundNumber === round)
+              const songsToRateInRound = roundSongs.filter(s => s.suggestedBy !== currentUserId)
+              const roundRatings = ratings.filter(r => 
+                roundSongs.some(s => s.id === r.songId) && r.givenBy === currentUserId
+              )
+              
+              if (roundRatings.length < songsToRateInRound.length) {
+                setSelectedRound(round)
+                break
+              }
+            }
+          }
+        }, 500)
       } else {
         const data = await response.json()
         const errorMessage = data.error?.message || "Fehler beim Speichern der Bewertung"
@@ -297,6 +353,99 @@ export function SongsCard({
     return `${minutes}:${seconds.toString().padStart(2, "0")}`
   }
 
+  // Calculate which rounds need rating indicators (!)
+  // Show indicator only if user has rated at least one song, and there are unrated songs in that round
+  const getRoundStatus = (round: number) => {
+    const roundSongs = songs.filter(s => s.roundNumber === round)
+    const songsToRate = roundSongs.filter(s => s.suggestedBy !== currentUserId)
+    
+    if (songsToRate.length === 0) {
+      return { hasUnratedSongs: false, totalRatings: 0 }
+    }
+    
+    const roundRatings = ratings.filter(r => 
+      roundSongs.some(s => s.id === r.songId) && r.givenBy === currentUserId
+    )
+    
+    return {
+      hasUnratedSongs: roundRatings.length < songsToRate.length,
+      totalRatings: roundRatings.length
+    }
+  }
+
+  // Check if user has rated at least one song overall
+  const hasRatedAnySong = ratings.some(r => r.givenBy === currentUserId)
+  
+  const handleRoundChange = (round: number) => {
+    setSelectedRound(round)
+  }
+
+  // Check if all participants have songs for current round
+  const allSongsPresent = roundSongs.length === participants.length
+
+  // Handle Play All - uses Spotify Queue API to add all songs
+  const handlePlayAll = async () => {
+    if (roundSongs.length === 0 || !isSpotifyLinked) return
+    
+    setIsPlayingAll(true)
+    
+    try {
+      // Collect all Spotify track IDs
+      const trackIds = roundSongs.map(song => song.spotifyTrackId)
+      
+      // Call API to add tracks to queue
+      const response = await fetch('/api/spotify/queue', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ trackIds }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        // Success!
+        alert(`✅ ${data.message || 'Playback started with all tracks in queue!'}`)
+      } else {
+        // Handle specific error cases
+        if (data.error?.code === 'PREMIUM_REQUIRED') {
+          alert('❌ Spotify Premium is required for playback control.\n\nPlease upgrade your Spotify account to Premium.')
+        } else if (data.error?.code === 'NO_ACTIVE_DEVICE') {
+          alert('❌ No active Spotify device found.\n\nPlease open Spotify on your phone, computer, or any device and try again.')
+        } else if (data.error?.code === 'SPOTIFY_NOT_LINKED') {
+          alert('❌ Spotify account not linked.\n\nPlease link your Spotify account in settings.')
+          setIsSpotifyLinked(false)
+        } else {
+          alert(`❌ ${data.error?.message || 'Failed to start playback. Please try again.'}`)
+        }
+      }
+    } catch (error) {
+      console.error('Error playing all tracks:', error)
+      alert('❌ Failed to start playback. Please try again.')
+    } finally {
+      setIsPlayingAll(false)
+    }
+  }
+
+  // Handle navigation to Spotify link in settings
+  const handleLinkSpotify = () => {
+    // Get locale from cookie or default to 'de'
+    const getLocale = () => {
+      if (typeof document !== 'undefined') {
+        const cookies = document.cookie.split(';')
+        const localeCookie = cookies.find(c => c.trim().startsWith('NEXT_LOCALE='))
+        if (localeCookie) {
+          return localeCookie.split('=')[1] || 'de'
+        }
+      }
+      return 'de'
+    }
+    
+    const locale = getLocale()
+    router.push(`/${locale}/settings`)
+  }
+
   return (
     <MagicCard
       className="p-4 md:p-6 rounded-2xl shadow-lg border border-neutral-300"
@@ -311,50 +460,93 @@ export function SongsCard({
         </h2>
       </div>
 
-      {/* Round Dropdown */}
-      <div className="mb-4">
-        <label
-          htmlFor="round-select"
-          className="block text-xs md:text-sm font-medium text-neutral-900 mb-2"
-        >
-          {t("round")}
-        </label>
-        <select
-          id="round-select"
-          value={selectedRound}
-          onChange={(e) => setSelectedRound(Number(e.target.value))}
-          className="w-full px-3 md:px-4 py-2 text-sm md:text-base border border-neutral-300 rounded-lg bg-neutral-50 text-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:border-transparent transition-all duration-200"
-        >
-          {Array.from({ length: lobby.maxRounds }, (_, i) => i + 1).map(
-            (round) => (
-              <option key={round} value={round}>
-                {t("round")} {round} {t("of")} {lobby.maxRounds}
-              </option>
+      {/* Round Tabs */}
+      <div className="mb-6">
+        <div className="flex flex-wrap gap-2 border-b border-neutral-300 pb-2">
+          {Array.from({ length: lobby.maxRounds }, (_, i) => i + 1).map((round) => {
+            const roundStatus = getRoundStatus(round)
+            const isActive = selectedRound === round
+            const showIndicator = hasRatedAnySong && roundStatus.hasUnratedSongs && !isGameFinished
+            
+            return (
+              <button
+                key={round}
+                onClick={() => handleRoundChange(round)}
+                className={cn(
+                  "relative px-4 py-2 text-sm md:text-base font-medium rounded-t-lg transition-all duration-200",
+                  isActive
+                    ? "bg-primary-500 text-white shadow-md"
+                    : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
+                )}
+              >
+                <span className="flex items-center gap-1.5">
+                  <span>{t("round")} {round}</span>
+                  {showIndicator && (
+                    <span className="text-[var(--color-error)] font-bold text-lg animate-pulse">
+                      !
+                    </span>
+                  )}
+                </span>
+                {isActive && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white" />
+                )}
+              </button>
             )
-          )}
-        </select>
+          })}
+        </div>
       </div>
 
+      {/* Play All Button - Show when all songs are present AND Spotify is linked */}
+      {mounted && allSongsPresent && roundSongs.length > 0 && isSpotifyLinked && !isCheckingSpotify && (
+        <div className="mb-4 flex justify-center">
+          <ShimmerButton
+            onClick={handlePlayAll}
+            disabled={isPlayingAll}
+            background="var(--color-accent-spotify)"
+            shimmerColor="var(--color-neutral-900)"
+            borderRadius="9999px"
+            className="px-6 py-3 flex items-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isPlayingAll ? (
+              <>
+                <Loader2 className="size-5 animate-spin" />
+                <span className="font-semibold text-sm md:text-base">
+                  Starting playback...
+                </span>
+              </>
+            ) : (
+              <>
+                <Play className="size-5 fill-current" />
+                <span className="font-semibold text-sm md:text-base">
+                  Play All ({roundSongs.length} {tGame("song")}s)
+                </span>
+              </>
+            )}
+          </ShimmerButton>
+        </div>
+      )}
 
       {/* Songs Table */}
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b border-neutral-300">
-              <th className="text-left py-2 px-2 md:px-4 text-xs md:text-sm font-medium text-neutral-700">
+              <th className="text-left py-2 px-2 md:px-4 text-xs md:text-sm font-medium text-neutral-700 w-12 md:w-auto">
                 {tGame("users")}
               </th>
-              <th className="text-left py-2 px-2 md:px-4 text-xs md:text-sm font-medium text-neutral-700">
+              <th className="text-left py-2 px-2 md:px-4 text-xs md:text-sm font-medium text-neutral-700 max-w-0">
                 {tGame("song")}
               </th>
-              <th className="text-center py-2 px-2 md:px-4 text-xs md:text-sm font-medium text-neutral-700">
-                {t("rateSong")}
+              <th className="text-center py-2 px-1 text-xs md:text-sm font-medium text-neutral-700 w-12 md:w-16">
+                <span className="sr-only md:not-sr-only">{t("rateSong")}</span>
+                <Star className="size-4 mx-auto md:hidden" />
               </th>
-              <th className="text-center py-2 px-2 md:px-4 text-xs md:text-sm font-medium text-neutral-700">
+              <th className="text-center py-2 px-2 md:px-4 text-xs md:text-sm font-medium text-neutral-700 hidden sm:table-cell">
                 {t("averageRating")}
               </th>
-              <th className="text-center py-2 px-2 md:px-4 text-xs md:text-sm font-medium text-neutral-700">
-                {t("actions")}
+              <th className="text-center py-2 px-1 text-xs md:text-sm font-medium text-neutral-700 w-12 md:w-16">
+                <span className="sr-only md:not-sr-only">{t("actions")}</span>
+                <Play className="size-4 mx-auto md:hidden" />
               </th>
             </tr>
           </thead>
@@ -382,18 +574,18 @@ export function SongsCard({
                   className="border-b border-neutral-200 hover:bg-neutral-50 transition-colors"
                 >
                   {/* Username */}
-                  <td className="py-3 px-2 md:px-4">
+                  <td className="py-3 px-2 md:px-4 w-12 md:w-auto">
                     <div className="flex items-center gap-2">
                       {row.participant.avatarUrl ? (
                         <img
                           src={row.participant.avatarUrl}
                           alt={row.participant.name}
-                          className="size-6 md:size-8 rounded-full"
+                          className="size-8 md:size-8 rounded-full shrink-0"
                           title={row.participant.name}
                         />
                       ) : (
                         <div 
-                          className="size-6 md:size-8 rounded-full bg-primary-500 flex items-center justify-center text-white font-semibold text-xs"
+                          className="size-8 md:size-8 rounded-full bg-primary-500 flex items-center justify-center text-white font-semibold text-xs shrink-0"
                           title={row.participant.name}
                         >
                           {row.participant.name.charAt(0).toUpperCase()}
@@ -407,7 +599,7 @@ export function SongsCard({
                   </td>
 
                   {/* Song */}
-                  <td className="py-3 px-2 md:px-4">
+                  <td className="py-3 px-2 md:px-4 max-w-0">
                     {row.song ? (
                       // Song exists - show details with edit/delete buttons
                       <div className="flex items-center gap-3">
@@ -471,7 +663,7 @@ export function SongsCard({
 
                   {/* Rate Song Button - Hidden when game is finished */}
                   {!isGameFinished && (
-                    <td className="py-3 px-2 md:px-4">
+                    <td className="py-3 px-1 w-12 md:w-16">
                       <div className="flex items-center justify-center">
                         {row.song && row.song.suggestedBy !== currentUserId ? (
                           <ShimmerButton
@@ -479,7 +671,7 @@ export function SongsCard({
                             background={row.userRating ? "var(--color-primary-500)" : "var(--color-primary-500)"}
                             shimmerColor="var(--color-neutral-900)"
                             borderRadius="9999px"
-                            className="size-10 md:size-12 p-0 flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-200"
+                            className="size-10 md:size-12 p-0 flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-200 shrink-0"
                             aria-label={t("rateSong")}
                             title={row.userRating ? `${t("yourRating")}: ${row.userRating}/10` : t("rateSong")}
                           >
@@ -493,8 +685,8 @@ export function SongsCard({
                     </td>
                   )}
 
-                  {/* Average Rating */}
-                  <td className="py-3 px-2 md:px-4 text-center">
+                  {/* Average Rating - Hidden on small screens */}
+                  <td className="py-3 px-2 md:px-4 text-center hidden sm:table-cell">
                     {row.averageRating !== null ? (
                       <span className="text-base md:text-lg font-medium text-neutral-900">
                         {row.averageRating.toFixed(1)} / 10
@@ -506,17 +698,17 @@ export function SongsCard({
                     )}
                   </td>
 
-                  {/* Actions: Edit, Delete, Play - Hidden when game is finished */}
+                  {/* Actions: Play Button (Edit/Delete only on desktop) - Hidden when game is finished */}
                   {!isGameFinished && (
-                    <td className="py-3 px-2 md:px-4">
+                    <td className="py-3 px-1 w-12 md:w-16">
                       {row.song ? (
-                        <div className="flex items-center justify-center gap-2">
-                        {/* Edit/Delete buttons (only for current user and if no ratings exist) */}
+                        <div className="flex items-center justify-center gap-1 md:gap-2">
+                        {/* Edit/Delete buttons (only for current user and if no ratings exist) - Hidden on mobile */}
                         {isCurrentUser && row.ratings.length === 0 && (
                           <>
                             <button
                               onClick={() => handleEditSong(row.participant.id)}
-                              className="p-1.5 text-neutral-600 hover:text-primary-500 hover:bg-primary-50 rounded transition-colors"
+                              className="hidden md:block p-1.5 text-neutral-600 hover:text-primary-500 hover:bg-primary-50 rounded transition-colors"
                               aria-label={t("editSong")}
                               title={t("editSong")}
                             >
@@ -525,7 +717,7 @@ export function SongsCard({
                             <button
                               onClick={() => handleDeleteSong(row.song!.id, row.song!.spotifyTrackId)}
                               disabled={deletingSongId === row.song!.id}
-                              className="p-1.5 text-neutral-600 hover:text-[var(--color-error)] hover:bg-[var(--color-error)]/10 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="hidden md:block p-1.5 text-neutral-600 hover:text-[var(--color-error)] hover:bg-[var(--color-error)]/10 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                               aria-label={t("deleteSong")}
                               title={t("deleteSong")}
                             >
@@ -546,7 +738,7 @@ export function SongsCard({
                           background="var(--color-accent-spotify)"
                           shimmerColor="var(--color-neutral-900)"
                           borderRadius="9999px"
-                          className="size-10 md:size-12 p-0 flex items-center justify-center"
+                          className="size-10 md:size-12 p-0 flex items-center justify-center shrink-0"
                           aria-label={tGame("playSong")}
                           title={tGame("playSong")}
                         >
@@ -564,6 +756,38 @@ export function SongsCard({
           </tbody>
         </table>
       </div>
+
+      {/* Spotify Link Prompt - OUTSIDE overflow container - Show when Spotify is NOT linked (even if not all songs present yet) */}
+      {mounted && roundSongs.length > 0 && !isSpotifyLinked && !isCheckingSpotify && (
+        <div className="mt-6 p-4 md:p-6 bg-gradient-to-r from-accent-spotify/10 to-accent-spotify/5 border border-accent-spotify/30 rounded-lg">
+          <div className="flex flex-col items-center gap-3 text-center">
+            <ShimmerButton
+              onClick={handleLinkSpotify}
+              background="var(--color-accent-spotify)"
+              shimmerColor="var(--color-neutral-900)"
+              borderRadius="9999px"
+              className="px-6 py-2.5 flex items-center justify-center gap-2 shadow-md w-full sm:w-auto max-w-xs"
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="20" 
+                height="20" 
+                viewBox="0 0 24 24" 
+                fill="currentColor"
+                className="shrink-0"
+              >
+                <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+              </svg>
+              <span className="font-semibold text-sm md:text-base whitespace-nowrap">
+                Link Spotify
+              </span>
+            </ShimmerButton>
+            <p className="text-xs text-neutral-500">
+              Premium account required for queue playback
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Rating Dialog */}
       {ratingSongId && (
