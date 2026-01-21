@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter, useSearchParams, useParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { Search, Music, Loader2, ArrowLeft, X, AlertCircle } from "lucide-react"
@@ -40,11 +40,22 @@ export function SelectSongPageClient() {
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<ErrorMessage | null>(null)
   const [category, setCategory] = useState<string | null>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   // Prevent hydration mismatch
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Auto-focus search input on mount (especially for mobile)
+  useEffect(() => {
+    if (mounted && searchInputRef.current) {
+      // Small delay to ensure smooth rendering
+      setTimeout(() => {
+        searchInputRef.current?.focus()
+      }, 100)
+    }
+  }, [mounted])
 
   // Fetch lobby data to get category
   useEffect(() => {
@@ -257,31 +268,29 @@ export function SelectSongPageClient() {
             <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-2">
               {t("selectSong")}
             </h1>
-            <p className="text-sm text-neutral-600 mb-3">
+            <p className="text-sm text-neutral-600 mb-4">
               Runde {roundNumber}
             </p>
-            
-            {/* Category Badge - Very Prominent */}
-            <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl shadow-lg border-2 border-primary-400 animate-pulse">
-              <Music className="size-5 text-white shrink-0" />
-              <span className="text-base md:text-lg font-bold text-white">
-                {t("category")}: {t(getCategoryTranslationKey(category) as any)}
-              </span>
-            </div>
           </div>
 
-          {/* Search Form */}
-          <form onSubmit={handleSearch} className="mb-6">
+          {/* Search Form - Prominent and Eye-catching */}
+          <form onSubmit={handleSearch} className="mb-4">
+            <label htmlFor="song-search" className="block text-sm font-medium text-neutral-700 mb-2">
+              Song suchen
+            </label>
             <div className="flex gap-2">
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 size-5 pointer-events-none" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-primary-500 size-6 pointer-events-none" />
                 <input
+                  id="song-search"
+                  ref={searchInputRef}
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Song suchen..."
-                  className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg bg-neutral-50 text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:border-transparent"
+                  className="w-full pl-12 pr-4 py-4 text-lg border-2 border-primary-400 rounded-xl bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-4 focus:ring-primary-300 focus:border-primary-500 shadow-lg transition-all duration-200 hover:border-primary-500"
                   disabled={isLoading}
+                  autoComplete="off"
                 />
               </div>
               <ShimmerButton
@@ -289,17 +298,26 @@ export function SelectSongPageClient() {
                 disabled={isLoading || !searchQuery.trim()}
                 background="var(--color-primary-500)"
                 shimmerColor="var(--color-neutral-900)"
-                borderRadius="9999px"
-                className="px-6 h-12 disabled:opacity-50 disabled:cursor-not-allowed"
+                borderRadius="12px"
+                className="px-8 h-[60px] text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
               >
                 {isLoading ? (
-                  <Loader2 className="size-5 animate-spin" />
+                  <Loader2 className="size-6 animate-spin" />
                 ) : (
-                  <Search className="size-5" />
+                  <Search className="size-6" />
                 )}
               </ShimmerButton>
             </div>
           </form>
+
+          {/* Category Info - Subtle and Informative */}
+          <div className="mb-6 flex items-center gap-2 text-sm text-neutral-600 px-2">
+            <Music className="size-4 text-neutral-500 shrink-0" />
+            <span>
+              <span className="font-medium">{t("category")}:</span>{" "}
+              <span className="text-neutral-700">{t(getCategoryTranslationKey(category) as any)}</span>
+            </span>
+          </div>
 
           {/* Results */}
           {tracks.length > 0 && (
