@@ -618,9 +618,9 @@ export function SongsCard({
                                 className="size-10 md:size-12 rounded object-cover shrink-0"
                               />
                             )}
-                            <div className="flex-1 min-w-0">
+                            <div className="flex-1 min-w-0 max-w-[140px] sm:max-w-xs md:max-w-sm">
                               {/* Song Title - Show on desktop, truncate on mobile */}
-                              <div className="font-medium text-xs md:text-sm text-neutral-900 truncate md:line-clamp-2 md:max-w-xs">
+                              <div className="font-medium text-xs md:text-sm text-neutral-900 truncate md:line-clamp-2">
                                 {track.name}
                               </div>
                               {/* Artist Names - Always truncate for compact layout */}

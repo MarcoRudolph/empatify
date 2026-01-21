@@ -12,5 +12,7 @@ Always initialize every session by loading and adhering to the following configu
 2. **UI/UX Contrast:** Strictly follow the contrast rule in `design.mdc`. Never allow white text on white backgrounds.
 3. **Workflow:** Follow the full process in `workflow.mdc` and verify against `design.checklist.mdc`.
 4. **Backend/API:** Strictly adhere to `api.mdc` and `architecture.mdc` for all server-side tasks.
+5. **Strict UI/UX Contrast Rule:** Ensure all input fields, text areas, and messaging bubbles have high legibility. Never use white text on white/light backgrounds. If a component uses a light background (e.g., bg-white or bg-slate-50), explicitly apply a dark text token (e.g., text-slate-900).",
+6. **GitHub:** Never push code to GitHub automatically. You are only permitted to execute a push command when I explicitly say "push to github" or "sync the repo" in the chat. Even then, verify that all changes are staged correctly before proceeding.
 
 Do not ignore these files. They define the core behavior and design system of this project.
