@@ -534,17 +534,17 @@ export function SongsCard({
               <th className="text-left py-2 px-2 md:px-4 text-xs md:text-sm font-medium text-neutral-700 w-12 md:w-auto">
                 {tGame("users")}
               </th>
-              <th className="text-left py-2 px-2 md:px-4 text-xs md:text-sm font-medium text-neutral-700 max-w-0">
+              <th className="text-left py-2 px-2 md:px-6 text-xs md:text-sm font-medium text-neutral-700">
                 {tGame("song")}
               </th>
-              <th className="text-center py-2 px-1 text-xs md:text-sm font-medium text-neutral-700 w-12 md:w-16">
+              <th className="text-center py-2 px-2 md:px-4 text-xs md:text-sm font-medium text-neutral-700 w-16 md:w-24">
                 <span className="sr-only md:not-sr-only">{t("rateSong")}</span>
                 <Star className="size-4 mx-auto md:hidden" />
               </th>
-              <th className="text-center py-2 px-2 md:px-4 text-xs md:text-sm font-medium text-neutral-700 hidden sm:table-cell">
+              <th className="text-center py-2 px-2 md:px-4 text-xs md:text-sm font-medium text-neutral-700 w-20 md:w-32 hidden sm:table-cell">
                 {t("averageRating")}
               </th>
-              <th className="text-center py-2 px-1 text-xs md:text-sm font-medium text-neutral-700 w-12 md:w-16">
+              <th className="text-center py-2 px-2 md:px-4 text-xs md:text-sm font-medium text-neutral-700 w-16 md:w-24">
                 <span className="sr-only md:not-sr-only">{t("actions")}</span>
                 <Play className="size-4 mx-auto md:hidden" />
               </th>
@@ -574,7 +574,7 @@ export function SongsCard({
                   className="border-b border-neutral-200 hover:bg-neutral-50 transition-colors"
                 >
                   {/* Username */}
-                  <td className="py-3 px-2 md:px-4 w-12 md:w-auto">
+                  <td className="py-3 px-2 md:px-4 w-12 md:w-auto align-middle">
                     <div className="flex items-center gap-2">
                       {row.participant.avatarUrl ? (
                         <img
@@ -599,7 +599,7 @@ export function SongsCard({
                   </td>
 
                   {/* Song */}
-                  <td className="py-3 px-2 md:px-4 max-w-0">
+                  <td className="py-3 px-2 md:px-6 align-middle">
                     {row.song ? (
                       // Song exists - show details with edit/delete buttons
                       <div className="flex items-center gap-3">
@@ -619,14 +619,17 @@ export function SongsCard({
                               />
                             )}
                             <div className="flex-1 min-w-0">
-                              <div className="font-medium text-xs md:text-sm text-neutral-900 truncate">
+                              {/* Song Title - Truncate only on mobile, full text on desktop */}
+                              <div className="font-medium text-xs md:text-sm text-neutral-900 truncate md:whitespace-normal">
                                 {track.name}
                               </div>
-                              <div className="text-xs text-neutral-500 truncate">
+                              {/* Artist Names - Truncate only on mobile */}
+                              <div className="text-xs text-neutral-500 truncate md:whitespace-normal">
                                 {track.artists.map((a) => a.name).join(", ")}
                               </div>
+                              {/* Duration */}
                               {track.duration_ms && (
-                                <div className="text-xs text-neutral-400">
+                                <div className="text-xs text-neutral-400 mt-0.5">
                                   {formatDuration(track.duration_ms)}
                                 </div>
                               )}
@@ -663,7 +666,7 @@ export function SongsCard({
 
                   {/* Rate Song Button - Hidden when game is finished */}
                   {!isGameFinished && (
-                    <td className="py-3 px-1 w-12 md:w-16">
+                    <td className="py-3 px-2 md:px-4 w-16 md:w-24 align-middle">
                       <div className="flex items-center justify-center">
                         {row.song && row.song.suggestedBy !== currentUserId ? (
                           <ShimmerButton
@@ -686,7 +689,7 @@ export function SongsCard({
                   )}
 
                   {/* Average Rating - Hidden on small screens */}
-                  <td className="py-3 px-2 md:px-4 text-center hidden sm:table-cell">
+                  <td className="py-3 px-2 md:px-4 text-center w-20 md:w-32 hidden sm:table-cell align-middle">
                     {row.averageRating !== null ? (
                       <span className="text-base md:text-lg font-medium text-neutral-900">
                         {row.averageRating.toFixed(1)} / 10
@@ -700,7 +703,7 @@ export function SongsCard({
 
                   {/* Actions: Play Button (Edit/Delete only on desktop) - Hidden when game is finished */}
                   {!isGameFinished && (
-                    <td className="py-3 px-1 w-12 md:w-16">
+                    <td className="py-3 px-2 md:px-4 w-16 md:w-24 align-middle">
                       {row.song ? (
                         <div className="flex items-center justify-center gap-1 md:gap-2">
                         {/* Edit/Delete buttons (only for current user and if no ratings exist) - Hidden on mobile */}
