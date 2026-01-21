@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Empatify - Rate. Connect. Win.",
+  title: "Empatify ..chill game",
   description: "Pick tracks your friends will love! Match the group's music taste to get the highest ratings for your song choices. The best curator wins!",
 };
 
