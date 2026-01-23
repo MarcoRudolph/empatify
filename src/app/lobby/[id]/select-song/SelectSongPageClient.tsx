@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl"
 import { Search, Music, Loader2, ArrowLeft, X, AlertCircle } from "lucide-react"
 import { MagicCard } from "@/components/ui/magic-card"
 import { ShimmerButton } from "@/components/ui/shimmer-button"
+import Image from "next/image"
 
 interface SpotifyTrack {
   id: string
@@ -265,17 +266,17 @@ export function SelectSongPageClient() {
               <ArrowLeft className="size-4 transition-transform duration-200 group-hover:-translate-x-1" />
               <span>Zurück</span>
             </button>
-            <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-2">
+            <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 dark:text-white mb-2">
               {t("selectSong")}
             </h1>
-            <p className="text-sm text-neutral-600 mb-4">
+            <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4">
               Runde {roundNumber}
             </p>
           </div>
 
           {/* Search Form - Prominent and Eye-catching */}
           <form onSubmit={handleSearch} className="mb-4">
-            <label htmlFor="song-search" className="block text-sm font-medium text-neutral-700 mb-2">
+            <label htmlFor="song-search" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
               Song suchen
             </label>
             <div className="flex gap-2">
@@ -288,10 +289,9 @@ export function SelectSongPageClient() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Song suchen..."
-                  className="w-full pl-12 pr-4 py-4 text-lg border-2 border-primary-400 rounded-xl bg-white placeholder:text-neutral-400 focus:outline-none focus:ring-4 focus:ring-primary-300 focus:border-primary-500 shadow-lg transition-all duration-200 hover:border-primary-500"
+                  className="w-full pl-12 pr-4 py-4 text-lg border-2 border-primary-400 rounded-xl bg-white text-black placeholder:text-[#6B6B6B] focus:outline-none focus:ring-4 focus:ring-primary-300 focus:border-primary-500 shadow-lg transition-all duration-200 hover:border-primary-500 dark:bg-neutral-800 dark:text-white dark:border-neutral-700 dark:focus:border-primary-500"
                   disabled={isLoading}
                   autoComplete="off"
-                  style={{ color: '#171717 !important', WebkitTextFillColor: '#171717 !important' }}
                 />
               </div>
               <ShimmerButton
@@ -312,11 +312,11 @@ export function SelectSongPageClient() {
           </form>
 
           {/* Category Info - Subtle and Informative */}
-          <div className="mb-6 flex items-center gap-2 text-sm text-neutral-600 px-2">
+          <div className="mb-6 flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400 px-2">
             <Music className="size-4 text-neutral-500 shrink-0" />
             <span>
               <span className="font-medium">{t("category")}:</span>{" "}
-              <span className="text-neutral-700">{t(getCategoryTranslationKey(category) as any)}</span>
+              <span className="text-neutral-800 dark:text-neutral-200">{t(getCategoryTranslationKey(category) as any)}</span>
             </span>
           </div>
 
@@ -328,23 +328,25 @@ export function SelectSongPageClient() {
                   key={track.id}
                   onClick={() => handleSelectSong(track)}
                   disabled={isSaving}
-                  className="w-full flex items-center gap-3 p-3 bg-neutral-50 hover:bg-neutral-100 rounded-lg border border-neutral-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center gap-3 p-3 bg-neutral-50 hover:bg-neutral-100 rounded-lg border border-neutral-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700"
                 >
                   {track.album.images[0] && (
-                    <img
+                    <Image
                       src={track.album.images[0].url}
                       alt={track.album.name}
+                      width={64}
+                      height={64}
                       className="size-12 md:size-16 rounded object-cover"
                     />
                   )}
                   <div className="flex-1 text-left min-w-0">
-                    <div className="font-medium text-neutral-900 truncate">
+                    <div className="font-medium text-neutral-900 dark:text-white truncate">
                       {track.name}
                     </div>
-                    <div className="text-sm text-neutral-500 truncate">
+                    <div className="text-sm text-neutral-600 dark:text-neutral-400 truncate">
                       {track.artists.map((a) => a.name).join(", ")}
                     </div>
-                    <div className="text-xs text-neutral-400 truncate">
+                    <div className="text-xs text-neutral-500 dark:text-neutral-500 truncate">
                       {track.album.name}
                     </div>
                   </div>

@@ -151,7 +151,7 @@ export function UserListCard({
     >
       <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
         <Users className="size-5 md:size-6 text-primary-500" />
-        <h2 className="text-xl md:text-2xl font-bold text-neutral-900">
+        <h2 className="text-xl md:text-2xl font-bold !text-[#0F0F0F]" style={{ color: '#0F0F0F' }}>
           {t("participants")} ({participants.length})
         </h2>
       </div>
@@ -265,7 +265,7 @@ export function UserListCard({
               )}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="font-medium text-neutral-900 text-sm md:text-base truncate">
+                  <p className="font-medium !text-[#0F0F0F] text-sm md:text-base truncate" style={{ color: '#0F0F0F' }}>
                     {participant.name}
                   </p>
                   {participant.id === hostId && (
@@ -274,7 +274,7 @@ export function UserListCard({
                     </span>
                   )}
                 </div>
-                <p className="text-xs md:text-sm text-neutral-500 truncate mt-0.5">
+                <p className="text-xs md:text-sm !text-[#4B4B4B] truncate mt-0.5" style={{ color: '#4B4B4B' }}>
                   {participant.email}
                 </p>
               </div>

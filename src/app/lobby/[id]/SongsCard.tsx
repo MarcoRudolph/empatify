@@ -455,7 +455,7 @@ export function SongsCard({
     >
       <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
         <Music className="size-5 md:size-6 text-primary-500" />
-        <h2 className="text-xl md:text-2xl font-bold text-neutral-900">
+        <h2 className="text-xl md:text-2xl font-bold !text-[#0F0F0F]" style={{ color: '#0F0F0F' }}>
           {tGame("song")}s
         </h2>
       </div>
@@ -476,8 +476,9 @@ export function SongsCard({
                   "relative px-4 py-2 text-sm md:text-base font-medium rounded-t-lg transition-all duration-200",
                   isActive
                     ? "bg-primary-500 text-white shadow-md"
-                    : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
+                    : "bg-neutral-100 !text-[#4B4B4B] hover:bg-neutral-200"
                 )}
+                style={!isActive ? { color: '#4B4B4B' } : undefined}
               >
                 <span className="flex items-center gap-1.5">
                   <span>{t("round")} {round}</span>
@@ -531,20 +532,20 @@ export function SongsCard({
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b border-neutral-300">
-              <th className="text-left py-2 px-2 md:px-4 text-xs md:text-sm font-medium text-neutral-700 w-12 md:w-auto">
+              <th className="text-left py-2 px-2 md:px-4 text-xs md:text-sm font-medium !text-[#4B4B4B] w-12 md:w-auto" style={{ color: '#4B4B4B' }}>
                 {tGame("users")}
               </th>
-              <th className="text-left py-2 px-2 md:px-6 text-xs md:text-sm font-medium text-neutral-700">
+              <th className="text-left py-2 px-2 md:px-6 text-xs md:text-sm font-medium !text-[#4B4B4B]" style={{ color: '#4B4B4B' }}>
                 {tGame("song")}
               </th>
-              <th className="text-center py-2 px-2 md:px-4 text-xs md:text-sm font-medium text-neutral-700 w-16 md:w-24">
+              <th className="text-center py-2 px-2 md:px-4 text-xs md:text-sm font-medium !text-[#4B4B4B] w-16 md:w-24" style={{ color: '#4B4B4B' }}>
                 <span className="sr-only md:not-sr-only">{t("rateSong")}</span>
                 <Star className="size-4 mx-auto md:hidden" />
               </th>
-              <th className="text-center py-2 px-2 md:px-4 text-xs md:text-sm font-medium text-neutral-700 w-20 md:w-32 hidden sm:table-cell">
+              <th className="text-center py-2 px-2 md:px-4 text-xs md:text-sm font-medium !text-[#4B4B4B] w-20 md:w-32 hidden sm:table-cell" style={{ color: '#4B4B4B' }}>
                 {t("averageRating")}
               </th>
-              <th className="text-center py-2 px-2 md:px-4 text-xs md:text-sm font-medium text-neutral-700 w-16 md:w-24">
+              <th className="text-center py-2 px-2 md:px-4 text-xs md:text-sm font-medium !text-[#4B4B4B] w-16 md:w-24" style={{ color: '#4B4B4B' }}>
                 <span className="sr-only md:not-sr-only">{t("actions")}</span>
                 <Play className="size-4 mx-auto md:hidden" />
               </th>
@@ -592,7 +593,7 @@ export function SongsCard({
                         </div>
                       )}
                       {/* Username only visible on desktop */}
-                      <span className="hidden md:inline text-xs md:text-sm font-medium text-neutral-900">
+                      <span className="hidden md:inline text-xs md:text-sm font-medium !text-[#0F0F0F]" style={{ color: '#0F0F0F' }}>
                         {row.participant.name}
                       </span>
                     </div>
@@ -604,7 +605,7 @@ export function SongsCard({
                       // Song exists - show details with edit/delete buttons
                       <div className="flex items-center gap-3">
                         {isLoadingTrack ? (
-                          <div className="flex items-center gap-2 text-xs md:text-sm text-neutral-500">
+                          <div className="flex items-center gap-2 text-xs md:text-sm !text-[#6B6B6B]" style={{ color: '#6B6B6B' }}>
                             <Loader2 className="size-4 animate-spin" />
                             <span>Lädt...</span>
                           </div>
@@ -620,16 +621,16 @@ export function SongsCard({
                             )}
                             <div className="flex-1 min-w-0 max-w-[140px] sm:max-w-xs md:max-w-sm">
                               {/* Song Title - Show on desktop, truncate on mobile */}
-                              <div className="font-medium text-xs md:text-sm text-neutral-900 truncate md:line-clamp-2">
+                              <div className="font-medium text-xs md:text-sm !text-[#0F0F0F] truncate md:line-clamp-2" style={{ color: '#0F0F0F' }}>
                                 {track.name}
                               </div>
                               {/* Artist Names - Always truncate for compact layout */}
-                              <div className="text-xs text-neutral-500 truncate">
+                              <div className="text-xs !text-[#6B6B6B] truncate" style={{ color: '#6B6B6B' }}>
                                 {track.artists.map((a) => a.name).join(", ")}
                               </div>
                               {/* Duration */}
                               {track.duration_ms && (
-                                <div className="text-xs text-neutral-400 mt-0.5">
+                                <div className="text-xs !text-[#9A9A9A] mt-0.5" style={{ color: '#9A9A9A' }}>
                                   {formatDuration(track.duration_ms)}
                                 </div>
                               )}
@@ -691,11 +692,11 @@ export function SongsCard({
                   {/* Average Rating - Hidden on small screens */}
                   <td className="py-3 px-2 md:px-4 text-center w-20 md:w-32 hidden sm:table-cell align-middle">
                     {row.averageRating !== null ? (
-                      <span className="text-base md:text-lg font-medium text-neutral-900">
+                      <span className="text-base md:text-lg font-medium !text-[#0F0F0F]" style={{ color: '#0F0F0F' }}>
                         {row.averageRating.toFixed(1)} / 10
                       </span>
                     ) : (
-                      <span className="text-xs md:text-sm text-neutral-400">
+                      <span className="text-xs md:text-sm !text-[#9A9A9A]" style={{ color: '#9A9A9A' }}>
                         -
                       </span>
                     )}

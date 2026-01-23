@@ -48,6 +48,11 @@
     "magicLinkExpired": "This magic link is invalid or has expired. Magic links can only be used once and are valid for 24 hours. Please request a new magic link.",
     "authenticationError": "Authentication error"
   },
+  "NotFound": {
+    "title": "Page Not Found",
+    "description": "The page you are looking for does not exist.",
+    "returnHome": "Return to Home"
+  },
   "dashboard": {
     "title": "Dashboard",
     "startGame": "Start Game",

@@ -4,7 +4,7 @@ import path from 'path';
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
-const nextConfig: NextConfig = {
+const nextConfig: NextConfig & Record<string, any> = {
   eslint: {
     // Disable ESLint during builds (warnings only, not blocking)
     ignoreDuringBuilds: true,
@@ -22,6 +22,16 @@ const nextConfig: NextConfig = {
       };
     }
     return config;
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'i.scdn.co',
+        port: '',
+        pathname: '/image/**',
+      },
+    ],
   },
 };
 

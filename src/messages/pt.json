@@ -46,6 +46,11 @@
     "magicLinkExpired": "Este Magic Link é inválido ou expirou. Magic Links só podem ser usados uma vez e são válidos por 24 horas. Por favor, solicite um novo Magic Link.",
     "authenticationError": "Erro de autenticação"
   },
+  "NotFound": {
+    "title": "Página não encontrada",
+    "description": "A página que você está procurando não existe.",
+    "returnHome": "Voltar para a página inicial"
+  },
   "dashboard": {
     "title": "Painel",
     "startGame": "Iniciar Jogo",

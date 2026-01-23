@@ -58,17 +58,17 @@ export function CookieConsent() {
             <div className="flex items-start gap-3">
               <Cookie className="size-6 text-primary-500 shrink-0 mt-1" />
               <div className="flex-1">
-                <h3 className="text-base md:text-lg font-bold text-neutral-900 mb-2">
+                <h3 className="text-base md:text-lg font-bold text-white mb-2" style={{ color: '#FFFFFF' }}>
                   🍪 {t("title")}
                 </h3>
-                <p className="text-sm text-neutral-700 leading-relaxed">
+                <p className="text-sm text-neutral-200 leading-relaxed" style={{ color: '#E5E5E5' }}>
                   {t("description")}
                 </p>
-                <p className="text-xs text-neutral-600 mt-2">
+                <p className="text-xs text-neutral-200 mt-2" style={{ color: '#E5E5E5' }}>
                   {t("moreInfo")}{" "}
                   <Link 
                     href="/datenschutz" 
-                    className="text-primary-600 hover:text-primary-700 underline font-medium"
+                    className="text-primary-400 hover:text-primary-300 underline font-medium"
                   >
                     {t("privacyPolicy")}
                   </Link>
@@ -77,7 +77,7 @@ export function CookieConsent() {
               </div>
               <button
                 onClick={handleDecline}
-                className="text-neutral-500 hover:text-neutral-900 transition-colors shrink-0 p-1 hover:bg-neutral-100 rounded-lg"
+                className="text-neutral-200 hover:!text-white transition-colors shrink-0 p-1 hover:bg-white/10 rounded-lg"
                 aria-label={t("decline")}
               >
                 <X className="size-5" />
@@ -86,17 +86,17 @@ export function CookieConsent() {
 
             {/* Cookie Categories */}
             <div className="space-y-2 text-xs md:text-sm">
-              <div className="flex items-start gap-2 text-neutral-700">
-                <span className="text-primary-600 font-bold shrink-0">✓</span>
+              <div className="flex items-start gap-2 text-neutral-200" style={{ color: '#E5E5E5' }}>
+                <span className="text-primary-500 font-bold shrink-0">✓</span>
                 <div>
-                  <span className="font-semibold text-neutral-900">{t("essential")}:</span> 
+                  <span className="font-semibold text-white" style={{ color: '#FFFFFF' }}>{t("essential")}:</span> 
                   {" "}{t("essentialDescription")}
                 </div>
               </div>
-              <div className="flex items-start gap-2 text-neutral-700">
-                <span className="text-neutral-400 font-bold shrink-0">○</span>
+              <div className="flex items-start gap-2 text-neutral-200" style={{ color: '#E5E5E5' }}>
+                <span className="text-neutral-200 font-bold shrink-0">○</span>
                 <div>
-                  <span className="font-semibold text-neutral-900">{t("analytics")}:</span> 
+                  <span className="font-semibold text-white" style={{ color: '#FFFFFF' }}>{t("analytics")}:</span> 
                   {" "}{t("analyticsDescription")}
                 </div>
               </div>
@@ -109,13 +109,14 @@ export function CookieConsent() {
                 background="var(--color-primary-500)"
                 shimmerColor="var(--color-neutral-900)"
                 borderRadius="9999px"
-                className="flex-1 h-11 px-6 text-sm font-bold"
+                className="flex-1 h-11 px-6 text-sm font-bold text-white"
               >
                 {t("acceptAll")}
               </ShimmerButton>
               <button
                 onClick={handleDecline}
-                className="flex-1 h-11 px-6 text-sm font-bold border-2 border-neutral-300 rounded-full bg-white text-neutral-900 hover:bg-neutral-100 hover:border-neutral-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-all duration-200"
+                className="flex-1 h-11 px-6 text-sm font-bold border-2 border-neutral-300 rounded-full bg-white !text-[#0F0F0F] hover:bg-neutral-100 hover:border-neutral-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-all duration-200"
+                style={{ color: '#0F0F0F' }}
               >
                 {t("onlyEssential")}
               </button>
