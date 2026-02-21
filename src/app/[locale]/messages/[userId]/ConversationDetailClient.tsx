@@ -124,7 +124,7 @@ export function ConversationDetailClient({
   }
 
   const handleLobbyClick = (lobbyId: string) => {
-    router.push(`/lobby/${lobbyId}`)
+    router.push(`/${locale}/lobby/${lobbyId}`)
   }
 
   // Helper function to render message content with clickable links

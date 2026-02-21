@@ -4,7 +4,7 @@ import { db } from "@/lib/db"
 import { users } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 import { cookies } from "next/headers"
-import { routing } from "@/i18n/routing"
+import { defaultLocale } from "@/i18n"
 
 /**
  * GET /api/spotify/callback
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
       console.error("=".repeat(80))
       
       const cookieStore = await cookies()
-      const locale = cookieStore.get("NEXT_LOCALE")?.value || routing.locales[0]
+      const locale = cookieStore.get("NEXT_LOCALE")?.value || defaultLocale
       
       // Include error description in redirect for debugging
       const errorParam = `${error}${errorDescription ? `:${encodeURIComponent(errorDescription)}` : ""}`
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
 
     if (!code || !state) {
       const cookieStore = await cookies()
-      const locale = cookieStore.get("NEXT_LOCALE")?.value || routing.locales[0]
+      const locale = cookieStore.get("NEXT_LOCALE")?.value || defaultLocale
       return NextResponse.redirect(
         new URL(`/${locale}/dashboard?spotify_error=missing_params`, requestUrl.origin)
       )
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
     } catch (e) {
       console.error("Invalid state parameter:", e)
       const cookieStore = await cookies()
-      const locale = cookieStore.get("NEXT_LOCALE")?.value || routing.locales[0]
+      const locale = cookieStore.get("NEXT_LOCALE")?.value || defaultLocale
       return NextResponse.redirect(
         new URL(`/${locale}/dashboard?spotify_error=invalid_state`, requestUrl.origin)
       )
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
 
     if (authError || !user || user.id !== userId) {
       const cookieStore = await cookies()
-      const locale = cookieStore.get("NEXT_LOCALE")?.value || routing.locales[0]
+      const locale = cookieStore.get("NEXT_LOCALE")?.value || defaultLocale
       return NextResponse.redirect(
         new URL(`/${locale}/dashboard?spotify_error=unauthorized`, requestUrl.origin)
       )
@@ -144,7 +144,7 @@ export async function GET(request: NextRequest) {
     if (!clientId || !clientSecret) {
       console.error("Spotify credentials not configured")
       const cookieStore = await cookies()
-      const locale = cookieStore.get("NEXT_LOCALE")?.value || routing.locales[0]
+      const locale = cookieStore.get("NEXT_LOCALE")?.value || defaultLocale
       return NextResponse.redirect(
         new URL(`/${locale}/dashboard?spotify_error=config_error`, requestUrl.origin)
       )
@@ -226,7 +226,7 @@ export async function GET(request: NextRequest) {
       }
       
       const cookieStore = await cookies()
-      const locale = cookieStore.get("NEXT_LOCALE")?.value || routing.locales[0]
+      const locale = cookieStore.get("NEXT_LOCALE")?.value || defaultLocale
       
       // Include detailed error in URL for debugging
       const errorParam = `${errorMessage}${errorDetails.error_description ? `:${encodeURIComponent(errorDetails.error_description)}` : ""}`
@@ -294,14 +294,14 @@ export async function GET(request: NextRequest) {
 
     // Redirect back to dashboard with success
     const cookieStore = await cookies()
-    const locale = cookieStore.get("NEXT_LOCALE")?.value || routing.locales[0]
+    const locale = cookieStore.get("NEXT_LOCALE")?.value || defaultLocale
     return NextResponse.redirect(
       new URL(`/${locale}/dashboard?spotify_linked=true`, requestUrl.origin)
     )
   } catch (error: any) {
     console.error("Unexpected error in Spotify callback:", error)
     const cookieStore = await cookies()
-    const locale = cookieStore.get("NEXT_LOCALE")?.value || routing.locales[0]
+    const locale = cookieStore.get("NEXT_LOCALE")?.value || defaultLocale
     const origin = new URL(request.url).origin
     return NextResponse.redirect(
       new URL(`/${locale}/dashboard?spotify_error=unexpected_error`, origin)

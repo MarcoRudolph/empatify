@@ -5,7 +5,7 @@ import { lobbies, lobbyParticipants, users } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 import { NextIntlClientProvider } from "next-intl"
 import { getMessages } from "next-intl/server"
-import { routing } from "@/i18n/routing"
+import { defaultLocale } from "../../../../i18n"
 import { LobbyPageClient } from "./LobbyPageClient"
 
 interface LobbyPageProps {
@@ -32,7 +32,7 @@ export default async function LobbyPage({ params }: LobbyPageProps) {
   }
 
   // Get messages for default locale (German) to support translations
-  const messages = await getMessages({ locale: routing.defaultLocale })
+  const messages = await getMessages({ locale: defaultLocale })
 
   try {
     // Get lobby (including gameMode)

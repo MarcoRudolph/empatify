@@ -29,6 +29,10 @@ export function CreateGameSection({
   const [gameMode, setGameMode] = useState<"single-device" | "multi-device">("multi-device")
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
   const [selectedFriendIds, setSelectedFriendIds] = useState<Set<string>>(new Set())
+  const localeFromPath =
+    typeof window !== "undefined"
+      ? window.location.pathname.match(/^\/(de|en|pt|fr|es)(\/|$)/)?.[1] ?? "en"
+      : "en"
 
   const categories = [
     { value: "all", label: tLobby("categoryAll") },
@@ -119,7 +123,7 @@ export function CreateGameSection({
       }
 
       const lobbyId = data.lobby.id
-      const lobbyLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/lobby/${lobbyId}`
+      const lobbyLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/${localeFromPath}/lobby/${lobbyId}`
 
       // Send invites if friends were selected
       if (selectedFriendIds.size > 0) {
@@ -151,7 +155,7 @@ export function CreateGameSection({
       }
 
       // Redirect to lobby
-      router.push(`/lobby/${lobbyId}`)
+      router.push(`/${localeFromPath}/lobby/${lobbyId}`)
     } catch (error) {
       console.error("Error creating lobby:", error)
       setIsCreating(false)

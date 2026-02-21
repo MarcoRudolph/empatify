@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
+import { cookies } from "next/headers"
 import { createClient } from "@/lib/supabase/server"
 import { db } from "@/lib/db"
 import { songs, users } from "@/lib/db/schema"
 import { eq, and } from "drizzle-orm"
+import { defaultLocale } from "@/i18n"
 
 /**
  * GET /api/spotify/song-callback
@@ -12,6 +14,8 @@ import { eq, and } from "drizzle-orm"
 export async function GET(request: NextRequest) {
   try {
     const requestUrl = new URL(request.url)
+    const cookieStore = await cookies()
+    const locale = cookieStore.get("NEXT_LOCALE")?.value || defaultLocale
     const lobbyId = requestUrl.searchParams.get("lobbyId")
     const roundNumber = requestUrl.searchParams.get("roundNumber")
     const spotifyTrackId = requestUrl.searchParams.get("trackId") || 
@@ -19,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     if (!lobbyId || !roundNumber) {
       return NextResponse.redirect(
-        new URL(`/lobby/${lobbyId || ""}?error=missing_params`, requestUrl.origin)
+        new URL(`/${locale}/lobby/${lobbyId || ""}?error=missing_params`, requestUrl.origin)
       )
     }
 
@@ -31,7 +35,7 @@ export async function GET(request: NextRequest) {
 
     if (authError || !user) {
       return NextResponse.redirect(
-        new URL(`/lobby/${lobbyId}?error=unauthorized`, requestUrl.origin)
+        new URL(`/${locale}/lobby/${lobbyId}?error=unauthorized`, requestUrl.origin)
       )
     }
 
@@ -79,12 +83,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Redirect back to lobby with the round number as query parameter
-    return NextResponse.redirect(new URL(`/lobby/${lobbyId}?round=${roundNumber}`, requestUrl.origin))
+    return NextResponse.redirect(new URL(`/${locale}/lobby/${lobbyId}?round=${roundNumber}`, requestUrl.origin))
   } catch (error: any) {
     console.error("Error in song callback:", error)
     const lobbyId = new URL(request.url).searchParams.get("lobbyId") || ""
+    const cookieStore = await cookies()
+    const locale = cookieStore.get("NEXT_LOCALE")?.value || defaultLocale
     return NextResponse.redirect(
-      new URL(`/lobby/${lobbyId}?error=callback_failed`, new URL(request.url).origin)
+      new URL(`/${locale}/lobby/${lobbyId}?error=callback_failed`, new URL(request.url).origin)
     )
   }
 }

@@ -12,7 +12,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const baseUrl =
+  process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(baseUrl),
   title: "Empatify ..chill game",
   description: "Pick tracks your friends will love! Match the group's music taste to get the highest ratings for your song choices. The best curator wins!",
 };
@@ -23,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* Google Fonts - Pacifico for Winner Display */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />

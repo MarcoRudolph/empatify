@@ -2,7 +2,6 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { NextIntlClientProvider } from "next-intl"
 import { getMessages } from "next-intl/server"
-import { routing } from "@/i18n/routing"
 import { SelectSongPageClient } from "./SelectSongPageClient"
 
 interface SelectSongPageProps {
@@ -29,7 +28,7 @@ export default async function SelectSongPage({ params }: SelectSongPageProps) {
   }
 
   // Get messages for default locale (German) to support translations
-  const messages = await getMessages({ locale: routing.defaultLocale })
+  const messages = await getMessages({ locale: "de" })
 
   return (
     <NextIntlClientProvider messages={messages}>

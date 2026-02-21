@@ -2,10 +2,11 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { locales } from '@/i18n';
 import { CookieConsent } from "@/components/ui/CookieConsent";
+import { SetHtmlLang } from './SetHtmlLang';
 
 type Props = {
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 };
 
 export function generateStaticParams() {
@@ -14,21 +15,17 @@ export function generateStaticParams() {
 
 export default async function LocaleLayout({
   children,
-  params: { locale },
+  params,
 }: Props) {
-  // Providing all messages to the client
-  // side is the easiest way to get started
-  const messages = await getMessages();
+  const { locale } = await params;
+  const messages = await getMessages({ locale });
 
   return (
-    <html lang={locale}>
-      <body>
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          {children}
-          <CookieConsent />
-        </NextIntlClientProvider>
-      </body>
-    </html>
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      <SetHtmlLang />
+      {children}
+      <CookieConsent />
+    </NextIntlClientProvider>
   );
 }
 

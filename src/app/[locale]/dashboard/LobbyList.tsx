@@ -96,10 +96,10 @@ export function LobbyList({ lobbies, user, locale }: LobbyListProps) {
           lobby.topPlayers[0].userId === user?.id;
 
         const lobbyUrl = lobby.roundToRate
-          ? `/lobby/${lobby.id}?round=${lobby.roundToRate}`
+          ? `/${locale}/lobby/${lobby.id}?round=${lobby.roundToRate}`
           : lobby.currentRound
-          ? `/lobby/${lobby.id}?round=${lobby.currentRound}`
-          : `/lobby/${lobby.id}`;
+          ? `/${locale}/lobby/${lobby.id}?round=${lobby.currentRound}`
+          : `/${locale}/lobby/${lobby.id}`;
         
         const isLoading = loadingLobbyId === lobby.id;
 

@@ -2,7 +2,6 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { NextIntlClientProvider } from "next-intl"
 import { getMessages } from "next-intl/server"
-import { routing } from "@/i18n/routing"
 import { SpotifySetupClient } from "./SpotifySetupClient"
 
 interface SpotifySetupPageProps {

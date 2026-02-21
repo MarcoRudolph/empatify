@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
-import { routing } from "@/i18n/routing"
+import { defaultLocale } from "@/i18n"
 import { getBaseUrl } from "@/lib/utils"
 
 /**
@@ -21,9 +21,14 @@ export async function GET(request: NextRequest) {
   const lobbyId = requestUrl.searchParams.get("lobbyId")
   const baseUrl = getBaseUrl(request)
   
-  // Get locale from cookie or default
+  const localeFromPath = requestUrl.pathname.split("/")[1]
+  const isLocaleInPath = ["en", "de", "pt", "fr", "es"].includes(localeFromPath)
+
+  // Prefer locale from path, fallback to cookie/default
   const cookieStore = await cookies()
-  const locale = cookieStore.get("NEXT_LOCALE")?.value || routing.locales[0]
+  const locale = isLocaleInPath
+    ? localeFromPath
+    : cookieStore.get("NEXT_LOCALE")?.value || defaultLocale
 
   // Check if user is authenticated
   const supabase = await createClient()
@@ -35,8 +40,8 @@ export async function GET(request: NextRequest) {
   // If not authenticated, redirect to login with redirect parameter
   if (authError || !user) {
     const redirectUrl = lobbyId
-      ? `/redirect?lobbyId=${lobbyId}`
-      : "/redirect"
+      ? `/${locale}/redirect?lobbyId=${lobbyId}`
+      : `/${locale}/redirect`
     console.log("User not authenticated, redirecting to login:", {
       redirectUrl,
       baseUrl,
@@ -54,7 +59,7 @@ export async function GET(request: NextRequest) {
       baseUrl,
       hostHeader: request.headers.get("host"),
     })
-    return NextResponse.redirect(new URL(`/lobby/${lobbyId}`, baseUrl))
+    return NextResponse.redirect(new URL(`/${locale}/lobby/${lobbyId}`, baseUrl))
   }
 
   // No lobbyId, redirect to dashboard

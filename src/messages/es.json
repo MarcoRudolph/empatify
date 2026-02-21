@@ -145,6 +145,13 @@
     "categoryMismatch": "La canción no coincide. La categoría especificada para este juego es: {category}.",
     "songSaveError": "Error al guardar la canción",
     "savingSong": "Guardando canción...",
+    "searchPlaceholder": "Busca canciones, artistas o álbumes...",
+    "searchAriaLabel": "Buscar canciones en Spotify",
+    "searchMinCharsHint": "Escribe al menos 3 caracteres para iniciar la búsqueda.",
+    "searchDebounceHint": "Buscando después de una breve pausa...",
+    "searchLoading": "Buscando en Spotify...",
+    "searchShowMore": "Mostrar más resultados",
+    "searchNoResults": "No se encontraron canciones para \"{query}\".",
     "tooLateTitle": "Lamentablemente llegaste tarde",
     "tooLateDescription": "Este juego ya ha terminado. Pero aún puedes ver los resultados y al ganador."
   },
@@ -274,6 +281,11 @@
     "acceptAll": "Aceptar todo",
     "onlyEssential": "Solo esenciales",
     "decline": "Rechazar"
+  },
+  "privacy": {
+    "backToHome": "Volver al inicio",
+    "title": "Política de privacidad",
+    "subtitle": "Información sobre la protección de sus datos personales"
   },
   "impressum": {
     "backToHome": "Volver al inicio",

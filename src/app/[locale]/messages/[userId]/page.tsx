@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { getMessages } from "next-intl/server"
-import { routing } from "@/i18n/routing"
 import { NextIntlClientProvider } from "next-intl"
 import { ConversationDetailClient } from "./ConversationDetailClient"
 

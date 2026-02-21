@@ -50,7 +50,8 @@ export function UserListCard({
     // Generate URL client-side to ensure we get the correct origin
     if (typeof window !== 'undefined') {
       const origin = window.location.origin
-      const url = `${origin}/redirect?lobbyId=${lobbyId}`
+      const locale = window.location.pathname.match(/^\/(de|en|pt|fr|es)(\/|$)/)?.[1] || "en"
+      const url = `${origin}/${locale}/redirect?lobbyId=${lobbyId}`
       setInviteUrl(url)
       console.log("🔍 Generated Invite URL:", url)
       console.log("  - Origin:", origin)
@@ -177,8 +178,8 @@ export function UserListCard({
                   if (response.ok) {
                     const data = await response.json()
                     // Navigate to the new lobby
-                    // Note: /lobby route is NOT internationalized (no locale prefix)
-                    window.location.href = `/lobby/${data.lobbyId}`
+                    const locale = window.location.pathname.match(/^\/(de|en|pt|fr|es)(\/|$)/)?.[1] || "en"
+                    window.location.href = `/${locale}/lobby/${data.lobbyId}`
                   } else {
                     const errorData = await response.json()
                     console.error('Failed to create new lobby:', errorData)

@@ -3,7 +3,7 @@ import { createBrowserClient } from '@supabase/ssr';
 /**
  * Supabase client for browser-side operations
  * Configured to properly handle cookies
- * Uses implicit flow (no PKCE) to allow Magic Links to work across devices
+ * Uses PKCE flow for robust OAuth + session handling
  */
 export function createClient() {
   return createBrowserClient(
@@ -11,9 +11,8 @@ export function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       auth: {
-        // Use implicit flow instead of PKCE for Magic Links
-        // This allows Magic Links to work even when opened on a different device
-        flowType: 'implicit',
+        // Keep OAuth and callback handling consistent with client-side code exchange.
+        flowType: 'pkce',
         // Auto-refresh tokens
         autoRefreshToken: true,
         // Persist session in cookies
@@ -23,6 +22,10 @@ export function createClient() {
       },
       cookies: {
         getAll() {
+          if (typeof document === 'undefined') {
+            return [];
+          }
+
           return document.cookie.split(';').map(cookie => {
             const [name, ...rest] = cookie.split('=')
             return {
@@ -32,6 +35,10 @@ export function createClient() {
           })
         },
         setAll(cookiesToSet) {
+          if (typeof document === 'undefined') {
+            return;
+          }
+
           cookiesToSet.forEach(({ name, value, options }) => {
             // Set cookie with proper options
             let cookieString = `${name}=${value}`

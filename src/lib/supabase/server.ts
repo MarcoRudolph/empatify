@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 
 /**
  * Supabase client for server-side operations
- * Uses implicit flow to match client configuration for Magic Links
+ * Uses PKCE flow to match browser client configuration
  */
 export async function createClient() {
   const cookieStore = await cookies();
@@ -13,9 +13,7 @@ export async function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       auth: {
-        // Use implicit flow instead of PKCE for Magic Links
-        // This allows Magic Links to work even when opened on a different device
-        flowType: 'implicit',
+        flowType: 'pkce',
         // Auto-refresh tokens
         autoRefreshToken: true,
         // Persist session in cookies

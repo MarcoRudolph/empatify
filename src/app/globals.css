@@ -156,3 +156,4 @@ body {
 .animate-rippling {
   animation: rippling var(--duration, 600ms) ease-out;
 }
+

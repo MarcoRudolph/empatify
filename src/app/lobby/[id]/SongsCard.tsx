@@ -232,12 +232,14 @@ export function SongsCard({
 
   const handleAddSong = (participantId: string) => {
     // Navigate to song selection page
-    router.push(`/lobby/${lobby.id}/select-song?round=${selectedRound}`)
+    const locale = document.cookie.split(';').find(c => c.trim().startsWith('NEXT_LOCALE='))?.split('=')[1] || "en"
+    router.push(`/${locale}/lobby/${lobby.id}/select-song?round=${selectedRound}`)
   }
 
   const handleEditSong = (participantId: string) => {
     // Navigate to song selection page to change the song
-    router.push(`/lobby/${lobby.id}/select-song?round=${selectedRound}`)
+    const locale = document.cookie.split(';').find(c => c.trim().startsWith('NEXT_LOCALE='))?.split('=')[1] || "en"
+    router.push(`/${locale}/lobby/${lobby.id}/select-song?round=${selectedRound}`)
   }
 
   const handleOpenRating = (songId: string, currentUserRating: number | null) => {

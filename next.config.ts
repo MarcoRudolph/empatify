@@ -2,13 +2,9 @@ import type { NextConfig } from "next";
 import createNextIntlPlugin from 'next-intl/plugin';
 import path from 'path';
 
-const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
+const withNextIntl = createNextIntlPlugin('./i18n.ts');
 
 const nextConfig: NextConfig & Record<string, any> = {
-  eslint: {
-    // Disable ESLint during builds (warnings only, not blocking)
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     // Disable type checking during builds (warnings only, not blocking)
     ignoreBuildErrors: true,
