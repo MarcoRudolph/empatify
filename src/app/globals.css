@@ -9,7 +9,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-family-sans);
+  --font-sans: var(--font-outfit), ui-sans-serif, system-ui;
+  --font-display: var(--font-unbounded), ui-sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -98,6 +99,59 @@ body {
 .stats-accent {
   color: var(--color-accent-blue);
 }
+
+/* ── Landing page animations ─────────────────────────────────────── */
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.anim-fade-up {
+  animation: fade-up 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.anim-d1 { animation-delay: 0.05s; }
+.anim-d2 { animation-delay: 0.18s; }
+.anim-d3 { animation-delay: 0.32s; }
+.anim-d4 { animation-delay: 0.48s; }
+.anim-d5 { animation-delay: 0.64s; }
+
+/* Scroll-driven hero background parallax + blur */
+@supports (animation-timeline: scroll()) {
+  .hero-scroll-out {
+    animation: hero-blur-out linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0px 500px;
+  }
+  @keyframes hero-blur-out {
+    to {
+      opacity: 0.15;
+      filter: blur(10px);
+      transform: scale(1.06);
+    }
+  }
+}
+
+/* Music bar equalizer animation */
+@keyframes music-bar {
+  0%, 100% { transform: scaleY(0.35); }
+  50%       { transform: scaleY(1); }
+}
+.music-bar {
+  animation: music-bar 1.1s ease-in-out infinite;
+  transform-origin: bottom;
+}
+
+/* Floating card subtle bob */
+@keyframes float-bob {
+  0%, 100% { transform: rotate(-2deg) translateY(0px); }
+  50%       { transform: rotate(-2deg) translateY(-8px); }
+}
+.float-card {
+  animation: float-bob 4s ease-in-out infinite;
+}
+
+/* ── Magic UI Animations ─────────────────────────────────────────── */
 
 /* Magic UI Animations */
 @keyframes gradient {
