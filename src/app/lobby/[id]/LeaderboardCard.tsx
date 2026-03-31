@@ -36,7 +36,7 @@ export function LeaderboardCard({ leaderboard, hasScores = false, isGameFinished
     if (index === 1) return <Medal className="size-5 md:size-6 text-gray-400" />
     if (index === 2) return <Award className="size-5 md:size-6 text-orange-600" />
     return (
-      <span className="size-6 md:size-8 rounded-full bg-neutral-200 flex items-center justify-center text-xs md:text-sm font-bold text-neutral-600">
+      <span className="size-6 md:size-8 rounded-full bg-neutral-300 flex items-center justify-center text-xs md:text-sm font-bold text-neutral-900">
         {index + 1}
       </span>
     )
@@ -114,12 +114,12 @@ export function LeaderboardCard({ leaderboard, hasScores = false, isGameFinished
                 flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-lg border transition-all
                 ${
                   index === 0
-                    ? "bg-yellow-50 border-yellow-200"
+                    ? "bg-yellow-400/10 border-yellow-400/30"
                     : index === 1
-                    ? "bg-gray-50 border-gray-200"
+                    ? "bg-white/5 border-white/15"
                     : index === 2
-                    ? "bg-orange-50 border-orange-200"
-                    : "bg-neutral-50 border-neutral-200"
+                    ? "bg-orange-400/10 border-orange-400/30"
+                    : "bg-white/5 border-white/10"
                 }
               `}
               style={
@@ -145,17 +145,10 @@ export function LeaderboardCard({ leaderboard, hasScores = false, isGameFinished
             )}
 
             {/* Name, Best Song, and Rating - Horizontal Layout */}
-            <div className="flex-1 min-w-0 flex items-center gap-4 md:gap-6" style={{ color: '#171717' }}>
+            <div className="flex-1 min-w-0 flex items-center gap-4 md:gap-6">
               {/* Username - Fixed width for vertical alignment */}
               <div className="w-24 md:w-32 shrink-0">
-                <p 
-                  className="font-medium text-sm md:text-base truncate" 
-                  style={{ 
-                    color: '#171717',
-                    WebkitTextFillColor: '#171717',
-                    opacity: 1
-                  }}
-                >
+                <p className="font-medium text-sm md:text-base truncate text-neutral-900">
                   {entry.name}
                 </p>
               </div>
@@ -163,12 +156,12 @@ export function LeaderboardCard({ leaderboard, hasScores = false, isGameFinished
               {/* Best Song */}
               {entry.bestSong ? (
                 <div className="flex-1 min-w-0 text-xs md:text-sm">
-                  <span style={{ color: '#525252' }} className="font-medium">{t("bestSong")}: </span>
-                  <span style={{ color: '#171717' }}>{entry.bestSong.name}</span>
+                  <span className="font-medium text-neutral-500">{t("bestSong")}: </span>
+                  <span className="text-neutral-900">{entry.bestSong.name}</span>
                   {entry.bestSong.artist && (
-                    <span style={{ color: '#737373' }}> - {entry.bestSong.artist}</span>
+                    <span className="text-neutral-400"> - {entry.bestSong.artist}</span>
                   )}
-                  <span style={{ color: '#525252' }} className="ml-2">
+                  <span className="ml-2 text-neutral-500">
                     ({entry.bestSong.rating.toFixed(1)}/10)
                   </span>
                 </div>
@@ -178,10 +171,10 @@ export function LeaderboardCard({ leaderboard, hasScores = false, isGameFinished
 
               {/* Average Rating */}
               <div className="shrink-0 text-right">
-                <p className="text-lg md:text-xl font-bold" style={{ color: '#171717' }}>
+                <p className="text-lg md:text-xl font-bold text-neutral-900">
                   {entry.averageRating > 0 ? entry.averageRating.toFixed(1) : "—"}
                 </p>
-                <p className="text-xs md:text-sm" style={{ color: '#737373' }}>/ 10</p>
+                <p className="text-xs md:text-sm text-neutral-400">/ 10</p>
               </div>
             </div>
             </div>

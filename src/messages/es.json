@@ -153,7 +153,10 @@
     "searchShowMore": "Mostrar más resultados",
     "searchNoResults": "No se encontraron canciones para \"{query}\".",
     "tooLateTitle": "Lamentablemente llegaste tarde",
-    "tooLateDescription": "Este juego ya ha terminado. Pero aún puedes ver los resultados y al ganador."
+    "tooLateDescription": "Este juego ya ha terminado. Pero aún puedes ver los resultados y al ganador.",
+    "spotifyLinkTapAgain": "Toca de nuevo para iniciar sesión en Spotify",
+    "spotifyPremiumQueueHint": "Se requiere cuenta Premium de Spotify para la cola de reproducción",
+    "spotifyLinkUsePromptBelow": "Usa «Vincular Spotify» abajo para conectar tu cuenta."
   },
   "game": {
     "round": "Ronda",
@@ -280,6 +283,7 @@
     "analyticsDescription": "Estadísticas de uso, seguimiento de rendimiento (opcional)",
     "acceptAll": "Aceptar todo",
     "onlyEssential": "Solo esenciales",
+    "rejectAll": "Rechazar todo",
     "decline": "Rechazar"
   },
   "privacy": {

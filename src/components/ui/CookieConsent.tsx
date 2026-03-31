@@ -14,13 +14,12 @@ import { useTranslations } from "next-intl"
  */
 export function CookieConsent() {
   const t = useTranslations("cookies")
-  const tCommon = useTranslations("common")
   const [isVisible, setIsVisible] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [analyticsEnabled, setAnalyticsEnabled] = useState(false)
 
   useEffect(() => {
     setMounted(true)
-    // Check if user has already made a choice
     const consent = localStorage.getItem("cookie-consent")
     if (!consent) {
       setIsVisible(true)
@@ -29,6 +28,12 @@ export function CookieConsent() {
 
   const handleAccept = () => {
     localStorage.setItem("cookie-consent", "accepted")
+    localStorage.setItem("cookie-consent-timestamp", new Date().toISOString())
+    setIsVisible(false)
+  }
+
+  const handleOnlyEssential = () => {
+    localStorage.setItem("cookie-consent", "essential-only")
     localStorage.setItem("cookie-consent-timestamp", new Date().toISOString())
     setIsVisible(false)
   }
@@ -86,20 +91,30 @@ export function CookieConsent() {
 
             {/* Cookie Categories */}
             <div className="space-y-2 text-xs md:text-sm">
-              <div className="flex items-start gap-2 text-neutral-200" style={{ color: '#E5E5E5' }}>
-                <span className="text-primary-500 font-bold shrink-0">✓</span>
+              <label className="flex items-start gap-3 text-neutral-200 cursor-not-allowed" style={{ color: '#E5E5E5' }}>
+                <input
+                  type="checkbox"
+                  checked
+                  disabled
+                  className="mt-0.5 size-4 shrink-0 accent-primary-500 cursor-not-allowed"
+                />
                 <div>
-                  <span className="font-semibold text-white" style={{ color: '#FFFFFF' }}>{t("essential")}:</span> 
+                  <span className="font-semibold text-white" style={{ color: '#FFFFFF' }}>{t("essential")}:</span>
                   {" "}{t("essentialDescription")}
                 </div>
-              </div>
-              <div className="flex items-start gap-2 text-neutral-200" style={{ color: '#E5E5E5' }}>
-                <span className="text-neutral-200 font-bold shrink-0">○</span>
+              </label>
+              <label className="flex items-start gap-3 text-neutral-200 cursor-pointer" style={{ color: '#E5E5E5' }}>
+                <input
+                  type="checkbox"
+                  checked={analyticsEnabled}
+                  onChange={(e) => setAnalyticsEnabled(e.target.checked)}
+                  className="mt-0.5 size-4 shrink-0 accent-primary-500 cursor-pointer"
+                />
                 <div>
-                  <span className="font-semibold text-white" style={{ color: '#FFFFFF' }}>{t("analytics")}:</span> 
+                  <span className="font-semibold text-white" style={{ color: '#FFFFFF' }}>{t("analytics")}:</span>
                   {" "}{t("analyticsDescription")}
                 </div>
-              </div>
+              </label>
             </div>
 
             {/* Action Buttons */}
@@ -114,11 +129,18 @@ export function CookieConsent() {
                 {t("acceptAll")}
               </ShimmerButton>
               <button
-                onClick={handleDecline}
+                onClick={handleOnlyEssential}
                 className="flex-1 h-11 px-6 text-sm font-bold border-2 border-neutral-300 rounded-full bg-white !text-[#0F0F0F] hover:bg-neutral-100 hover:border-neutral-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-all duration-200"
                 style={{ color: '#0F0F0F' }}
               >
                 {t("onlyEssential")}
+              </button>
+              <button
+                onClick={handleDecline}
+                className="flex-1 h-11 px-6 text-sm font-bold border-2 border-neutral-300 rounded-full bg-white !text-[#0F0F0F] hover:bg-neutral-100 hover:border-neutral-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-all duration-200"
+                style={{ color: '#0F0F0F' }}
+              >
+                {t("rejectAll")}
               </button>
             </div>
           </div>

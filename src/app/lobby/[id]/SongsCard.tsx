@@ -6,7 +6,7 @@ import { MagicCard } from "@/components/ui/magic-card"
 import { ShimmerButton } from "@/components/ui/shimmer-button"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
-import { useRouter, useSearchParams } from "next/navigation"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
 interface Participant {
   id: string
@@ -61,6 +61,7 @@ interface SongsCardProps {
   ratings: Rating[]
   currentUserId: string
   isGameFinished?: boolean
+  locale: string
 }
 
 /**
@@ -75,11 +76,14 @@ export function SongsCard({
   ratings,
   currentUserId,
   isGameFinished = false,
+  locale,
 }: SongsCardProps) {
   const t = useTranslations("lobby")
   const tGame = useTranslations("game")
   const tCommon = useTranslations("common")
+  const tDashboard = useTranslations("dashboard")
   const router = useRouter()
+  const pathname = usePathname()
   const searchParams = useSearchParams()
   
   // Initialize selectedRound from URL parameter if present, otherwise default to 1
@@ -106,6 +110,7 @@ export function SongsCard({
   const [isSubmittingRating, setIsSubmittingRating] = useState(false)
   const [isSpotifyLinked, setIsSpotifyLinked] = useState(false)
   const [isCheckingSpotify, setIsCheckingSpotify] = useState(true)
+  const [spotifyLinkArmed, setSpotifyLinkArmed] = useState(false)
   const [isPlayingAll, setIsPlayingAll] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -140,6 +145,35 @@ export function SongsCard({
 
     checkSpotifyStatus()
   }, [])
+
+  // After Spotify OAuth, land on lobby with ?spotify_linked=true — refresh link state and strip params
+  useEffect(() => {
+    if (searchParams.get("spotify_linked") !== "true") return
+
+    const syncAfterOAuth = async () => {
+      try {
+        const response = await fetch("/api/spotify/status")
+        if (response.ok) {
+          const data = await response.json()
+          setIsSpotifyLinked(data.linked || false)
+        }
+      } catch (error) {
+        console.error("Error checking Spotify status after OAuth:", error)
+      } finally {
+        setIsCheckingSpotify(false)
+      }
+    }
+
+    void syncAfterOAuth()
+    setSpotifyLinkArmed(false)
+
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete("spotify_linked")
+    params.delete("spotify_error")
+    const q = params.toString()
+    const nextPath = q ? `${pathname}?${q}` : pathname
+    router.replace(nextPath)
+  }, [searchParams, pathname, router])
 
   // Get songs for selected round
   const roundSongs = songs.filter((song) => song.roundNumber === selectedRound)
@@ -416,7 +450,7 @@ export function SongsCard({
         } else if (data.error?.code === 'NO_ACTIVE_DEVICE') {
           alert('❌ No active Spotify device found.\n\nPlease open Spotify on your phone, computer, or any device and try again.')
         } else if (data.error?.code === 'SPOTIFY_NOT_LINKED') {
-          alert('❌ Spotify account not linked.\n\nPlease link your Spotify account in settings.')
+          alert(`❌ Spotify account not linked.\n\n${t("spotifyLinkUsePromptBelow")}`)
           setIsSpotifyLinked(false)
         } else {
           alert(`❌ ${data.error?.message || 'Failed to start playback. Please try again.'}`)
@@ -430,22 +464,13 @@ export function SongsCard({
     }
   }
 
-  // Handle navigation to Spotify link in settings
   const handleLinkSpotify = () => {
-    // Get locale from cookie or default to 'de'
-    const getLocale = () => {
-      if (typeof document !== 'undefined') {
-        const cookies = document.cookie.split(';')
-        const localeCookie = cookies.find(c => c.trim().startsWith('NEXT_LOCALE='))
-        if (localeCookie) {
-          return localeCookie.split('=')[1] || 'de'
-        }
-      }
-      return 'de'
+    if (!spotifyLinkArmed) {
+      setSpotifyLinkArmed(true)
+      return
     }
-    
-    const locale = getLocale()
-    router.push(`/${locale}/settings`)
+    const returnTo = `/${locale}/lobby/${lobby.id}`
+    window.location.href = `/api/spotify/auth?return_to=${encodeURIComponent(returnTo)}`
   }
 
   return (
@@ -457,30 +482,29 @@ export function SongsCard({
     >
       <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
         <Music className="size-5 md:size-6 text-primary-500" />
-        <h2 className="text-xl md:text-2xl font-bold !text-[#0F0F0F]" style={{ color: '#0F0F0F' }}>
+        <h2 className="text-xl md:text-2xl font-bold text-neutral-900">
           {tGame("song")}s
         </h2>
       </div>
 
-      {/* Round Tabs */}
+      {/* Round Tabs — segmented control */}
       <div className="mb-6">
-        <div className="flex flex-wrap gap-2 border-b border-neutral-300 pb-2">
+        <div className="inline-flex items-center gap-1 bg-neutral-200 rounded-full p-1 flex-wrap">
           {Array.from({ length: lobby.maxRounds }, (_, i) => i + 1).map((round) => {
             const roundStatus = getRoundStatus(round)
             const isActive = selectedRound === round
             const showIndicator = hasRatedAnySong && roundStatus.hasUnratedSongs && !isGameFinished
-            
+
             return (
               <button
                 key={round}
                 onClick={() => handleRoundChange(round)}
                 className={cn(
-                  "relative px-4 py-2 text-sm md:text-base font-medium rounded-t-lg transition-all duration-200",
+                  "relative px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
                   isActive
-                    ? "bg-primary-500 text-white shadow-md"
-                    : "bg-neutral-100 !text-[#4B4B4B] hover:bg-neutral-200"
+                    ? "bg-primary-500 text-white shadow-sm"
+                    : "text-neutral-500 hover:text-neutral-700"
                 )}
-                style={!isActive ? { color: '#4B4B4B' } : undefined}
               >
                 <span className="flex items-center gap-1.5">
                   <span>{t("round")} {round}</span>
@@ -490,9 +514,6 @@ export function SongsCard({
                     </span>
                   )}
                 </span>
-                {isActive && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white" />
-                )}
               </button>
             )
           })}
@@ -534,20 +555,20 @@ export function SongsCard({
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b border-neutral-300">
-              <th className="text-left py-2 px-2 md:px-4 text-xs md:text-sm font-medium !text-[#4B4B4B] w-12 md:w-auto" style={{ color: '#4B4B4B' }}>
+              <th className="text-left py-2 px-2 md:px-4 text-xs md:text-sm font-medium text-neutral-500 w-12 md:w-auto">
                 {tGame("users")}
               </th>
-              <th className="text-left py-2 px-2 md:px-6 text-xs md:text-sm font-medium !text-[#4B4B4B]" style={{ color: '#4B4B4B' }}>
+              <th className="text-left py-2 px-2 md:px-6 text-xs md:text-sm font-medium text-neutral-500">
                 {tGame("song")}
               </th>
-              <th className="text-center py-2 px-2 md:px-4 text-xs md:text-sm font-medium !text-[#4B4B4B] w-16 md:w-24" style={{ color: '#4B4B4B' }}>
+              <th className="text-center py-2 px-2 md:px-4 text-xs md:text-sm font-medium text-neutral-500 w-16 md:w-24">
                 <span className="sr-only md:not-sr-only">{t("rateSong")}</span>
                 <Star className="size-4 mx-auto md:hidden" />
               </th>
-              <th className="text-center py-2 px-2 md:px-4 text-xs md:text-sm font-medium !text-[#4B4B4B] w-20 md:w-32 hidden sm:table-cell" style={{ color: '#4B4B4B' }}>
+              <th className="text-center py-2 px-2 md:px-4 text-xs md:text-sm font-medium text-neutral-500 w-20 md:w-32 hidden sm:table-cell">
                 {t("averageRating")}
               </th>
-              <th className="text-center py-2 px-2 md:px-4 text-xs md:text-sm font-medium !text-[#4B4B4B] w-16 md:w-24" style={{ color: '#4B4B4B' }}>
+              <th className="text-center py-2 px-2 md:px-4 text-xs md:text-sm font-medium text-neutral-500 w-16 md:w-24">
                 <span className="sr-only md:not-sr-only">{t("actions")}</span>
                 <Play className="size-4 mx-auto md:hidden" />
               </th>
@@ -595,7 +616,7 @@ export function SongsCard({
                         </div>
                       )}
                       {/* Username only visible on desktop */}
-                      <span className="hidden md:inline text-xs md:text-sm font-medium !text-[#0F0F0F]" style={{ color: '#0F0F0F' }}>
+                      <span className="hidden md:inline text-xs md:text-sm font-medium text-neutral-900">
                         {row.participant.name}
                       </span>
                     </div>
@@ -607,7 +628,7 @@ export function SongsCard({
                       // Song exists - show details with edit/delete buttons
                       <div className="flex items-center gap-3">
                         {isLoadingTrack ? (
-                          <div className="flex items-center gap-2 text-xs md:text-sm !text-[#6B6B6B]" style={{ color: '#6B6B6B' }}>
+                          <div className="flex items-center gap-2 text-xs md:text-sm text-neutral-400">
                             <Loader2 className="size-4 animate-spin" />
                             <span>Lädt...</span>
                           </div>
@@ -623,16 +644,16 @@ export function SongsCard({
                             )}
                             <div className="flex-1 min-w-0 max-w-[140px] sm:max-w-xs md:max-w-sm">
                               {/* Song Title - Show on desktop, truncate on mobile */}
-                              <div className="font-medium text-xs md:text-sm !text-[#0F0F0F] truncate md:line-clamp-2" style={{ color: '#0F0F0F' }}>
+                              <div className="font-medium text-xs md:text-sm text-neutral-900 truncate md:line-clamp-2">
                                 {track.name}
                               </div>
                               {/* Artist Names - Always truncate for compact layout */}
-                              <div className="text-xs !text-[#6B6B6B] truncate" style={{ color: '#6B6B6B' }}>
+                              <div className="text-xs text-neutral-400 truncate">
                                 {track.artists.map((a) => a.name).join(", ")}
                               </div>
                               {/* Duration */}
                               {track.duration_ms && (
-                                <div className="text-xs !text-[#9A9A9A] mt-0.5" style={{ color: '#9A9A9A' }}>
+                                <div className="text-xs text-neutral-500 mt-0.5">
                                   {formatDuration(track.duration_ms)}
                                 </div>
                               )}
@@ -694,11 +715,11 @@ export function SongsCard({
                   {/* Average Rating - Hidden on small screens */}
                   <td className="py-3 px-2 md:px-4 text-center w-20 md:w-32 hidden sm:table-cell align-middle">
                     {row.averageRating !== null ? (
-                      <span className="text-base md:text-lg font-medium !text-[#0F0F0F]" style={{ color: '#0F0F0F' }}>
+                      <span className="text-base md:text-lg font-medium text-neutral-900">
                         {row.averageRating.toFixed(1)} / 10
                       </span>
                     ) : (
-                      <span className="text-xs md:text-sm !text-[#9A9A9A]" style={{ color: '#9A9A9A' }}>
+                      <span className="text-xs md:text-sm text-neutral-500">
                         -
                       </span>
                     )}
@@ -714,7 +735,7 @@ export function SongsCard({
                           <>
                             <button
                               onClick={() => handleEditSong(row.participant.id)}
-                              className="hidden md:block p-1.5 text-neutral-600 hover:text-primary-500 hover:bg-primary-50 rounded transition-colors"
+                              className="hidden md:block p-1.5 text-neutral-500 hover:text-primary-500 hover:bg-primary-500/10 rounded transition-colors"
                               aria-label={t("editSong")}
                               title={t("editSong")}
                             >
@@ -723,7 +744,7 @@ export function SongsCard({
                             <button
                               onClick={() => handleDeleteSong(row.song!.id, row.song!.spotifyTrackId)}
                               disabled={deletingSongId === row.song!.id}
-                              className="hidden md:block p-1.5 text-neutral-600 hover:text-[var(--color-error)] hover:bg-[var(--color-error)]/10 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="hidden md:block p-1.5 text-neutral-500 hover:text-[var(--color-error)] hover:bg-[var(--color-error)]/10 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                               aria-label={t("deleteSong")}
                               title={t("deleteSong")}
                             >
@@ -763,34 +784,45 @@ export function SongsCard({
         </table>
       </div>
 
-      {/* Spotify Link Prompt - OUTSIDE overflow container - Show when Spotify is NOT linked (even if not all songs present yet) */}
+      {/* Spotify Link Prompt — compact inline strip */}
       {mounted && roundSongs.length > 0 && !isSpotifyLinked && !isCheckingSpotify && (
-        <div className="mt-6 p-4 md:p-6 bg-gradient-to-r from-accent-spotify/10 to-accent-spotify/5 border border-accent-spotify/30 rounded-lg">
-          <div className="flex flex-col items-center gap-3 text-center">
-            <ShimmerButton
-              onClick={handleLinkSpotify}
-              background="var(--color-accent-spotify)"
-              shimmerColor="var(--color-neutral-900)"
-              borderRadius="9999px"
-              className="px-6 py-2.5 flex items-center justify-center gap-2 shadow-md w-full sm:w-auto max-w-xs"
+        <div className="mt-4 flex items-center justify-between gap-3 px-3 py-2.5 bg-accent-spotify/10 border border-accent-spotify/20 rounded-lg">
+          <div className="flex items-center gap-2 min-w-0">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="shrink-0 text-accent-spotify"
             >
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                width="20" 
-                height="20" 
-                viewBox="0 0 24 24" 
-                fill="currentColor"
-                className="shrink-0"
+              <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+            </svg>
+            <span className="text-xs text-neutral-500 truncate">
+              {t("spotifyPremiumQueueHint")}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            {spotifyLinkArmed && (
+              <button
+                type="button"
+                onClick={() => setSpotifyLinkArmed(false)}
+                className="text-xs text-neutral-500 hover:text-neutral-700 transition-colors"
               >
-                <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
-              </svg>
-              <span className="font-semibold text-sm md:text-base whitespace-nowrap">
-                Link Spotify
-              </span>
-            </ShimmerButton>
-            <p className="text-xs text-neutral-500">
-              Premium account required for queue playback
-            </p>
+                {tCommon("cancel")}
+              </button>
+            )}
+            <button
+              onClick={handleLinkSpotify}
+              className={cn(
+                "text-xs font-semibold px-3 py-1.5 rounded-full transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
+                spotifyLinkArmed
+                  ? "bg-accent-spotify text-white animate-pulse"
+                  : "bg-accent-spotify/20 text-accent-spotify hover:bg-accent-spotify/30"
+              )}
+            >
+              {spotifyLinkArmed ? t("spotifyLinkTapAgain") : tDashboard("linkSpotify")}
+            </button>
           </div>
         </div>
       )}
@@ -814,7 +846,7 @@ export function SongsCard({
               </h3>
               <button
                 onClick={handleCloseRating}
-                className="p-1.5 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded transition-colors"
+                className="p-1.5 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded transition-colors"
                 aria-label={tCommon("close")}
               >
                 <X className="size-5" />
@@ -842,7 +874,7 @@ export function SongsCard({
             {/* Current Rating Display */}
             {currentRating && (
               <div className="text-center mb-4">
-                <p className="text-sm text-neutral-600">
+                <p className="text-sm text-neutral-500">
                   {t("yourRating")}: <span className="font-semibold text-primary-600">{currentRating}/10</span>
                 </p>
               </div>

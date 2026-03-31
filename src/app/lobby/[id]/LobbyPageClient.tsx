@@ -30,6 +30,8 @@ interface LobbyPageClientProps {
   participants: Participant[]
   currentUserId: string
   isViewer?: boolean
+  /** URL locale segment (e.g. de) for Spotify OAuth return path */
+  locale: string
 }
 
 /**
@@ -41,6 +43,7 @@ export function LobbyPageClient({
   participants: initialParticipants,
   currentUserId,
   isViewer = false,
+  locale,
 }: LobbyPageClientProps) {
   const router = useRouter()
   const t = useTranslations("common")
@@ -177,21 +180,21 @@ export function LobbyPageClient({
         {/* Back Button */}
         <button
           onClick={handleBackToDashboard}
-          className="flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-900 transition-colors duration-200 mb-4 group"
+          className="flex items-center gap-2 text-sm text-neutral-700 hover:text-neutral-900 border border-neutral-300 hover:border-neutral-400 rounded-full px-3 py-1.5 transition-all duration-200 group w-fit focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           aria-label={t("back")}
         >
-          <ArrowLeft className="size-4 transition-transform duration-200 group-hover:-translate-x-1" />
+          <ArrowLeft className="size-4 transition-transform duration-200 group-hover:-translate-x-0.5" />
           <span>{t("back")} {tDashboard("title")}</span>
         </button>
 
         {/* Header */}
         <div className="text-center">
           {isViewer && (
-            <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">
-              <h3 className="text-lg font-bold text-yellow-800 mb-1">
+            <div className="mb-6 p-4 bg-yellow-400/10 border border-yellow-400/30 rounded-xl animate-in fade-in slide-in-from-top-4 duration-500">
+              <h3 className="text-base font-semibold text-yellow-400 mb-1">
                 ⚠️ {tLobby("tooLateTitle")}
               </h3>
-              <p className="text-sm text-yellow-700">
+              <p className="text-sm text-neutral-500">
                 {tLobby("tooLateDescription")}
               </p>
             </div>
@@ -202,14 +205,14 @@ export function LobbyPageClient({
                 🎮 {tLobby("gameResults")} 🎮
               </h1>
               {leaderboard.length > 0 && (
-                <h2 
+                <h2
                   className="text-2xl md:text-3xl font-bold mb-2 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 bg-clip-text text-transparent"
                   style={{ fontFamily: "'Pacifico', cursive" }}
                 >
                   🏆 Congratulations, {leaderboard[0].name}! 🏆
                 </h2>
               )}
-              <p className="text-sm md:text-base text-neutral-600">
+              <p className="text-sm md:text-base text-neutral-500">
                 {lobby.category || "Alle Kategorien"} • {lobby.maxRounds} Runden
               </p>
             </>
@@ -218,7 +221,7 @@ export function LobbyPageClient({
               <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-2">
                 Lobby
               </h1>
-              <p className="text-sm md:text-base text-neutral-600">
+              <p className="text-sm md:text-base text-neutral-500">
                 {lobby.category || "Alle Kategorien"} • {lobby.maxRounds} Runden
               </p>
             </>
@@ -251,6 +254,7 @@ export function LobbyPageClient({
               ratings={ratings}
               currentUserId={currentUserId}
               isGameFinished={isGameFinished}
+              locale={locale}
             />
           </div>
 

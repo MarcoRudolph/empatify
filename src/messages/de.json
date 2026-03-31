@@ -157,7 +157,10 @@
     "searchShowMore": "Mehr Ergebnisse anzeigen",
     "searchNoResults": "Keine Songs gefunden für \"{query}\".",
     "tooLateTitle": "Du bist leider zu spät",
-    "tooLateDescription": "Dieses Spiel ist bereits beendet. Du kannst dir aber die Ergebnisse und den Gewinner ansehen."
+    "tooLateDescription": "Dieses Spiel ist bereits beendet. Du kannst dir aber die Ergebnisse und den Gewinner ansehen.",
+    "spotifyLinkTapAgain": "Nochmal tippen, um dich bei Spotify anzumelden",
+    "spotifyPremiumQueueHint": "Für die Wiedergabe aller Songs in der Warteschlange ist Spotify Premium nötig",
+    "spotifyLinkUsePromptBelow": "Nutze unten „Spotify verknüpfen“, um dein Konto zu verbinden."
   },
   "game": {
     "round": "Runde",
@@ -288,6 +291,7 @@
     "analyticsDescription": "Nutzungsstatistiken, Performance-Tracking (optional)",
     "acceptAll": "Alle akzeptieren",
     "onlyEssential": "Nur essenzielle",
+    "rejectAll": "Alle ablehnen",
     "decline": "Ablehnen"
   },
   "privacy": {

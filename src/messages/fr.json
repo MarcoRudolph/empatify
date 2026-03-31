@@ -153,7 +153,10 @@
     "searchShowMore": "Afficher plus de résultats",
     "searchNoResults": "Aucune chanson trouvée pour \"{query}\".",
     "tooLateTitle": "Malheureusement, vous arrivez trop tard",
-    "tooLateDescription": "Ce jeu est déjà terminé. Mais vous pouvez toujours consulter les résultats et le gagnant."
+    "tooLateDescription": "Ce jeu est déjà terminé. Mais vous pouvez toujours consulter les résultats et le gagnant.",
+    "spotifyLinkTapAgain": "Appuyez à nouveau pour vous connecter à Spotify",
+    "spotifyPremiumQueueHint": "Un compte Spotify Premium est requis pour la file d’attente",
+    "spotifyLinkUsePromptBelow": "Utilisez « Lier Spotify » ci-dessous pour connecter votre compte."
   },
   "game": {
     "round": "Tour",
@@ -280,6 +283,7 @@
     "analyticsDescription": "Statistiques d'utilisation, suivi des performances (facultatif)",
     "acceptAll": "Tout accepter",
     "onlyEssential": "Seulement essentiels",
+    "rejectAll": "Tout refuser",
     "decline": "Refuser"
   },
   "privacy": {

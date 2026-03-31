@@ -91,18 +91,33 @@ export async function GET(request: NextRequest) {
   }
 
   // Handle PKCE flow (code parameter)
-  // Code verifier lives in the browser (localStorage); do not exchange on the server.
-  // Redirect to a client page so exchangeCodeForSession runs where the verifier is available.
+  // With @supabase/ssr, createBrowserClient stores the code verifier in cookies (not localStorage),
+  // so the verifier is available here and we can exchange the code server-side directly.
   if (code) {
-    const clientCallbackUrl = new URL(`/${activeLocale}`, baseUrl)
-    clientCallbackUrl.searchParams.set("code", code)
-    if (next) clientCallbackUrl.searchParams.set("next", next)
-    console.log("🟡 PKCE: redirecting to client for code exchange:", {
-      locale: activeLocale,
-      next,
-      timestamp: new Date().toISOString(),
-    })
-    return NextResponse.redirect(clientCallbackUrl)
+    const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+
+    if (exchangeError) {
+      console.error("🔴 PKCE Code Exchange Error:", {
+        error: exchangeError,
+        timestamp: new Date().toISOString(),
+      })
+      const redirectParam = next ? `&redirect=${encodeURIComponent(next)}` : ""
+      return NextResponse.redirect(
+        new URL(
+          `/${activeLocale}/login?error=auth_failed&error_description=${encodeURIComponent(exchangeError.message)}${redirectParam}`,
+          baseUrl
+        )
+      )
+    }
+
+    if (data?.user) {
+      console.log("✅ PKCE code exchange successful, redirecting:", {
+        userId: data.user.id,
+        next,
+        timestamp: new Date().toISOString(),
+      })
+      return NextResponse.redirect(new URL(normalizeNextPath(next), baseUrl))
+    }
   }
 
   // Handle Magic Link flow (token_hash or token parameter)
