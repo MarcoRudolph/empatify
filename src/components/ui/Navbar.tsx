@@ -73,16 +73,6 @@ export function Navbar({ locale }: { locale: string }) {
             </Link>
           </div>
 
-          {/* Center - Dashboard Link */}
-          <div className="flex-1 flex justify-center">
-            <Link
-              href="/dashboard"
-              className="text-lg font-medium text-neutral-900 hover:text-primary-500 transition-colors duration-200"
-            >
-              {t("dashboard")}
-            </Link>
-          </div>
-
           {/* Right Side - Messages Icon + Language Picker + User Dropdown */}
           <div className="flex items-center gap-2">
             {/* Messages Icon */}

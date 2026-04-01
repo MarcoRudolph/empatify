@@ -92,9 +92,9 @@ export function LobbyList({ lobbies, user, locale }: LobbyListProps) {
         const hasLeaderboard = lobby.topPlayers?.length > 0 && lobby.status !== 'not_started';
 
         const medals = [
-          { emoji: '🥇', bg: 'bg-yellow-100', text: 'text-yellow-800' },
-          { emoji: '🥈', bg: 'bg-neutral-200', text: 'text-neutral-700' },
-          { emoji: '🥉', bg: 'bg-orange-100', text: 'text-orange-800' },
+          { rank: '1', nameClass: 'text-neutral-900 font-semibold' },
+          { rank: '2', nameClass: 'text-neutral-500 font-medium' },
+          { rank: '3', nameClass: 'text-neutral-400 font-medium' },
         ];
 
         return (
@@ -194,16 +194,13 @@ export function LobbyList({ lobbies, user, locale }: LobbyListProps) {
 
               {/* Row 4: leaderboard */}
               {hasLeaderboard && (
-                <div className="mt-3 pt-3 border-t border-neutral-200 flex items-center gap-2 flex-wrap">
-                  {lobby.topPlayers.map((player, index) => {
-                    const medal = medals[index] ?? { emoji: '', bg: 'bg-neutral-100', text: 'text-neutral-700' };
+                <div className="mt-3 pt-3 border-t border-neutral-200 flex items-center gap-4">
+                  {lobby.topPlayers.slice(0, 3).map((player, index) => {
+                    const medal = medals[index] ?? { rank: String(index + 1), nameClass: 'text-neutral-400 font-medium' };
                     return (
-                      <div
-                        key={player.userId}
-                        className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg ${medal.bg} min-h-[36px]`}
-                      >
-                        <span className="text-base leading-none">{medal.emoji}</span>
-                        <span className={`text-sm font-semibold ${medal.text} truncate max-w-[80px]`}>
+                      <div key={player.userId} className="inline-flex items-center gap-1.5 min-w-0">
+                        <span className="text-xs text-neutral-400 font-mono tabular-nums shrink-0">{medal.rank}</span>
+                        <span className={`text-sm ${medal.nameClass} truncate max-w-[90px]`}>
                           {player.name}
                         </span>
                       </div>

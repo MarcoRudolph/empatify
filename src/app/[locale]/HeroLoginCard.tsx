@@ -99,7 +99,7 @@ function HeroLoginCardInner() {
               disabled={isLoading || !email}
               className="w-full h-12 rounded-xl font-display font-black text-base transition-opacity duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               style={{
-                background: 'linear-gradient(135deg, #FF6B00 0%, #FF2D78 100%)',
+                background: 'linear-gradient(135deg, #7A2D00 0%, #7A0F38 100%)',
                 color: '#ffffff',
                 animation: 'glow-cta 2.4s ease-in-out infinite',
               }}
@@ -110,7 +110,7 @@ function HeroLoginCardInner() {
                   <span>Loading…</span>
                 </>
               ) : (
-                "Start to gamify your music →"
+                "Start to gamify your music"
               )}
             </button>
           </form>
