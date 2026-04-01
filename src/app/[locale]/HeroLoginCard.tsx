@@ -87,13 +87,22 @@ function HeroLoginCardInner() {
               required
               disabled={isLoading}
               placeholder="Type your email..."
-              className="w-full px-4 py-3 h-12 border-2 border-neutral-200 rounded-xl bg-white text-neutral-900 placeholder:text-neutral-400 text-base focus:outline-none focus:border-[#FF6B00] transition-all duration-200 disabled:opacity-50"
+              className="w-full px-4 py-3 h-12 rounded-xl text-base outline-none transition-all duration-200 disabled:opacity-50"
+              style={{
+                background: '#ffffff',
+                color: '#171717',
+                border: '2px solid #FF6B00',
+              }}
             />
             <button
               type="submit"
               disabled={isLoading || !email}
-              className="w-full h-12 rounded-xl font-display font-black text-base text-white bg-neutral-900 hover:bg-neutral-800 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              style={{ animation: 'glow-cta 2.4s ease-in-out infinite' }}
+              className="w-full h-12 rounded-xl font-display font-black text-base transition-opacity duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              style={{
+                background: 'linear-gradient(135deg, #FF6B00 0%, #FF2D78 100%)',
+                color: '#ffffff',
+                animation: 'glow-cta 2.4s ease-in-out infinite',
+              }}
             >
               {isLoading ? (
                 <>
@@ -101,7 +110,7 @@ function HeroLoginCardInner() {
                   <span>Loading…</span>
                 </>
               ) : (
-                "Gamify my music →"
+                "Start to gamify your music →"
               )}
             </button>
           </form>
@@ -129,7 +138,8 @@ function HeroLoginCardInner() {
             type="button"
             onClick={handleGoogle}
             disabled={isLoading}
-            className="w-full h-11 flex items-center justify-center gap-3 border-2 border-neutral-300 rounded-xl bg-neutral-100 hover:bg-neutral-200 transition-all duration-200 text-sm font-semibold text-neutral-900 disabled:opacity-50"
+            className="w-full h-11 flex items-center justify-center gap-3 rounded-xl text-sm font-semibold transition-all duration-200 disabled:opacity-50"
+            style={{ background: '#f5f5f5', color: '#171717', border: '1.5px solid #d4d4d4' }}
           >
             <svg className="size-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
