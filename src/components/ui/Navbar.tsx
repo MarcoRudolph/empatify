@@ -5,7 +5,6 @@ import { useRouter, usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { createClient } from "@/lib/supabase/client"
 import { User, Settings, LogOut, ChevronDown, ArrowLeft } from "lucide-react"
-import Image from "next/image"
 import { Link } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
 import { MessagesIcon } from "@/components/messaging/MessagesIcon"
@@ -68,19 +67,9 @@ export function Navbar({ locale }: { locale: string }) {
               </button>
             )}
             <Link href="/dashboard" className="flex items-center">
-              <Image
-                src="/img/landingpage_background_4K.png"
-                alt="Empatify"
-                width={120}
-                height={40}
-                className="h-10 w-auto object-contain"
-                priority
-                loading="eager"
-                quality={85}
-                sizes="(max-width: 768px) 100px, 120px"
-                placeholder="blur"
-                blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjQwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iNDAiIGZpbGw9IiMxQTFBMUEiLz48L3N2Zz4="
-              />
+              <span className="font-display text-xl font-black tracking-tight text-neutral-900 hover:text-primary-500 transition-colors duration-200">
+                empatify
+              </span>
             </Link>
           </div>
 

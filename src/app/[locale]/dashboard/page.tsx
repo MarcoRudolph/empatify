@@ -618,11 +618,11 @@ export default async function DashboardPage({
       <div className="relative z-10 max-w-container mx-auto px-6 pt-24 pb-12 md:pt-28 md:pb-20">
         {/* Header Section */}
         <div className="mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-neutral-900 mb-3">
+          <h1 className="font-display text-4xl md:text-5xl font-black tracking-tight text-neutral-900 mb-3">
             {t('title')}
           </h1>
           <p className="text-lg text-neutral-500 leading-relaxed">
-            {t('welcomeBack')}, {user.email?.split('@')[0]}!
+            {t('welcomeBack')}, <span className="font-semibold text-neutral-700">{user.email?.split('@')[0]}</span>
           </p>
         </div>
 
@@ -647,7 +647,7 @@ export default async function DashboardPage({
               gradientSize={400}
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-neutral-900">
+                <h2 className="font-display text-2xl font-black text-neutral-900 tracking-tight">
                   {t('lobbies')}
                 </h2>
                 {userLobbies.length > 0 && (
@@ -684,40 +684,40 @@ export default async function DashboardPage({
           <div className="space-y-8">
             {/* Mini Stats */}
             <MagicCard
-              className="p-8 rounded-2xl shadow-lg"
+              className="p-6 rounded-2xl shadow-lg"
               gradientFrom="var(--color-accent-blue)"
               gradientTo="var(--color-accent-blue)"
               gradientSize={300}
             >
-              <div className="flex items-center gap-3 mb-6">
-                <TrendingUp className="size-6 text-accent-blue" />
-                <h2 className="text-2xl font-bold text-neutral-900">
+              <div className="flex items-center gap-2.5 mb-5">
+                <TrendingUp className="size-5 text-accent-blue shrink-0" />
+                <h2 className="font-display text-lg font-black text-neutral-900 tracking-tight">
                   {t('miniStats')}
                 </h2>
               </div>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-sm text-neutral-500 mb-1">
-                    {t('gamesPlayed')}
-                  </p>
-                  <p className="text-3xl font-bold text-accent-blue">
+              <div className="grid grid-cols-3 divide-x divide-neutral-200">
+                <div className="text-center px-2">
+                  <p className="font-display text-4xl font-black text-accent-blue leading-none mb-1.5">
                     {miniStats.gamesPlayed}
                   </p>
-                </div>
-                <div>
-                  <p className="text-sm text-neutral-500 mb-1">
-                    {t('averageRating')}
+                  <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
+                    Spiele
                   </p>
-                  <p className="text-3xl font-bold text-accent-blue">
+                </div>
+                <div className="text-center px-2">
+                  <p className="font-display text-4xl font-black text-accent-blue leading-none mb-1.5">
                     {miniStats.averageRating.toFixed(1)}
                   </p>
-                </div>
-                <div>
-                  <p className="text-sm text-neutral-500 mb-1">
-                    {t('songsSuggested')}
+                  <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
+                    Ø Wertung
                   </p>
-                  <p className="text-3xl font-bold text-accent-blue">
+                </div>
+                <div className="text-center px-2">
+                  <p className="font-display text-4xl font-black text-accent-blue leading-none mb-1.5">
                     {miniStats.songsSuggested}
+                  </p>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
+                    Songs
                   </p>
                 </div>
               </div>
@@ -732,8 +732,8 @@ export default async function DashboardPage({
             >
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <Users className="size-6 text-primary-500" />
-                  <h2 className="text-2xl font-bold text-neutral-900">
+                  <Users className="size-5 text-primary-500" />
+                  <h2 className="font-display text-lg font-black text-neutral-900 tracking-tight">
                     {t('friends')}
                   </h2>
                 </div>
