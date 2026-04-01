@@ -154,14 +154,6 @@ export default async function LandingPage({
 
             {/* Left: copy */}
             <div className="flex-1 max-w-2xl">
-              {/* Badge */}
-              <div className="anim-fade-up anim-d1 inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-neutral-300 bg-neutral-100/50 backdrop-blur-sm mb-8">
-                <span className="size-2 rounded-full bg-accent-spotify animate-pulse shrink-0" />
-                <span className="text-xs font-semibold tracking-widest uppercase text-neutral-500">
-                  Multiplayer Music Game
-                </span>
-              </div>
-
               {/* Headline */}
               <h1 className="anim-fade-up anim-d2 font-display text-[clamp(3.5rem,8vw,7rem)] font-black leading-[0.92] tracking-tight mb-8">
                 {t('title')}
@@ -269,16 +261,18 @@ export default async function LandingPage({
           </p>
 
           {/* Second CTA */}
-          <Link href="/login">
-            <ShimmerButton
-              background="var(--color-primary-500)"
-              shimmerColor="var(--color-neutral-900)"
-              borderRadius="9999px"
-              className="font-bold text-base px-8 py-4 tracking-wide"
-            >
-              {tCommon('letsPlay')}
-            </ShimmerButton>
-          </Link>
+          <div className="flex justify-center">
+            <Link href="/login">
+              <ShimmerButton
+                background="var(--color-primary-500)"
+                shimmerColor="var(--color-neutral-900)"
+                borderRadius="9999px"
+                className="font-bold text-base px-8 py-4 tracking-wide"
+              >
+                {tCommon('letsPlay')}
+              </ShimmerButton>
+            </Link>
+          </div>
         </div>
       </section>
 

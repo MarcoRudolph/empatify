@@ -19,21 +19,38 @@ export const Footer: React.FC<{ locale: string }> = async ({ locale }) => {
 
   return (
     <footer className="relative border-t border-neutral-300 bg-neutral-75">
-      <div className="max-w-container mx-auto px-md py-2xl md:py-3xl">
-        <div className="rounded-2xl border border-neutral-300/70 bg-neutral-100/90 p-6 shadow-sm backdrop-blur-sm md:p-8">
-          <div className="mb-6 flex items-center justify-end md:mb-8">
-            <div className="inline-flex items-center gap-1 rounded-full border border-neutral-300 bg-neutral-200 p-1">
+      <div className="max-w-container mx-auto px-6 py-10 md:py-14">
+        <div className="rounded-2xl border border-neutral-300/70 bg-neutral-100/90 p-6 shadow-sm backdrop-blur-sm">
+
+          {/* Top row: brand + lang switcher */}
+          <div className="flex items-start justify-between gap-4 mb-5">
+            <div>
+              <h3 className="text-lg font-bold text-neutral-900 tracking-tight">
+                {t('businessName')}
+              </h3>
+              <p className="text-xs text-neutral-500 mt-0.5">
+                {t('developedBy')}{' '}
+                <a
+                  href="https://rudolpho-ai.de"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-primary-500 hover:text-primary-600 transition-colors duration-200"
+                >
+                  rudolpho-ai.de
+                </a>
+              </p>
+            </div>
+            <div className="inline-flex items-center gap-0.5 rounded-full border border-neutral-300 bg-neutral-200 p-1 shrink-0">
               {locales.map((lang) => {
                 const isActive = locale === lang;
-
                 return (
                   <a
                     key={lang}
                     href={`/${lang}`}
-                    className={`min-w-9 rounded-full px-2.5 py-1 text-center text-xs font-semibold tracking-tight transition-colors duration-200 ${
+                    className={`min-w-8 rounded-full px-2 py-1 text-center text-xs font-semibold tracking-tight transition-colors duration-200 ${
                       isActive
                         ? 'bg-accent-spotify text-neutral-900'
-                        : 'text-neutral-700 hover:bg-neutral-300 hover:text-neutral-900'
+                        : 'text-neutral-600 hover:bg-neutral-300 hover:text-neutral-900'
                     }`}
                     aria-label={`Switch language to ${lang.toUpperCase()}`}
                   >
@@ -44,94 +61,67 @@ export const Footer: React.FC<{ locale: string }> = async ({ locale }) => {
             </div>
           </div>
 
-          {/* Main Footer Content */}
-          <div className="grid gap-8 md:grid-cols-12 md:gap-10">
-            {/* Business Info */}
-            <div className="space-y-4 text-center md:col-span-5 md:text-left">
-              <h3 className="text-2xl md:text-3xl font-bold text-neutral-900 tracking-tight">
-                {t('businessName')}
-              </h3>
-              <p className="max-w-[36ch] mx-auto text-base md:text-lg text-neutral-700 leading-relaxed md:mx-0">
-                {t('description')}
+          {/* Description */}
+          <p className="text-sm text-neutral-600 leading-relaxed mb-6 max-w-xs">
+            {t('description')}
+          </p>
+
+          {/* Link columns — compact grid */}
+          <div className="grid grid-cols-2 gap-6 mb-6 md:flex md:gap-12">
+            {/* Service */}
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-neutral-400 mb-2.5">
+                {t('service.title')}
               </p>
-              <p className="text-sm text-neutral-500">
-                {t('developedBy')}{' '}
-                <a
-                  href="https://rudolpho-ai.de"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium text-primary-500 transition-colors duration-200 hover:text-primary-600"
-                >
-                  rudolpho-ai.de
-                </a>
-              </p>
+              <ul className="space-y-2">
+                <li>
+                  <Link
+                    href="/upgrade"
+                    className="text-sm text-neutral-700 hover:text-neutral-900 transition-colors duration-200"
+                  >
+                    Upgrade
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/documentation"
+                    className="text-sm text-neutral-700 hover:text-neutral-900 transition-colors duration-200"
+                  >
+                    {t('service.documentation')}
+                  </Link>
+                </li>
+              </ul>
             </div>
 
-            {/* Navigation Columns */}
-            <div className="grid grid-cols-1 gap-8 text-center md:col-span-7 md:grid-cols-2 md:gap-10 md:text-left">
-              {/* Service Links */}
-              <div>
-                <h4 className="mb-4 text-sm font-semibold uppercase tracking-tight text-neutral-500">
-                  {t('service.title')}
-                </h4>
-                <ul className="space-y-3">
-                  <li>
-                    <Link
-                      href="/pricing"
-                      className="inline-block text-neutral-700 transition-colors duration-200 hover:text-neutral-900"
-                    >
-                      {t('service.pricing')}
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/pro-features"
-                      className="inline-block text-neutral-700 transition-colors duration-200 hover:text-neutral-900"
-                    >
-                      {t('service.proFeatures')}
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/documentation"
-                      className="inline-block text-neutral-700 transition-colors duration-200 hover:text-neutral-900"
-                    >
-                      {t('service.documentation')}
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Legal Links */}
-              <div>
-                <h4 className="mb-4 text-sm font-semibold uppercase tracking-tight text-neutral-500">
-                  {t('legal.title')}
-                </h4>
-                <ul className="space-y-3">
-                  <li>
-                    <Link
-                      href="/impressum"
-                      className="inline-block text-neutral-700 transition-colors duration-200 hover:text-neutral-900"
-                    >
-                      {t('legal.imprint')}
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/datenschutz"
-                      className="inline-block text-neutral-700 transition-colors duration-200 hover:text-neutral-900"
-                    >
-                      {t('legal.privacy')}
-                    </Link>
-                  </li>
-                </ul>
-              </div>
+            {/* Legal */}
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-neutral-400 mb-2.5">
+                {t('legal.title')}
+              </p>
+              <ul className="space-y-2">
+                <li>
+                  <Link
+                    href="/impressum"
+                    className="text-sm text-neutral-700 hover:text-neutral-900 transition-colors duration-200"
+                  >
+                    {t('legal.imprint')}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/datenschutz"
+                    className="text-sm text-neutral-700 hover:text-neutral-900 transition-colors duration-200"
+                  >
+                    {t('legal.privacy')}
+                  </Link>
+                </li>
+              </ul>
             </div>
           </div>
 
           {/* Copyright */}
-          <div className="mt-8 border-t border-neutral-300/80 pt-5">
-            <p className="text-center text-sm text-neutral-500">{t('copyright')}</p>
+          <div className="border-t border-neutral-300/80 pt-4">
+            <p className="text-center text-xs text-neutral-400">{t('copyright')}</p>
           </div>
         </div>
       </div>
