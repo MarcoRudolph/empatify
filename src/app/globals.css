@@ -151,6 +151,27 @@ body {
   animation: float-bob 4s ease-in-out infinite;
 }
 
+/* Glow CTA button animation — primary-500 = #FF6B00 */
+@keyframes glow-cta {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(255,107,0,0.45), 0 0 28px rgba(255,107,0,0.22), inset 0 0 0 rgba(255,107,0,0);
+  }
+  50% {
+    box-shadow: 0 0 24px rgba(255,107,0,0.75), 0 0 56px rgba(255,107,0,0.40), inset 0 0 12px rgba(255,200,100,0.08);
+  }
+}
+.glow-cta {
+  animation: glow-cta 2.4s ease-in-out infinite;
+}
+
+/* Slow spin for decorative icons */
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+.spin-slow {
+  animation: spin-slow 10s linear infinite;
+}
+
 /* ── Magic UI Animations ─────────────────────────────────────────── */
 
 /* Magic UI Animations */

@@ -1,97 +1,47 @@
 import { getTranslations } from 'next-intl/server';
-import { Link } from '@/i18n/routing';
 import Footer from '@/components/ui/Footer';
-import { ShimmerButton } from '@/components/ui/shimmer-button';
 import { Users, Music2, Trophy } from 'lucide-react';
 import OAuthCallbackHandler from './OAuthCallbackHandler';
+import { HeroLoginCard } from './HeroLoginCard';
 
-/** Fake "Now Playing" card — explains the game at a glance */
-function NowPlayingCard() {
+/** Flower-of-life derived icon — 7 overlapping circles, stroke only */
+function FlowerIcon({ className }: { className?: string }) {
   return (
-    <div className="float-card w-72 xl:w-80">
-      {/* Main card */}
-      <div className="relative bg-neutral-100 border border-neutral-300 rounded-2xl p-5 shadow-2xl">
-        {/* Header */}
-        <div className="flex items-center gap-2 mb-5">
-          <span className="relative flex size-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-500 opacity-75" />
-            <span className="relative inline-flex rounded-full size-2 bg-primary-500" />
-          </span>
-          <span className="text-[10px] tracking-widest uppercase font-semibold text-neutral-500">Now Playing</span>
-        </div>
+    <svg
+      viewBox="3 2 34 36"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+    >
+      {/* center */}
+      <circle cx="20" cy="20" r="9" strokeOpacity="0.9" />
+      {/* top */}
+      <circle cx="20" cy="11" r="9" strokeOpacity="0.65" />
+      {/* top-right */}
+      <circle cx="27.8" cy="15.5" r="9" strokeOpacity="0.65" />
+      {/* bottom-right */}
+      <circle cx="27.8" cy="24.5" r="9" strokeOpacity="0.65" />
+      {/* bottom */}
+      <circle cx="20" cy="29" r="9" strokeOpacity="0.65" />
+      {/* bottom-left */}
+      <circle cx="12.2" cy="24.5" r="9" strokeOpacity="0.65" />
+      {/* top-left */}
+      <circle cx="12.2" cy="15.5" r="9" strokeOpacity="0.65" />
+    </svg>
+  );
+}
 
-        {/* Track */}
-        <div className="flex items-center gap-3 mb-5">
-          <div className="size-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-900 flex items-center justify-center text-xl shrink-0 shadow-lg">
-            🎵
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="font-semibold text-neutral-900 text-sm truncate">Blinding Lights</div>
-            <div className="text-neutral-500 text-xs">The Weeknd</div>
-          </div>
-          {/* Music bars */}
-          <div className="flex items-end gap-0.5 h-5 shrink-0">
-            {[40, 100, 65, 85, 45].map((h, i) => (
-              <div
-                key={i}
-                className="w-1 bg-primary-500 rounded-full music-bar"
-                style={{ height: `${h}%`, animationDelay: `${i * 0.15}s` }}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div className="h-px bg-neutral-300 mb-4" />
-
-        {/* Rating row */}
-        <div className="mb-4">
-          <div className="text-[10px] tracking-widest uppercase text-neutral-500 mb-2">Rate this song</div>
-          <div className="flex gap-1.5">
-            {[7, 8, 9, 10].map((n) => (
-              <div
-                key={n}
-                className={`flex-1 py-2 rounded-lg text-center text-xs font-bold transition-colors ${
-                  n === 9
-                    ? 'bg-primary-500 text-white shadow-md shadow-primary-500/30'
-                    : 'bg-neutral-200 text-neutral-500'
-                }`}
-              >
-                {n}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Average */}
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-neutral-500">Group average</span>
-          <span className="text-sm font-bold text-neutral-900">8.4 / 10</span>
-        </div>
-        <div className="h-1.5 bg-neutral-200 rounded-full overflow-hidden">
-          <div className="h-full rounded-full bg-gradient-to-r from-primary-500 to-primary-600" style={{ width: '84%' }} />
-        </div>
-
-        {/* Friend ratings */}
-        <div className="flex items-center gap-3 mt-4 pt-4 border-t border-neutral-300">
-          {[
-            { initials: 'LM', rating: 9, color: 'bg-accent-spotify' },
-            { initials: 'TK', rating: 8, color: 'bg-accent-blue' },
-            { initials: 'SR', rating: 8, color: 'bg-primary-500' },
-          ].map(({ initials, rating, color }) => (
-            <div key={initials} className="flex items-center gap-1.5">
-              <div className={`size-6 rounded-full ${color} flex items-center justify-center text-[9px] font-bold text-white`}>
-                {initials}
-              </div>
-              <span className="text-xs font-semibold text-neutral-700">{rating}</span>
-            </div>
-          ))}
-          <span className="ml-auto text-[10px] text-neutral-500">3/4 rated</span>
-        </div>
-      </div>
-
-      {/* Stack shadow card */}
-      <div className="absolute -bottom-2 -right-2 w-full h-full bg-neutral-200 border border-neutral-300/60 rounded-2xl -z-10 rotate-[3deg]" />
+/** Five star rating display */
+function FiveStars() {
+  return (
+    <div className="flex items-center gap-0.5">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <svg key={i} className="size-3.5 fill-yellow-400 text-yellow-400" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+        </svg>
+      ))}
     </div>
   );
 }
@@ -118,7 +68,7 @@ export default async function LandingPage({
   }
 
   const t = await getTranslations('landing');
-  const tCommon = await getTranslations('common');
+  const tLobby = await getTranslations('lobby');
 
   const steps = [
     { num: '01', icon: Users,  text: t('howTo.step1') },
@@ -126,84 +76,109 @@ export default async function LandingPage({
     { num: '03', icon: Trophy, text: t('howTo.step3') },
   ];
 
+  const bullets = [
+    { emoji: '🎵', text: 'Listen to music → rate songs of your friends' },
+    { emoji: '✨', text: 'Getting new music inspiration' },
+    { emoji: '🤝', text: 'Bond with your friends' },
+    { emoji: '🧠', text: 'Choose songs wisely with empathy' },
+  ];
+
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-900">
 
       {/* ── HERO ────────────────────────────────────────────────────── */}
-      <section className="relative min-h-screen flex items-center overflow-hidden">
+      <section className="relative min-h-screen flex flex-col overflow-hidden">
 
         {/* Background layers */}
         <div className="hero-scroll-out absolute inset-0">
-          {/* Photo */}
           <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
             style={{ backgroundImage: 'url(/img/landingpage_background_4K.png)' }}
           />
-          {/* Dark vignette */}
-          <div className="absolute inset-0 bg-gradient-to-r from-neutral-50/95 via-neutral-50/80 to-neutral-50/40" />
-          <div className="absolute inset-0 bg-gradient-to-t from-neutral-50 via-transparent to-neutral-50/60" />
+          <div className="absolute inset-0 bg-gradient-to-r from-neutral-50/95 via-neutral-50/85 to-neutral-50/50" />
+          <div className="absolute inset-0 bg-gradient-to-t from-neutral-50 via-transparent to-neutral-50/70" />
         </div>
 
         {/* Glow orbs */}
         <div className="absolute top-1/3 left-0 w-[500px] h-[500px] rounded-full bg-primary-500/15 blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/3 w-96 h-96 rounded-full bg-accent-spotify/10 blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-accent-spotify/10 blur-[100px] pointer-events-none" />
 
-        {/* Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-10 w-full py-28 md:py-36">
-          <div className="flex items-center justify-between gap-16">
-
-            {/* Left: copy */}
-            <div className="flex-1 max-w-2xl">
-              {/* Headline */}
-              <h1 className="anim-fade-up anim-d2 font-display text-[clamp(3.5rem,8vw,7rem)] font-black leading-[0.92] tracking-tight mb-8">
-                {t('title')}
-                <span className="block text-primary-500">.</span>
-              </h1>
-
-              {/* Subtext */}
-              <p className="anim-fade-up anim-d3 text-lg md:text-xl text-neutral-500 leading-relaxed max-w-lg mb-12">
-                {t('subtitle')}
-              </p>
-
-              {/* CTA */}
-              <div className="anim-fade-up anim-d4 flex items-center gap-4 flex-wrap">
-                <Link href="/login">
-                  <ShimmerButton
-                    background="var(--color-primary-500)"
-                    shimmerColor="var(--color-neutral-900)"
-                    borderRadius="9999px"
-                    className="font-bold text-base px-8 py-4 tracking-wide"
-                  >
-                    {tCommon('letsPlay')} →
-                  </ShimmerButton>
-                </Link>
-                <span className="text-sm text-neutral-500">
-                  Free · No account needed to join
-                </span>
-              </div>
+        {/* ── Top bar: brand only ───────────────────────────────────── */}
+        <div className="relative z-20 px-6 md:px-10 pt-6 md:pt-8">
+          <div className="flex items-center gap-2.5">
+            <div className="spin-slow text-primary-500 size-7 shrink-0">
+              <FlowerIcon className="size-7" />
             </div>
+            <span className="font-display text-xl font-black tracking-tight text-neutral-900">
+              empatify
+            </span>
+          </div>
+        </div>
 
-            {/* Right: mock card — desktop only */}
-            <div className="anim-fade-up anim-d5 hidden lg:block shrink-0">
-              <NowPlayingCard />
+        {/* ── Hero content ─────────────────────────────────────────── */}
+        <div className="relative z-10 flex-1 flex items-center">
+          <div className="max-w-7xl mx-auto px-6 md:px-10 w-full py-12 md:py-20">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-20">
+
+              {/* Left: copy */}
+              <div className="flex-1 max-w-xl">
+
+                {/* Heroic badge */}
+                <div className="anim-fade-up anim-d1 inline-flex flex-col items-start gap-1.5 mb-8">
+                  <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-neutral-900 text-white shadow-lg">
+                    {/* Shield-star icon */}
+                    <svg className="size-4 text-yellow-400 fill-yellow-400 shrink-0" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 1a.75.75 0 01.69.455l2.13 5.08 5.466.617a.75.75 0 01.424 1.295l-4.022 3.71.992 5.39a.75.75 0 01-1.096.793L10 15.433l-4.583 2.907a.75.75 0 01-1.096-.793l.992-5.39-4.022-3.71A.75.75 0 011.714 7.15l5.466-.617L9.31 1.455A.75.75 0 0110 1z" clipRule="evenodd"/>
+                    </svg>
+                    <span className="text-xs font-bold tracking-widest uppercase">#1 Game with Spotify</span>
+                  </div>
+                  <div className="pl-1">
+                    <FiveStars />
+                  </div>
+                </div>
+
+                {/* Headline */}
+                <h1 className="anim-fade-up anim-d2 font-display text-[clamp(3rem,7.5vw,6.5rem)] font-black leading-[0.92] tracking-tight mb-8">
+                  Gamify <span className="block">hanging</span>
+                  <span className="block">out<span className="text-primary-500">!</span></span>
+                </h1>
+
+                {/* Bullet list */}
+                <ul className="anim-fade-up anim-d3 space-y-3 mb-10">
+                  {bullets.map(({ emoji, text }) => (
+                    <li key={text} className="flex items-start gap-3">
+                      <span className="text-lg leading-none mt-0.5 shrink-0">{emoji}</span>
+                      <span className="text-base md:text-lg text-neutral-600 leading-snug">{text}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Login card on mobile (below bullets) */}
+                <div className="anim-fade-up anim-d4 lg:hidden">
+                  <HeroLoginCard />
+                </div>
+              </div>
+
+              {/* Right: login card — desktop */}
+              <div className="anim-fade-up anim-d4 hidden lg:block shrink-0 w-full max-w-[380px]">
+                <HeroLoginCard />
+              </div>
             </div>
           </div>
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-neutral-500 anim-fade-up anim-d5">
+        <div className="relative z-10 pb-8 flex flex-col items-center gap-2 text-neutral-400 anim-fade-up anim-d5">
           <span className="text-xs tracking-widest uppercase">Scroll</span>
-          <div className="w-px h-8 bg-gradient-to-b from-neutral-500 to-transparent" />
+          <div className="w-px h-8 bg-gradient-to-b from-neutral-400 to-transparent" />
         </div>
       </section>
 
       {/* ── HOW IT WORKS ────────────────────────────────────────────── */}
       <section className="py-28 md:py-36 relative overflow-hidden">
-        {/* Subtle background texture */}
         <div className="absolute inset-0 bg-gradient-to-b from-neutral-50 via-neutral-75 to-neutral-50 pointer-events-none" />
 
         <div className="relative max-w-7xl mx-auto px-6 md:px-10">
-          {/* Section label */}
           <div className="flex items-center gap-4 mb-6">
             <div className="h-px flex-1 max-w-[3rem] bg-neutral-300" />
             <span className="text-xs font-semibold tracking-widest uppercase text-neutral-500">
@@ -211,32 +186,23 @@ export default async function LandingPage({
             </span>
           </div>
 
-          {/* Section headline */}
           <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight mb-20 max-w-2xl">
             Three steps to{' '}
             <span className="text-primary-500">win</span>.
           </h2>
 
-          {/* Steps */}
           <div className="grid md:grid-cols-3 gap-12 md:gap-8 lg:gap-16">
             {steps.map(({ num, icon: Icon, text }, i) => (
               <div key={num} className="group relative">
-                {/* Connector line (between cards) */}
                 {i < 2 && (
                   <div className="hidden md:block absolute top-8 left-full w-full h-px bg-neutral-300 -z-10 translate-x-4" style={{ width: 'calc(100% - 2rem)' }} />
                 )}
-
-                {/* Number */}
                 <div className="font-display text-7xl md:text-8xl font-black text-neutral-200 leading-none mb-6 group-hover:text-primary-500/20 transition-colors duration-500 select-none">
                   {num}
                 </div>
-
-                {/* Icon pill */}
                 <div className="inline-flex items-center justify-center size-11 rounded-xl bg-primary-500/10 border border-primary-500/20 mb-5 group-hover:bg-primary-500/20 transition-colors duration-300">
                   <Icon className="size-5 text-primary-500" />
                 </div>
-
-                {/* Text */}
                 <p className="text-neutral-700 leading-relaxed text-base md:text-lg">
                   {text}
                 </p>
@@ -248,30 +214,25 @@ export default async function LandingPage({
 
       {/* ── ABOUT / QUOTE ───────────────────────────────────────────── */}
       <section className="py-28 md:py-36 bg-neutral-100 relative overflow-hidden">
-        {/* Glow accent */}
         <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary-500/8 blur-[80px] rounded-full pointer-events-none" />
 
         <div className="relative max-w-4xl mx-auto px-6 md:px-10 text-center">
-          {/* Quote mark */}
           <div className="font-display text-8xl font-black text-neutral-300 leading-none mb-4 select-none">"</div>
-
-          {/* Statement */}
-          <p className="text-2xl md:text-3xl lg:text-4xl font-medium text-neutral-700 leading-relaxed mb-16">
+          <p className="text-2xl md:text-3xl lg:text-4xl font-medium text-neutral-700 leading-relaxed mb-12">
             {t('about.description')}
           </p>
 
-          {/* Second CTA */}
-          <div className="flex justify-center">
-            <Link href="/login">
-              <ShimmerButton
-                background="var(--color-primary-500)"
-                shimmerColor="var(--color-neutral-900)"
-                borderRadius="9999px"
-                className="font-bold text-base px-8 py-4 tracking-wide"
-              >
-                {tCommon('letsPlay')}
-              </ShimmerButton>
-            </Link>
+          {/* Subtle brand repeat — no duplicate CTA button */}
+          <div className="flex items-center justify-center gap-3 text-neutral-400">
+            <div className="spin-slow text-primary-500/60 size-6">
+              <FlowerIcon className="size-6" />
+            </div>
+            <span className="font-display text-sm font-black tracking-widest uppercase text-neutral-400">
+              empatify
+            </span>
+            <div className="spin-slow text-primary-500/60 size-6" style={{ animationDirection: 'reverse' }}>
+              <FlowerIcon className="size-6" />
+            </div>
           </div>
         </div>
       </section>
