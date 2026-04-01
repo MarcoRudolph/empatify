@@ -59,7 +59,7 @@ function HeroLoginCardInner() {
   }
 
   return (
-    <div className="relative rounded-2xl border-4 border-white shadow-[0_8px_48px_rgba(0,0,0,0.18)] bg-white/96 backdrop-blur-md p-6 md:p-8 w-full">
+    <div className="relative rounded-2xl border-4 border-white shadow-[0_8px_48px_rgba(0,0,0,0.18)] bg-white p-6 md:p-8 w-full">
 
       {isSent ? (
         <div className="text-center py-6">
@@ -87,12 +87,13 @@ function HeroLoginCardInner() {
               required
               disabled={isLoading}
               placeholder="Type your email..."
-              className="w-full px-4 py-3 h-12 border-2 border-neutral-200 rounded-xl bg-neutral-50 text-neutral-900 placeholder:text-neutral-400 text-base focus:outline-none focus:border-primary-500 focus:bg-white transition-all duration-200 disabled:opacity-50"
+              className="w-full px-4 py-3 h-12 border-2 border-neutral-200 rounded-xl bg-white text-neutral-900 placeholder:text-neutral-400 text-base focus:outline-none focus:border-[#FF6B00] transition-all duration-200 disabled:opacity-50"
             />
             <button
               type="submit"
               disabled={isLoading || !email}
-              className="glow-cta w-full h-12 rounded-xl font-bold text-base text-white bg-[#FF6B00] hover:bg-[#E65F00] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2"
+              className="w-full h-12 rounded-xl font-display font-black text-base text-white bg-neutral-900 hover:bg-neutral-800 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              style={{ animation: 'glow-cta 2.4s ease-in-out infinite' }}
             >
               {isLoading ? (
                 <>
@@ -100,7 +101,7 @@ function HeroLoginCardInner() {
                   <span>Loading…</span>
                 </>
               ) : (
-                "Start to gamify your music"
+                "Gamify my music →"
               )}
             </button>
           </form>
@@ -128,7 +129,7 @@ function HeroLoginCardInner() {
             type="button"
             onClick={handleGoogle}
             disabled={isLoading}
-            className="w-full h-11 flex items-center justify-center gap-3 border-2 border-neutral-200 rounded-xl bg-white hover:bg-neutral-50 hover:border-neutral-300 transition-all duration-200 text-sm font-semibold text-neutral-700 disabled:opacity-50"
+            className="w-full h-11 flex items-center justify-center gap-3 border-2 border-neutral-300 rounded-xl bg-neutral-100 hover:bg-neutral-200 transition-all duration-200 text-sm font-semibold text-neutral-900 disabled:opacity-50"
           >
             <svg className="size-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

@@ -125,11 +125,7 @@ export default async function LandingPage({
 
                 {/* Heroic badge */}
                 <div className="anim-fade-up anim-d1 inline-flex flex-col items-start gap-1.5 mb-8">
-                  <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-neutral-900 text-white shadow-lg">
-                    {/* Shield-star icon */}
-                    <svg className="size-4 text-yellow-400 fill-yellow-400 shrink-0" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 1a.75.75 0 01.69.455l2.13 5.08 5.466.617a.75.75 0 01.424 1.295l-4.022 3.71.992 5.39a.75.75 0 01-1.096.793L10 15.433l-4.583 2.907a.75.75 0 01-1.096-.793l.992-5.39-4.022-3.71A.75.75 0 011.714 7.15l5.466-.617L9.31 1.455A.75.75 0 0110 1z" clipRule="evenodd"/>
-                    </svg>
+                  <div className="inline-flex items-center px-4 py-2 rounded-full bg-black text-white shadow-lg">
                     <span className="text-xs font-bold tracking-widest uppercase">#1 Game with Spotify</span>
                   </div>
                   <div className="pl-1">
@@ -148,7 +144,7 @@ export default async function LandingPage({
                   {bullets.map(({ emoji, text }) => (
                     <li key={text} className="flex items-start gap-3">
                       <span className="text-lg leading-none mt-0.5 shrink-0">{emoji}</span>
-                      <span className="text-base md:text-lg text-neutral-600 leading-snug">{text}</span>
+                      <span className="text-base md:text-lg text-neutral-500 font-medium leading-snug">{text}</span>
                     </li>
                   ))}
                 </ul>
