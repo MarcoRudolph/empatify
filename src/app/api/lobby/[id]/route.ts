@@ -286,6 +286,8 @@ export async function GET(
         maxRounds: lobby.maxRounds,
         category: lobby.category,
         gameMode: lobby.gameMode,
+        roundPrompts: lobby.roundPrompts ?? null,
+        isBlind: lobby.isBlind ?? false,
         createdAt: lobby.createdAt.toISOString(),
       },
       participants: participants.map((p) => ({

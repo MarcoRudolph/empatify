@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { rounds, category, gameMode, copyFromLobbyId } = body
+    const { rounds, category, gameMode, copyFromLobbyId, roundPrompts, isBlind } = body
 
     console.log("Received lobby creation request:", { rounds, category, gameMode, copyFromLobbyId })
 
@@ -69,6 +69,12 @@ export async function POST(request: NextRequest) {
       // Validate game mode (default to multi-device)
       lobbyGameMode = gameMode === "single-device" ? "single-device" : "multi-device"
     }
+
+    const lobbyRoundPrompts: string[] | null =
+      Array.isArray(roundPrompts) && roundPrompts.some(Boolean)
+        ? roundPrompts.map((p: string) => p?.trim() ?? "")
+        : null
+    const lobbyIsBlind = Boolean(isBlind)
 
     console.log("Processed values:", {
       maxRounds,
@@ -158,6 +164,8 @@ export async function POST(request: NextRequest) {
           category: lobbyCategory,
           maxRounds,
           gameMode: lobbyGameMode,
+          roundPrompts: lobbyRoundPrompts,
+          isBlind: lobbyIsBlind,
         })
         .returning()
       newLobby = result[0]
@@ -173,6 +181,8 @@ export async function POST(request: NextRequest) {
           hostId: userId,
           category: lobbyCategory,
           maxRounds,
+          roundPrompts: lobbyRoundPrompts,
+          isBlind: lobbyIsBlind,
         })
         .returning()
       newLobby = result[0]
@@ -267,6 +277,8 @@ export async function POST(request: NextRequest) {
           category: newLobby.category,
           maxRounds: newLobby.maxRounds,
           gameMode: newLobby.gameMode || lobbyGameMode,
+          roundPrompts: newLobby.roundPrompts ?? null,
+          isBlind: newLobby.isBlind ?? false,
           createdAt: newLobby.createdAt,
         },
       },
