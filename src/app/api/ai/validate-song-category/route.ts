@@ -42,26 +42,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Use cost-effective model (gpt-4o-mini or gpt-3.5-turbo)
+    // gpt-4o-mini: ~$0.15/1M input tokens — single-message format minimises cost
     const model = "gpt-4o-mini"
-    
-    // Improved prompt with context and more tolerance for genre overlaps
-    const systemPrompt = `Du bist ein Musik-Experte für ein Musikrate-Spiel. 
-Deine Aufgabe ist es zu bewerten, ob ein Song zur gewählten Spielkategorie passt.
-Wichtig: 
-- Genre-Überschneidungen und Subgenres sind normal und sollten akzeptiert werden
-- Wenn ein Song hauptsächlich oder teilweise zur Kategorie gehört, ist das ausreichend
-- Nur wenn der Song offensichtlich NICHT zur Kategorie passt, solltest du "Nein" sagen
-- Sei großzügig bei der Bewertung
 
-Antworte NUR mit "Ja" oder "Nein".`
+    // Minimal prompt: ~12 input tokens, 1 output token
+    // "yes" and "no" are reliable single tokens; avoids German "Nein" (2 tokens)
+    const userPrompt = `${category}? yes/no\n${songName}`
 
-    const userPrompt = `Song: "${songName}"
-Kategorie: "${category}"
-
-Passt dieser Song zur Kategorie?`
-
-    // Call OpenAI API
     const openAIResponse = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -70,18 +57,9 @@ Passt dieser Song zur Kategorie?`
       },
       body: JSON.stringify({
         model,
-        messages: [
-          {
-            role: "system",
-            content: systemPrompt,
-          },
-          {
-            role: "user",
-            content: userPrompt,
-          },
-        ],
-        max_tokens: 10, // Minimal tokens since we only expect "Ja" or "Nein"
-        temperature: 0.2, // Slightly less deterministic for better genre understanding
+        messages: [{ role: "user", content: userPrompt }],
+        max_tokens: 1,
+        temperature: 0,
       }),
     })
 
@@ -131,14 +109,13 @@ Passt dieser Song zur Kategorie?`
     const data = await openAIResponse.json()
     const responseText = data.choices?.[0]?.message?.content?.trim() || ""
 
-    // Parse response: "Ja" = valid, "Nein" = invalid
-    // Handle variations: "Ja", "ja", "Yes", "yes", etc.
-    const isValid = /^(ja|yes)$/i.test(responseText)
+    const isValid = /^yes$/i.test(responseText)
 
     return NextResponse.json(
       {
         valid: isValid,
         response: responseText,
+        tokensUsed: data.usage?.prompt_tokens ?? 12,
       },
       { status: 200 }
     )

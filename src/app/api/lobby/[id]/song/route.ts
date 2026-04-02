@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { songs, users, ratings, lobbies } from "@/lib/db/schema"
 import { eq, and } from "drizzle-orm"
 import { getClientCredentialsToken } from "@/lib/spotify/client-credentials"
+import { checkCategoryAccess, recordTokenUsage } from "@/lib/plan/checkCategoryAccess"
 
 /**
  * POST /api/lobby/[id]/song
@@ -51,6 +52,26 @@ export async function POST(
       )
     }
 
+    // Get user's database ID (needed for access check before category validation)
+    const [dbUser] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, user.email!))
+      .limit(1)
+
+    if (!dbUser) {
+      return NextResponse.json(
+        {
+          error: {
+            code: "USER_NOT_FOUND",
+            message: "User not found in database",
+            status: 404,
+          },
+        },
+        { status: 404 }
+      )
+    }
+
     // Get lobby to check if category is set
     const [lobby] = await db
       .select({ category: lobbies.category })
@@ -74,6 +95,20 @@ export async function POST(
     // If category is set (and not "all"), validate the song matches the category
     // Skip validation if category is null or "all" (alle kategorien erlaubt)
     if (lobby.category && lobby.category !== 'all') {
+      // Check Pro trial access before calling OpenAI
+      const access = await checkCategoryAccess(dbUser.id)
+      if (!access.allowed) {
+        const msg: Record<string, string> = {
+          trial_expired: "Your 4-week free trial has ended. Upgrade to Pro to keep playing category games.",
+          budget_exceeded: "You've used your free AI validation budget. Upgrade to Pro to continue.",
+          no_access: "Category games require a Pro plan.",
+        }
+        return NextResponse.json(
+          { error: { code: "PRO_REQUIRED", message: msg[access.reason], status: 403 } },
+          { status: 403 }
+        )
+      }
+
       console.log(`Category validation enabled for category: ${lobby.category}`)
       try {
         // Fetch track details from Spotify to get song name
@@ -115,8 +150,12 @@ export async function POST(
 
             if (validationResponse.ok) {
               const validationData = await validationResponse.json()
-              
-              // Only block if validation explicitly returns false (Nein)
+
+              // Record actual tokens used
+              const tokensUsed = validationData.tokensUsed ?? 12
+              await recordTokenUsage(dbUser.id, tokensUsed)
+
+              // Only block if validation explicitly returns false
               if (validationData.valid === false) {
                 return NextResponse.json(
                   {
@@ -145,26 +184,6 @@ export async function POST(
       }
     } else {
       console.log(`Skipping category validation: category is ${lobby.category || 'null'} (all categories allowed)`)
-    }
-
-    // Get user's database ID
-    const [dbUser] = await db
-      .select({ id: users.id })
-      .from(users)
-      .where(eq(users.email, user.email!))
-      .limit(1)
-
-    if (!dbUser) {
-      return NextResponse.json(
-        {
-          error: {
-            code: "USER_NOT_FOUND",
-            message: "User not found in database",
-            status: 404,
-          },
-        },
-        { status: 404 }
-      )
     }
 
     // Check if user already suggested a song for this round
