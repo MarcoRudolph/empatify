@@ -1,7 +1,9 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Trophy, Medal, Award } from "lucide-react"
 import { MagicCard } from "@/components/ui/magic-card"
+import { MoodCard } from "@/components/ui/MoodCard"
 import { useTranslations } from "next-intl"
 
 interface LeaderboardEntry {
@@ -30,6 +32,24 @@ interface LeaderboardCardProps {
 export function LeaderboardCard({ leaderboard, hasScores = false, isGameFinished = false }: LeaderboardCardProps) {
   const t = useTranslations("lobby")
   const tGame = useTranslations("game")
+  const [moodData, setMoodData] = useState<{ collective_mood: string; profiles: Record<string, string>; next_prompt: string } | null>(null)
+
+  useEffect(() => {
+    if (!isGameFinished) return
+    const songsForMood = leaderboard
+      .filter(e => e.bestSong)
+      .map(e => ({ playerName: e.name, trackName: e.bestSong!.name, artist: e.bestSong!.artist ?? "" }))
+    if (songsForMood.length === 0) return
+
+    fetch("/api/ai/game-mood", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ songs: songsForMood }),
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => data && !data.error && setMoodData(data))
+      .catch(() => null)
+  }, [isGameFinished, leaderboard])
 
   const getRankIcon = (index: number) => {
     if (index === 0) return <Trophy className="size-5 md:size-6 text-yellow-500" />
@@ -181,6 +201,16 @@ export function LeaderboardCard({ leaderboard, hasScores = false, isGameFinished
           </div>
         ))}
       </div>
+
+      {moodData && (
+        <div className="mt-4">
+          <MoodCard
+            collectiveMood={moodData.collective_mood}
+            profiles={moodData.profiles}
+            nextPrompt={moodData.next_prompt}
+          />
+        </div>
+      )}
     </MagicCard>
   )
 }
