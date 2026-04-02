@@ -33,6 +33,7 @@ export function CreateGameSection({
       return next.map((_, i) => prev[i] ?? "")
     })
   }, [rounds])
+  const [isBlind, setIsBlind] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
   const [gameMode, setGameMode] = useState<"single-device" | "multi-device">("multi-device")
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
@@ -71,6 +72,7 @@ export function CreateGameSection({
         category: category === "all" ? null : category,
         gameMode,
         roundPrompts: prompts,
+        isBlind,
       }
       console.log("Creating lobby with:", requestBody)
       
@@ -289,6 +291,28 @@ export function CreateGameSection({
             ))}
           </div>
         </div>
+
+        {/* Blind Mode Toggle */}
+        <label className="flex items-center gap-3 cursor-pointer select-none">
+          <div
+            onClick={() => setIsBlind(!isBlind)}
+            className={`relative w-10 h-6 rounded-full transition-colors duration-200 ${
+              isBlind ? "bg-primary-500" : "bg-neutral-300"
+            }`}
+          >
+            <span
+              className={`absolute top-1 left-1 size-4 bg-white rounded-full shadow transition-transform duration-200 ${
+                isBlind ? "translate-x-4" : "translate-x-0"
+              }`}
+            />
+          </div>
+          <div>
+            <span className="text-sm font-medium text-neutral-900">Blind Mode</span>
+            <span className="block text-xs text-neutral-400">
+              Submitters hidden until all ratings are in — then everyone guesses who picked what
+            </span>
+          </div>
+        </label>
 
         {/* Invite Friends Button - Prominent */}
         {selectedFriendIds.size > 0 ? (
