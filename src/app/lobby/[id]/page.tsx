@@ -45,6 +45,8 @@ export default async function LobbyPage({ params }: LobbyPageProps) {
           category: lobbies.category,
           maxRounds: lobbies.maxRounds,
           gameMode: lobbies.gameMode,
+          roundPrompts: lobbies.roundPrompts,
+          isBlind: lobbies.isBlind,
           createdAt: lobbies.createdAt,
         })
         .from(lobbies)
@@ -232,6 +234,8 @@ export default async function LobbyPage({ params }: LobbyPageProps) {
               category: lobby.category,
               maxRounds: lobby.maxRounds,
               gameMode: lobby.gameMode || "multi-device",
+              roundPrompts: lobby.roundPrompts ?? null,
+              isBlind: lobby.isBlind ?? false,
               createdAt: lobby.createdAt.toISOString(),
             }}
             participants={updatedParticipants.map((p) => ({

@@ -22,6 +22,8 @@ interface Lobby {
   category: string | null
   maxRounds: number
   gameMode: string
+  roundPrompts?: string[] | null
+  isBlind?: boolean
   createdAt: string
 }
 

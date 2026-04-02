@@ -22,6 +22,8 @@ interface Lobby {
   category: string | null
   maxRounds: number
   gameMode: string
+  roundPrompts?: string[] | null
+  isBlind?: boolean
   createdAt: string
 }
 
@@ -600,25 +602,34 @@ export function SongsCard({
                   {/* Username */}
                   <td className="py-3 px-2 md:px-4 w-12 md:w-auto align-middle">
                     <div className="flex items-center gap-2">
-                      {row.participant.avatarUrl ? (
-                        <img
-                          src={row.participant.avatarUrl}
-                          alt={row.participant.name}
-                          className="size-8 md:size-8 rounded-full shrink-0"
-                          title={row.participant.name}
-                        />
+                      {lobby.isBlind && !isGameFinished && !isCurrentUser ? (
+                        <>
+                          <div className="size-8 rounded-full bg-neutral-200 flex items-center justify-center text-xs font-bold text-neutral-400 shrink-0">?</div>
+                          <span className="hidden md:inline text-xs md:text-sm font-medium text-neutral-400">Hidden</span>
+                        </>
                       ) : (
-                        <div 
-                          className="size-8 md:size-8 rounded-full bg-primary-500 flex items-center justify-center text-white font-semibold text-xs shrink-0"
-                          title={row.participant.name}
-                        >
-                          {row.participant.name.charAt(0).toUpperCase()}
-                        </div>
+                        <>
+                          {row.participant.avatarUrl ? (
+                            <img
+                              src={row.participant.avatarUrl}
+                              alt={row.participant.name}
+                              className="size-8 md:size-8 rounded-full shrink-0"
+                              title={row.participant.name}
+                            />
+                          ) : (
+                            <div
+                              className="size-8 md:size-8 rounded-full bg-primary-500 flex items-center justify-center text-white font-semibold text-xs shrink-0"
+                              title={row.participant.name}
+                            >
+                              {row.participant.name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          {/* Username only visible on desktop */}
+                          <span className="hidden md:inline text-xs md:text-sm font-medium text-neutral-900">
+                            {row.participant.name}
+                          </span>
+                        </>
                       )}
-                      {/* Username only visible on desktop */}
-                      <span className="hidden md:inline text-xs md:text-sm font-medium text-neutral-900">
-                        {row.participant.name}
-                      </span>
                     </div>
                   </td>
 

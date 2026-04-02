@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { db } from "@/lib/db"
-import { lobbies, lobbyParticipants, songs, ratings, users } from "@/lib/db/schema"
-import { eq, and } from "drizzle-orm"
+import { lobbies, lobbyParticipants, songs, ratings, users, submitterGuesses } from "@/lib/db/schema"
+import { eq, and, sql } from "drizzle-orm"
 import { getClientCredentialsToken } from "@/lib/spotify/client-credentials"
 
 /**
@@ -211,6 +211,15 @@ export async function GET(
       })
     })
 
+    // Fetch bonus points from submitter_guesses
+    const guessCounts = await db
+      .select({ guesserId: submitterGuesses.guesserId, count: sql<number>`COUNT(*)` })
+      .from(submitterGuesses)
+      .where(and(eq(submitterGuesses.lobbyId, id), eq(submitterGuesses.isCorrect, true)))
+      .groupBy(submitterGuesses.guesserId)
+
+    const bonusMap = new Map(guessCounts.map(g => [g.guesserId, Number(g.count)]))
+
     // Convert to array and calculate averages
     const leaderboard = Array.from(leaderboardMap.values())
       .map((entry) => ({
@@ -221,6 +230,7 @@ export async function GET(
         songsSuggested: entry.songsSuggested,
         bestSongId: entry.bestSongId,
         bestSongAverageRating: entry.bestSongAverageRating,
+        bonusGuesses: bonusMap.get(entry.userId) ?? 0,
       }))
       .sort((a, b) => b.averageRating - a.averageRating)
     
