@@ -168,6 +168,17 @@ export default async function LobbyPage({ params }: LobbyPageProps) {
 
     // If not a participant and game is NOT finished, add them
     if (!isParticipant && !isGameFinished) {
+      // Slice 3: Player count gate — free plan lobbies max 3 players
+      const [host] = await db
+        .select({ proPlan: users.proPlan })
+        .from(users)
+        .where(eq(users.id, lobby.hostId))
+        .limit(1)
+
+      if (!host?.proPlan && participants.length >= 3) {
+        redirect("/de/dashboard?error=lobby_full")
+      }
+
       // Ensure user exists in database
       let dbUser = await db
         .select()
@@ -229,6 +240,7 @@ export default async function LobbyPage({ params }: LobbyPageProps) {
             }))}
             currentUserId={currentDbUserId || ""}
             isViewer={false}
+            locale={defaultLocale}
           />
         </NextIntlClientProvider>
       )
@@ -251,6 +263,7 @@ export default async function LobbyPage({ params }: LobbyPageProps) {
           }))}
           currentUserId={currentDbUserId || ""}
           isViewer={!isParticipant && isGameFinished}
+          locale={defaultLocale}
         />
       </NextIntlClientProvider>
     )

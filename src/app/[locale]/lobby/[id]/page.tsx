@@ -150,6 +150,17 @@ export default async function LocalizedLobbyPage({ params }: LobbyPageProps) {
     const isParticipant = currentDbUserId ? participants.some((p) => p.id === currentDbUserId) : false
 
     if (!isParticipant && !isGameFinished) {
+      // Slice 3: Player count gate — free plan lobbies max 3 players
+      const [host] = await db
+        .select({ proPlan: users.proPlan })
+        .from(users)
+        .where(eq(users.id, lobby.hostId))
+        .limit(1)
+
+      if (!host?.proPlan && participants.length >= 3) {
+        redirect(`/${locale}/dashboard?error=lobby_full`)
+      }
+
       let dbUser = await db
         .select()
         .from(users)
@@ -208,6 +219,7 @@ export default async function LocalizedLobbyPage({ params }: LobbyPageProps) {
             }))}
             currentUserId={currentDbUserId || ""}
             isViewer={false}
+            locale={locale}
           />
         </NextIntlClientProvider>
       )
@@ -230,6 +242,7 @@ export default async function LocalizedLobbyPage({ params }: LobbyPageProps) {
           }))}
           currentUserId={currentDbUserId || ""}
           isViewer={!isParticipant && isGameFinished}
+          locale={locale}
         />
       </NextIntlClientProvider>
     )
