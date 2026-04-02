@@ -45,6 +45,7 @@ export function SelectSongPageClient() {
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<ErrorMessage | null>(null)
   const [category, setCategory] = useState<string | null>(null)
+  const [roundPrompts, setRoundPrompts] = useState<string[] | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -64,6 +65,7 @@ export function SelectSongPageClient() {
         if (response.ok) {
           const data = await response.json()
           setCategory(data.lobby?.category || null)
+          setRoundPrompts(data.lobby?.roundPrompts ?? null)
         }
       } catch {
         // ignore
@@ -272,6 +274,20 @@ export function SelectSongPageClient() {
             <p className="text-sm text-neutral-500">
               Runde {roundNumber}
             </p>
+
+            {roundPrompts?.[roundNumber - 1] && (
+              <div className="mt-3 p-4 bg-primary-500/10 border border-primary-500/20 rounded-xl">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-primary-500 mb-1">
+                  Round Prompt
+                </p>
+                <p className="text-base font-semibold text-neutral-900">
+                  {roundPrompts[roundNumber - 1]}
+                </p>
+                <p className="text-xs text-neutral-500 mt-1">
+                  Pick a song that fits this vibe — not your favourite.
+                </p>
+              </div>
+            )}
 
             <div className="mt-4">
               <div className="relative">

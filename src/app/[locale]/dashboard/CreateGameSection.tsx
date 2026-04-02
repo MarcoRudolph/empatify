@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import { MagicCard } from "@/components/ui/magic-card"
@@ -23,8 +23,16 @@ export function CreateGameSection({
   const tCommon = useTranslations("common")
   const tMessaging = useTranslations("messaging")
 
-  const [rounds, setRounds] = useState(isProPlan ? 5 : 5)
+  const [rounds, setRounds] = useState(5)
   const [category, setCategory] = useState("all")
+  const [prompts, setPrompts] = useState<string[]>(Array(5).fill(""))
+
+  useEffect(() => {
+    setPrompts((prev) => {
+      const next = Array(rounds).fill("")
+      return next.map((_, i) => prev[i] ?? "")
+    })
+  }, [rounds])
   const [isCreating, setIsCreating] = useState(false)
   const [gameMode, setGameMode] = useState<"single-device" | "multi-device">("multi-device")
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
@@ -62,6 +70,7 @@ export function CreateGameSection({
         rounds,
         category: category === "all" ? null : category,
         gameMode,
+        roundPrompts: prompts,
       }
       console.log("Creating lobby with:", requestBody)
       
@@ -256,6 +265,29 @@ export function CreateGameSection({
               </option>
             ))}
           </select>
+        </div>
+
+        {/* Round Prompts */}
+        <div>
+          <label className="block text-sm font-medium text-neutral-900 mb-2">
+            Round Prompts
+            <span className="text-xs text-neutral-400 ml-2">(optional)</span>
+          </label>
+          <div className="space-y-2">
+            {Array.from({ length: rounds }, (_, i) => (
+              <input
+                key={i}
+                value={prompts[i] ?? ""}
+                onChange={(e) => {
+                  const next = [...prompts]
+                  next[i] = e.target.value
+                  setPrompts(next)
+                }}
+                placeholder={`Round ${i + 1} — e.g. "A song your dad dances to"`}
+                className="w-full px-4 py-2.5 border border-neutral-300 rounded-lg bg-neutral-50 text-neutral-900 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              />
+            ))}
+          </div>
         </div>
 
         {/* Invite Friends Button - Prominent */}
