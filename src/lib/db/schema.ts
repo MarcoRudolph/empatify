@@ -1,5 +1,5 @@
 import { pgTable, uuid, varchar, text, boolean, integer, timestamp, unique, check, index } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 
 /**
  * Users table
@@ -11,6 +11,8 @@ export const users = pgTable('users', {
   name: varchar('name', { length: 255 }).notNull().unique(),
   avatarUrl: text('avatar_url'),
   proPlan: boolean('pro_plan').default(false).notNull(),
+  aiTrialStartedAt: timestamp('ai_trial_started_at', { withTimezone: true }),
+  aiTokensUsed: integer('ai_tokens_used').default(0).notNull(),
   // Spotify OAuth tokens
   spotifyAccessToken: text('spotify_access_token'),
   spotifyRefreshToken: text('spotify_refresh_token'),
@@ -29,6 +31,8 @@ export const lobbies = pgTable('lobbies', {
   category: varchar('category', { length: 100 }),
   maxRounds: integer('max_rounds').default(5).notNull(),
   gameMode: varchar('game_mode', { length: 20 }).default('multi-device').notNull(),
+  roundPrompts: text('round_prompts').array(),
+  isBlind: boolean('is_blind').default(false).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({
   hostIdIdx: index('idx_lobbies_host_id').on(table.hostId),
@@ -79,7 +83,7 @@ export const ratings = pgTable('ratings', {
   uniqueSongUser: unique().on(table.songId, table.givenBy),
   songIdIdx: index('idx_ratings_song_id').on(table.songId),
   givenByIdx: index('idx_ratings_given_by').on(table.givenBy),
-  ratingCheck: check('rating_value_check', 'rating_value >= 1 AND rating_value <= 10'),
+  ratingCheck: check('rating_value_check', sql`rating_value >= 1 AND rating_value <= 10`),
 }));
 
 /**
@@ -140,6 +144,22 @@ export const friends = pgTable('friends', {
   primaryKey: unique().on(table.userId, table.friendId),
   userIdIdx: index('idx_friends_user_id').on(table.userId),
   friendIdIdx: index('idx_friends_friend_id').on(table.friendId),
+}));
+
+/**
+ * Submitter Guesses table
+ * Stores player guesses for who submitted which song in Blind Mode
+ */
+export const submitterGuesses = pgTable('submitter_guesses', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  lobbyId: uuid('lobby_id').notNull().references(() => lobbies.id, { onDelete: 'cascade' }),
+  songId: uuid('song_id').notNull().references(() => songs.id, { onDelete: 'cascade' }),
+  guesserId: uuid('guesser_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  guessedUserId: uuid('guessed_user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  isCorrect: boolean('is_correct').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+}, (table) => ({
+  uniqueSongGuesser: unique().on(table.songId, table.guesserId),
 }));
 
 // Relations
@@ -272,4 +292,6 @@ export type UserMessage = typeof userMessages.$inferSelect;
 export type NewUserMessage = typeof userMessages.$inferInsert;
 export type MessageReadStatus = typeof messageReadStatus.$inferSelect;
 export type NewMessageReadStatus = typeof messageReadStatus.$inferInsert;
+export type SubmitterGuess = typeof submitterGuesses.$inferSelect;
+export type NewSubmitterGuess = typeof submitterGuesses.$inferInsert;
 
