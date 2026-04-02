@@ -226,24 +226,14 @@ export function CreateGameSection({
             id="rounds"
             value={rounds}
             onChange={(e) => setRounds(Number(e.target.value))}
-            disabled={!isProPlan}
-            className="w-full px-4 py-3 border border-neutral-300 rounded-lg bg-neutral-50 text-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:border-transparent transition-all duration-200 disabled:bg-neutral-100 disabled:text-neutral-500 disabled:cursor-not-allowed"
+            className="w-full px-4 py-3 border border-neutral-300 rounded-lg bg-neutral-50 text-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:border-transparent transition-all duration-200"
           >
-            {isProPlan ? (
-              Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
-                <option key={num} value={num}>
-                  {num}
-                </option>
-              ))
-            ) : (
-              <option value={5}>5</option>
-            )}
+            {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
+              <option key={num} value={num}>
+                {num}
+              </option>
+            ))}
           </select>
-          {!isProPlan && (
-            <p className="mt-1 text-xs text-neutral-500">
-              {t("freePlanRoundsNote")}
-            </p>
-          )}
         </div>
 
         {/* Category Dropdown */}
@@ -258,8 +248,7 @@ export function CreateGameSection({
             id="category"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            disabled={!isProPlan}
-            className="w-full px-4 py-3 border border-neutral-300 rounded-lg bg-neutral-50 text-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:border-transparent transition-all duration-200 disabled:bg-neutral-100 disabled:text-neutral-500 disabled:cursor-not-allowed"
+            className="w-full px-4 py-3 border border-neutral-300 rounded-lg bg-neutral-50 text-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:border-transparent transition-all duration-200"
           >
             {categories.map((cat) => (
               <option key={cat.value} value={cat.value}>
@@ -267,11 +256,6 @@ export function CreateGameSection({
               </option>
             ))}
           </select>
-          {!isProPlan && (
-            <p className="mt-1 text-xs text-neutral-500">
-              {t("freePlanCategoryNote")}
-            </p>
-          )}
         </div>
 
         {/* Invite Friends Button - Prominent */}
