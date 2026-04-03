@@ -39,6 +39,11 @@
   "auth": {
     "loginWithGoogle": "Login with Google",
     "loginWithMagicLink": "Login with Magic Link",
+    "continueWithGoogle": "Continue with Google",
+    "orContinueWithEmail": "or continue with email",
+    "tagline": "Do you know your friends' taste?",
+    "privacyNotice": "By continuing, you agree to our",
+    "privacyPolicy": "Privacy Policy",
     "email": "Email",
     "enterEmail": "Enter your email",
     "sendMagicLink": "Send Magic Link",

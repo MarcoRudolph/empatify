@@ -37,6 +37,11 @@
   "auth": {
     "loginWithGoogle": "Iniciar sesión con Google",
     "loginWithMagicLink": "Iniciar sesión con Magic Link",
+    "continueWithGoogle": "Continuar con Google",
+    "orContinueWithEmail": "o continuar con correo electrónico",
+    "tagline": "¿Conoces el gusto musical de tus amigos?",
+    "privacyNotice": "Al continuar, aceptas nuestra",
+    "privacyPolicy": "Política de privacidad",
     "email": "Correo electrónico",
     "enterEmail": "Ingresa tu correo electrónico",
     "sendMagicLink": "Enviar Magic Link",
