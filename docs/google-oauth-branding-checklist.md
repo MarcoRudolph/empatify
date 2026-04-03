@@ -51,9 +51,8 @@ Go to: **console.cloud.google.com → APIs & Services → OAuth consent screen**
 
 ### 6. Set Privacy Policy URL
 - Field: **Application privacy policy link**
-- Value: `https://www.empatify.de/en/datenschutz`
-- The app uses `localePrefix = 'always'` — `/datenschutz` without a locale prefix would 404. Use `/en/datenschutz` as the universal English fallback.
-- The datenschutz page already exists in the codebase at `src/app/[locale]/datenschutz/page.tsx`
+- Value: `https://www.empatify.de/privacy`
+- `/privacy` redirects to `/[locale]/datenschutz` via `src/app/[locale]/privacy/page.tsx`
 
 ### 7. Terms of Service URL
 - Field: **Application terms of service link**
