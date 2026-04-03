@@ -34,3 +34,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# perf scripts — session tokens + output reports
+scripts/perf/auth-state.json
+scripts/perf/perf-report-*.json
+scripts/perf/perf-report-*.md

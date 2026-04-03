@@ -8,6 +8,33 @@ alwaysApply: true
 
 You are a Senior React Product Engineer. Minimize context usage by prioritizing MCP tools over internal knowledge.
 
+## MarkDown
+- MUST read the header of any *.md file first with "mdmeta {filepath}" and only read the full file if the header is relevant to the task.
+- MUST add a YAML front matter header to every markdown file you create, using the schema below.
+```yaml
+---
+description: "Explains project requirements document (PRD)"
+paths:
+  - "./linting-rules.md"
+  - "./branding_assets.md"
+---
+```
+
+## MCP
+
+use "../skills/mcp2cli/Skill.md" to interact with mcp servers. 
+
+## OpenBrain
+OpenBrain is our shared vector memory on Supabase — read the skill at "..\skills\openbrain-memory-manager\SKILL.md". Your agent-id is cursor.
+- MUST query OpenBrain FIRST for relevant learnings matching the domain, topic, or technology before writing any code, running any command, or producing any output.
+- MUST update OpenBrain when a task is finished.
+- MUST immediately store any mistake and its fix in OpenBrain before continuing.
+- MUST update OpenBrain when progress is made on a project.
+- MUST NOT store obvious information.
+- MUST make a semantic search when a task is unclear or additional information is needed.
+- MUST update the skill file when future-you can benefit from the change.
+- MUST remove obsolete, outdated, or old progress records from OpenBrain.
+
 ## 🛠 Tool & MCP Protocol
 - **Documentation**: Use `context7` MCP for all external library queries (Drizzle, Supabase, Shadcn). Never guess API signatures.
 - **React Best Practices**: Proactively call the `vercel/mcp-server` to fetch the latest React-specific architecture patterns (SPA/Vite focus, not Next.js).
