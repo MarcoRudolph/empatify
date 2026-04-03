@@ -51,12 +51,13 @@ Go to: **console.cloud.google.com → APIs & Services → OAuth consent screen**
 
 ### 6. Set Privacy Policy URL
 - Field: **Application privacy policy link**
-- Value: `https://empatify.de/datenschutz`
-- The datenschutz page already exists in the codebase — ensure it is accessible on the prod domain
+- Value: `https://www.empatify.de/en/datenschutz`
+- The app uses `localePrefix = 'always'` — `/datenschutz` without a locale prefix would 404. Use `/en/datenschutz` as the universal English fallback.
+- The datenschutz page already exists in the codebase at `src/app/[locale]/datenschutz/page.tsx`
 
-### 7. Set Terms of Service URL (optional)
+### 7. Terms of Service URL
 - Field: **Application terms of service link**
-- Value: `https://empatify.de/terms` (create this page if needed)
+- **Leave blank** — this field is optional and an Impressum is not a substitute for TOS. Add a proper TOS page when you have paying users.
 
 ### 8. Add Authorized domain
 - Field: **Authorized domains**
