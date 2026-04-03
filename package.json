@@ -15,6 +15,7 @@
     "test:coverage": "vitest run --coverage",
     "e2e:report": "playwright show-report",
     "perf:auth": "npx tsx scripts/perf/auth-setup.ts",
+    "perf:auth-token": "npx tsx scripts/perf/auth-from-token.ts",
     "perf:measure": "npx tsx scripts/perf/measure.ts",
     "perf:measure:after": "RUN_LABEL=after npx tsx scripts/perf/measure.ts",
     "perf:diff": "npx tsx scripts/perf/report.ts diff",
@@ -30,6 +31,7 @@
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.81.1",
+    "@upstash/redis": "^1.37.0",
     "clsx": "^2.1.1",
     "cookie": "^1.0.2",
     "lucide-react": "^0.553.0",
