@@ -68,7 +68,7 @@ export function Navbar({ locale }: { locale: string }) {
             )}
             <Link href="/dashboard" className="flex items-center gap-2.5">
               <div className="spin-slow text-primary-500 size-7 shrink-0">
-                <svg viewBox="3 2 34 36" fill="none" stroke="currentColor" strokeWidth="1.4" className="size-7">
+                <svg viewBox="2 1 36 38" fill="none" stroke="currentColor" strokeWidth="1.4" className="size-7">
                   <circle cx="20" cy="20" r="9" strokeOpacity="0.9" />
                   <circle cx="20" cy="11" r="9" strokeOpacity="0.65" />
                   <circle cx="27.8" cy="15.5" r="9" strokeOpacity="0.65" />

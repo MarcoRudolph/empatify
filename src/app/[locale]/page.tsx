@@ -8,7 +8,7 @@ import { HeroLoginCard } from './HeroLoginCard';
 function FlowerIcon({ className }: { className?: string }) {
   return (
     <svg
-      viewBox="3 2 34 36"
+      viewBox="2 1 36 38"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       fill="none"
