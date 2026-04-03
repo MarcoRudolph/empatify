@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getClientCredentialsToken } from "@/lib/spotify/client-credentials"
+import { withCache } from "@/lib/cache"
 
 /**
  * GET /api/spotify/search
@@ -39,43 +40,26 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Search Spotify
-    const searchResponse = await fetch(
-      `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=20`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    )
-
-    if (!searchResponse.ok) {
-      const errorText = await searchResponse.text()
-      console.error("Spotify API error:", errorText)
-      return NextResponse.json(
-        {
-          error: {
-            code: "SPOTIFY_API_ERROR",
-            message: "Failed to search Spotify",
-            status: searchResponse.status,
-          },
-        },
-        { status: searchResponse.status }
+    // Search Spotify — cached 1 h (track metadata is stable)
+    const cacheKey = `spotify:search:${query.toLowerCase().trim()}`
+    const data = await withCache(cacheKey, 3600, async () => {
+      const res = await fetch(
+        `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=20`,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
       )
-    }
+      if (!res.ok) {
+        const errorText = await res.text()
+        console.error('Spotify API error:', errorText)
+        throw new Error(`Spotify API error ${res.status}`)
+      }
+      return res.json()
+    })
 
-    const data = await searchResponse.json()
     return NextResponse.json(data)
   } catch (error: any) {
-    console.error("Error searching Spotify:", error)
+    console.error('Spotify search route error:', error)
     return NextResponse.json(
-      {
-        error: {
-          code: "INTERNAL_ERROR",
-          message: error?.message || "Failed to search Spotify",
-          status: 500,
-        },
-      },
+      { error: { code: 'INTERNAL_ERROR', message: 'Failed to search Spotify', status: 500 } },
       { status: 500 }
     )
   }
