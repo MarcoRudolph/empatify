@@ -104,25 +104,31 @@ export function SelectSongPageClient() {
   }, [searchQuery])
 
   useEffect(() => {
-    const fetchTracks = async () => {
-      if (!debouncedQuery) return
+    if (!debouncedQuery) return
 
+    const controller = new AbortController()
+
+    const fetchTracks = async () => {
       setIsSearching(true)
       setSearchError(null)
       setVisibleResults(10)
 
       try {
-        const response = await fetch(`/api/spotify/search?q=${encodeURIComponent(debouncedQuery)}`)
+        const response = await fetch(
+          `/api/spotify/search?q=${encodeURIComponent(debouncedQuery)}`,
+          { signal: controller.signal }
+        )
         const data = await response.json()
 
         if (!response.ok) {
-          throw new Error(data?.error?.message || "Search failed")
+          throw new Error(data?.error?.message || 'Search failed')
         }
 
         setTracks(Array.isArray(data?.tracks?.items) ? data.tracks.items : [])
       } catch (fetchError) {
+        if (fetchError instanceof Error && fetchError.name === 'AbortError') return
         const message =
-          fetchError instanceof Error ? fetchError.message : "Could not search songs right now."
+          fetchError instanceof Error ? fetchError.message : 'Could not search songs right now.'
         setTracks([])
         setSearchError(message)
       } finally {
@@ -131,6 +137,7 @@ export function SelectSongPageClient() {
     }
 
     fetchTracks()
+    return () => controller.abort()
   }, [debouncedQuery])
 
   const handleSelectSong = async (track: SpotifyTrack) => {
