@@ -80,6 +80,7 @@
     "lobbyNotStarted": "Nicht gestartet",
     "currentRound": "Aktuelle Runde",
     "selectSongForRound": "Song für diese Runde auswählen",
+    "rateInRound": "Song in Runde {round} bewerten",
     "copyInviteLink": "Invite-Link kopieren"
   },
   "lobby": {

@@ -79,7 +79,7 @@ export default async function LandingPage({
   const bullets = [
     { emoji: '🎵', text: 'Listen to music → rate songs of your friends' },
     { emoji: '✨', text: 'Getting new music inspiration' },
-    { emoji: '🤝', text: 'Bond with your friends' },
+    { emoji: '🤔', text: 'Do you know your friends well enough?' },
     { emoji: '🧠', text: 'Choose songs wisely with empathy' },
   ];
 

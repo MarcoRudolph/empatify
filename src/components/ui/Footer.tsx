@@ -2,85 +2,69 @@ import React from 'react';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import { locales } from '@/i18n';
+import { FooterUpgradeButton } from './FooterUpgradeButton';
 
-/**
- * Footer component with business information and legal links
- * Displays company info, service links, and legal pages
- */
+function FlowerIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="3 2 34 36" fill="none" stroke="currentColor" strokeWidth="1.4" className={className}>
+      <circle cx="20" cy="20" r="9" strokeOpacity="0.9" />
+      <circle cx="20" cy="11" r="9" strokeOpacity="0.65" />
+      <circle cx="27.8" cy="15.5" r="9" strokeOpacity="0.65" />
+      <circle cx="27.8" cy="24.5" r="9" strokeOpacity="0.65" />
+      <circle cx="20" cy="29" r="9" strokeOpacity="0.65" />
+      <circle cx="12.2" cy="24.5" r="9" strokeOpacity="0.65" />
+      <circle cx="12.2" cy="15.5" r="9" strokeOpacity="0.65" />
+    </svg>
+  );
+}
+
 export const Footer: React.FC<{ locale: string }> = async ({ locale }) => {
   const t = await getTranslations('footer');
   const localeLabels: Record<string, string> = {
-    en: 'EN',
-    de: 'DE',
-    pt: 'PT',
-    fr: 'FR',
-    es: 'ES',
+    en: 'EN', de: 'DE', pt: 'PT', fr: 'FR', es: 'ES',
   };
 
   return (
     <footer className="relative border-t border-neutral-300 bg-neutral-75">
       <div className="max-w-container mx-auto px-6 py-10 md:py-14">
-        <div className="rounded-2xl border border-neutral-300/70 bg-neutral-100/90 p-6 shadow-sm backdrop-blur-sm">
+        <div className="rounded-2xl border border-neutral-300/70 bg-neutral-100/90 p-6 md:p-10 shadow-sm backdrop-blur-sm">
 
-          {/* Top row: brand + lang switcher */}
-          <div className="flex items-start justify-between gap-4 mb-5">
-            <div>
-              <h3 className="text-lg font-bold text-neutral-900 tracking-tight">
-                {t('businessName')}
-              </h3>
-              <p className="text-xs text-neutral-500 mt-0.5">
-                {t('developedBy')}{' '}
-                <a
-                  href="https://rudolpho-ai.de"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium text-primary-500 hover:text-primary-600 transition-colors duration-200"
-                >
-                  rudolpho-ai.de
-                </a>
-              </p>
+          {/* Brand — centered */}
+          <div className="flex flex-col items-center text-center mb-8">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="spin-slow text-primary-500 size-7 shrink-0">
+                <FlowerIcon className="size-7" />
+              </div>
+              <span className="font-display text-xl font-black tracking-tight text-neutral-900">
+                empatify
+              </span>
             </div>
-            <div className="inline-flex items-center gap-0.5 rounded-full border border-neutral-300 bg-neutral-200 p-1 shrink-0">
-              {locales.map((lang) => {
-                const isActive = locale === lang;
-                return (
-                  <a
-                    key={lang}
-                    href={`/${lang}`}
-                    className={`min-w-8 rounded-full px-2 py-1 text-center text-xs font-semibold tracking-tight transition-colors duration-200 ${
-                      isActive
-                        ? 'bg-accent-spotify text-neutral-900'
-                        : 'text-neutral-600 hover:bg-neutral-300 hover:text-neutral-900'
-                    }`}
-                    aria-label={`Switch language to ${lang.toUpperCase()}`}
-                  >
-                    {localeLabels[lang] ?? lang.toUpperCase()}
-                  </a>
-                );
-              })}
-            </div>
+            <p className="text-sm text-neutral-500 leading-relaxed max-w-xs">
+              {t('description')}
+            </p>
+            <p className="text-xs text-neutral-400 mt-1.5">
+              {t('developedBy')}{' '}
+              <a
+                href="https://rudolpho-ai.de"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-primary-500 hover:text-primary-600 transition-colors duration-200"
+              >
+                rudolpho-ai.de
+              </a>
+            </p>
           </div>
 
-          {/* Description */}
-          <p className="text-sm text-neutral-600 leading-relaxed mb-6 max-w-xs">
-            {t('description')}
-          </p>
-
-          {/* Link columns — compact grid */}
-          <div className="grid grid-cols-2 gap-6 mb-6 md:flex md:gap-12">
+          {/* Link columns — centered */}
+          <div className="flex justify-center gap-16 md:gap-24 mb-8">
             {/* Service */}
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-neutral-400 mb-2.5">
+            <div className="text-center">
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-neutral-400 mb-3">
                 {t('service.title')}
               </p>
-              <ul className="space-y-2">
+              <ul className="space-y-2.5">
                 <li>
-                  <Link
-                    href="/upgrade"
-                    className="text-sm text-neutral-700 hover:text-neutral-900 transition-colors duration-200"
-                  >
-                    Upgrade
-                  </Link>
+                  <FooterUpgradeButton label="Upgrade" />
                 </li>
                 <li>
                   <Link
@@ -94,11 +78,11 @@ export const Footer: React.FC<{ locale: string }> = async ({ locale }) => {
             </div>
 
             {/* Legal */}
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-neutral-400 mb-2.5">
+            <div className="text-center">
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-neutral-400 mb-3">
                 {t('legal.title')}
               </p>
-              <ul className="space-y-2">
+              <ul className="space-y-2.5">
                 <li>
                   <Link
                     href="/impressum"
@@ -119,9 +103,33 @@ export const Footer: React.FC<{ locale: string }> = async ({ locale }) => {
             </div>
           </div>
 
-          {/* Copyright */}
-          <div className="border-t border-neutral-300/80 pt-4">
-            <p className="text-center text-xs text-neutral-400">{t('copyright')}</p>
+          {/* Bottom bar */}
+          <div className="border-t border-neutral-300/80 pt-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+            {/* Language picker */}
+            <div className="inline-flex items-center gap-0.5 rounded-full border border-neutral-300 bg-neutral-200 p-1">
+              {locales.map((lang) => {
+                const isActive = locale === lang;
+                return (
+                  <a
+                    key={lang}
+                    href={`/${lang}`}
+                    className={`min-w-8 rounded-full px-2 py-1 text-center text-xs font-semibold tracking-tight transition-colors duration-200 ${
+                      isActive
+                        ? 'bg-accent-spotify text-neutral-900'
+                        : 'text-neutral-600 hover:bg-neutral-300 hover:text-neutral-900'
+                    }`}
+                    aria-label={`Switch language to ${lang.toUpperCase()}`}
+                  >
+                    {localeLabels[lang] ?? lang.toUpperCase()}
+                  </a>
+                );
+              })}
+            </div>
+
+            <p className="text-xs text-neutral-400 text-center">{t('copyright')}</p>
+
+            {/* Spacer to balance the lang picker */}
+            <div className="hidden sm:block w-[120px]" />
           </div>
         </div>
       </div>
@@ -130,4 +138,3 @@ export const Footer: React.FC<{ locale: string }> = async ({ locale }) => {
 };
 
 export default Footer;
-

@@ -1,0 +1,153 @@
+"use client"
+
+import { X, Check, Zap, Music2, Shuffle, Star } from "lucide-react"
+import { ShimmerButton } from "@/components/ui/shimmer-button"
+
+interface UpgradeModalProps {
+  isOpen: boolean
+  onClose: () => void
+}
+
+const FREE_FEATURES = [
+  "5 rounds per game (fixed)",
+  "\"All\" music category",
+  "Multi-device & single-device modes",
+  "Invite friends to games",
+  "Unlimited games",
+]
+
+const PRO_FEATURES = [
+  "1–10 rounds per game",
+  "All music categories (80s, Hip-Hop, Techno…)",
+  "Multi-device & single-device modes",
+  "Invite friends to games",
+  "Unlimited games",
+  "Priority support",
+  "Early access to new features",
+]
+
+export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
+  if (!isOpen) return null
+
+  return (
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-neutral-900/60 backdrop-blur-sm" />
+
+      {/* Panel */}
+      <div
+        className="relative z-10 w-full max-w-2xl bg-neutral-50 rounded-2xl shadow-2xl border border-neutral-200 overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-neutral-200">
+          <div>
+            <h2 className="font-display text-2xl font-black tracking-tight text-neutral-900">
+              Choose your plan
+            </h2>
+            <p className="text-sm text-neutral-500 mt-0.5">
+              Unlock the full Empatify experience
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="flex items-center justify-center size-9 rounded-lg text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 transition-colors"
+            aria-label="Close"
+          >
+            <X className="size-5" />
+          </button>
+        </div>
+
+        {/* Cards */}
+        <div className="p-6 grid sm:grid-cols-2 gap-4">
+
+          {/* Free Plan */}
+          <div className="rounded-xl border border-neutral-300 bg-neutral-100 p-5 flex flex-col">
+            <div className="mb-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-200 text-neutral-600 text-xs font-semibold uppercase tracking-wider mb-3">
+                <Music2 className="size-3.5" />
+                Free Plan
+              </div>
+              <div className="flex items-baseline gap-1">
+                <span className="font-display text-4xl font-black text-neutral-900">€0</span>
+                <span className="text-sm text-neutral-500">/ forever</span>
+              </div>
+            </div>
+
+            <ul className="space-y-2.5 flex-1 mb-5">
+              {FREE_FEATURES.map((feature) => (
+                <li key={feature} className="flex items-start gap-2.5 text-sm text-neutral-600">
+                  <Check className="size-4 text-neutral-400 shrink-0 mt-0.5" />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-auto">
+              <div className="w-full py-2.5 rounded-lg border border-neutral-300 bg-neutral-200 text-center text-sm font-semibold text-neutral-500 cursor-default select-none">
+                Current Plan
+              </div>
+            </div>
+          </div>
+
+          {/* Pro Plan */}
+          <div className="rounded-xl border-2 border-primary-500 bg-white p-5 flex flex-col relative overflow-hidden shadow-lg shadow-primary-500/10">
+            {/* Glow */}
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary-500/10 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="mb-4 relative">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-500 text-white text-xs font-semibold uppercase tracking-wider mb-3">
+                <Zap className="size-3.5" />
+                Pro Plan
+              </div>
+              <div className="flex items-baseline gap-1">
+                <span className="font-display text-4xl font-black text-neutral-900">€4.99</span>
+                <span className="text-sm text-neutral-500">/ month</span>
+              </div>
+            </div>
+
+            <ul className="space-y-2.5 flex-1 mb-5 relative">
+              {PRO_FEATURES.map((feature, i) => (
+                <li key={feature} className="flex items-start gap-2.5 text-sm text-neutral-700">
+                  <Check className={`size-4 shrink-0 mt-0.5 ${i < 2 ? "text-primary-500" : "text-neutral-400"}`} />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+
+            <ShimmerButton
+              background="var(--color-primary-500)"
+              shimmerColor="var(--color-neutral-900)"
+              borderRadius="9999px"
+              className="w-full h-11 font-semibold"
+              onClick={() => {
+                window.location.href = "mailto:marco@rudolpho-ai.de?subject=Empatify Pro Plan"
+              }}
+            >
+              <span className="flex items-center justify-center gap-2">
+                <Star className="size-4" />
+                Upgrade to Pro
+              </span>
+            </ShimmerButton>
+          </div>
+        </div>
+
+        {/* Footer note */}
+        <div className="px-6 pb-6 text-center">
+          <p className="text-xs text-neutral-400">
+            Questions? Contact{" "}
+            <a
+              href="mailto:marco@rudolpho-ai.de"
+              className="text-primary-500 hover:text-primary-600 font-medium transition-colors"
+            >
+              marco@rudolpho-ai.de
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}

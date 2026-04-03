@@ -5,6 +5,21 @@ import { users } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 import { cookies } from "next/headers"
 import { defaultLocale } from "@/i18n"
+import { sanitizeSpotifyOAuthReturnTo } from "@/lib/spotify/sanitizeReturnTo"
+
+function spotifyOAuthRedirect(
+  origin: string,
+  locale: string,
+  returnTo: string | null,
+  query: Record<string, string>
+): URL {
+  const pathBase = returnTo ?? `/${locale}/dashboard`
+  const url = new URL(pathBase, origin)
+  for (const [key, value] of Object.entries(query)) {
+    url.searchParams.set(key, value)
+  }
+  return url
+}
 
 /**
  * GET /api/spotify/callback
@@ -52,11 +67,15 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Decode state to get userId
+    // Decode state to get userId and optional post-auth path
     let userId: string
+    let sanitizedReturnTo: string | null = null
     try {
       const decodedState = JSON.parse(Buffer.from(state, "base64").toString())
       userId = decodedState.userId
+      if (typeof decodedState.returnTo === "string") {
+        sanitizedReturnTo = sanitizeSpotifyOAuthReturnTo(decodedState.returnTo)
+      }
     } catch (e) {
       console.error("Invalid state parameter:", e)
       const cookieStore = await cookies()
@@ -66,6 +85,9 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    const cookieStoreLocale = await cookies()
+    const locale = cookieStoreLocale.get("NEXT_LOCALE")?.value || defaultLocale
+
     // Verify user is authenticated
     const supabase = await createClient()
     const {
@@ -74,10 +96,10 @@ export async function GET(request: NextRequest) {
     } = await supabase.auth.getUser()
 
     if (authError || !user || user.id !== userId) {
-      const cookieStore = await cookies()
-      const locale = cookieStore.get("NEXT_LOCALE")?.value || defaultLocale
       return NextResponse.redirect(
-        new URL(`/${locale}/dashboard?spotify_error=unauthorized`, requestUrl.origin)
+        spotifyOAuthRedirect(requestUrl.origin, locale, sanitizedReturnTo, {
+          spotify_error: "unauthorized",
+        })
       )
     }
 
@@ -143,10 +165,10 @@ export async function GET(request: NextRequest) {
 
     if (!clientId || !clientSecret) {
       console.error("Spotify credentials not configured")
-      const cookieStore = await cookies()
-      const locale = cookieStore.get("NEXT_LOCALE")?.value || defaultLocale
       return NextResponse.redirect(
-        new URL(`/${locale}/dashboard?spotify_error=config_error`, requestUrl.origin)
+        spotifyOAuthRedirect(requestUrl.origin, locale, sanitizedReturnTo, {
+          spotify_error: "config_error",
+        })
       )
     }
 
@@ -225,13 +247,13 @@ export async function GET(request: NextRequest) {
         console.error("   Raw error data:", errorData)
       }
       
-      const cookieStore = await cookies()
-      const locale = cookieStore.get("NEXT_LOCALE")?.value || defaultLocale
-      
       // Include detailed error in URL for debugging
       const errorParam = `${errorMessage}${errorDetails.error_description ? `:${encodeURIComponent(errorDetails.error_description)}` : ""}`
       return NextResponse.redirect(
-        new URL(`/${locale}/dashboard?spotify_error=${errorParam}&status=${statusCode}`, baseUrl)
+        spotifyOAuthRedirect(requestUrl.origin, locale, sanitizedReturnTo, {
+          spotify_error: errorParam,
+          status: String(statusCode),
+        })
       )
     }
 
@@ -292,11 +314,11 @@ export async function GET(request: NextRequest) {
       })
       .where(eq(users.id, userRecord[0].id))
 
-    // Redirect back to dashboard with success
-    const cookieStore = await cookies()
-    const locale = cookieStore.get("NEXT_LOCALE")?.value || defaultLocale
+    // Redirect back to dashboard or lobby with success
     return NextResponse.redirect(
-      new URL(`/${locale}/dashboard?spotify_linked=true`, requestUrl.origin)
+      spotifyOAuthRedirect(requestUrl.origin, locale, sanitizedReturnTo, {
+        spotify_linked: "true",
+      })
     )
   } catch (error: any) {
     console.error("Unexpected error in Spotify callback:", error)

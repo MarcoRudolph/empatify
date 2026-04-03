@@ -126,19 +126,29 @@ export function LobbyList({ lobbies, user, locale }: LobbyListProps) {
                   className="flex items-center gap-0.5 shrink-0 -mr-1 -mt-1"
                   onClick={(e) => e.preventDefault()}
                 >
-                  <div className="flex items-center justify-center w-11 h-11">
+                  <div className="flex items-center justify-center w-11 h-11 relative group/icon">
                     {lobby.needsSongSelection ? (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        className="text-yellow-500"
-                        aria-label={t('selectSongForRound')}
-                      >
-                        <path fillRule="evenodd" d="M8.544 1.056a3 3 0 0 1-3 3v1a3 3 0 0 1 3 3h1a3 3 0 0 1 3-3v-1a3 3 0 0 1-3-3zm-4.1 7.056v1.944H6.39v2H4.445V14h-2v-1.944H.5v-2h1.944V8.112zm4.579 1.444v5.979a4 4 0 1 0 2 3.465v-8.28l10-3.333v5.148a4 4 0 1 0 2 3.465V1.113l-8.979 2.992v2.451h-1.5a1.5 1.5 0 0 0-1.5 1.5v1.5z" clipRule="evenodd" />
-                      </svg>
+                      <>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          className="text-yellow-500"
+                          aria-label={t('selectSongForRound')}
+                        >
+                          <path fillRule="evenodd" d="M8.544 1.056a3 3 0 0 1-3 3v1a3 3 0 0 1 3 3h1a3 3 0 0 1 3-3v-1a3 3 0 0 1-3-3zm-4.1 7.056v1.944H6.39v2H4.445V14h-2v-1.944H.5v-2h1.944V8.112zm4.579 1.444v5.979a4 4 0 1 0 2 3.465v-8.28l10-3.333v5.148a4 4 0 1 0 2 3.465V1.113l-8.979 2.992v2.451h-1.5a1.5 1.5 0 0 0-1.5 1.5v1.5z" clipRule="evenodd" />
+                        </svg>
+                        {lobby.roundToRate != null && (
+                          <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2 hidden group-hover/icon:block z-20 pointer-events-none">
+                            <div className="bg-neutral-900 text-white text-xs font-medium rounded-lg px-3 py-1.5 whitespace-nowrap shadow-lg">
+                              {t('rateInRound', { round: lobby.roundToRate })}
+                              <div className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-neutral-900" />
+                            </div>
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <Music className="size-5 text-neutral-400 group-hover:text-primary-500 transition-colors" />
                     )}
@@ -159,11 +169,6 @@ export function LobbyList({ lobbies, user, locale }: LobbyListProps) {
                 <span className={`inline-flex items-center px-2.5 py-1 text-sm font-semibold rounded-md ${statusInfo.bg} ${statusInfo.text}`}>
                   {statusInfo.label}
                 </span>
-                {lobby.hostId === user?.id && (
-                  <span className="px-2.5 py-1 text-sm font-semibold bg-primary-500/15 text-primary-600 rounded-md">
-                    {tLobby('host')}
-                  </span>
-                )}
                 {isWinner && (
                   <span className="px-2.5 py-1 text-sm font-bold bg-yellow-100 text-yellow-800 rounded-md inline-flex items-center gap-1">
                     <Trophy className="size-3.5" />

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { ArrowLeft, Send, Loader2, Music, PartyPopper } from "lucide-react"
+import { ArrowLeft, Send, Loader2, Music, PartyPopper, X } from "lucide-react"
 import { MagicCard } from "@/components/ui/magic-card"
 import { Navbar } from "@/components/ui/Navbar"
 import { ShimmerButton } from "@/components/ui/shimmer-button"
@@ -46,6 +46,7 @@ export function ConversationDetailClient({
   const [messageText, setMessageText] = useState("")
   const [isSending, setIsSending] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [dismissedInvites, setDismissedInvites] = useState<Set<string>>(new Set())
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -317,23 +318,33 @@ export function ConversationDetailClient({
               }
 
               if (isPlayAgainInviteMessage) {
+                if (dismissedInvites.has(message.id)) return null
                 // Render Play Again invite message with special styling
                 return (
                   <div
                     key={message.id}
                     className="flex justify-center my-6"
                   >
-                    <MagicCard
-                      className="p-5 rounded-2xl shadow-lg max-w-md w-full bg-gradient-to-br from-green-50 to-green-100"
-                      gradientFrom="var(--color-primary-400)"
-                      gradientTo="var(--color-primary-600)"
-                      gradientSize={300}
-                    >
-                      {renderMessageContent(message.content, message.lobbyId, message.senderName)}
-                      <p className="text-xs text-neutral-500 mt-3 text-center">
-                        {mounted ? formatTime(message.sentAt) : ""}
-                      </p>
-                    </MagicCard>
+                    <div className="relative max-w-md w-full">
+                      <button
+                        onClick={() => setDismissedInvites(prev => new Set(prev).add(message.id))}
+                        className="absolute top-2 right-2 z-10 p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 hover:bg-neutral-200 transition-colors"
+                        aria-label={tCommon("close")}
+                      >
+                        <X className="size-4" />
+                      </button>
+                      <MagicCard
+                        className="p-5 rounded-2xl shadow-lg w-full bg-gradient-to-br from-green-50 to-green-100"
+                        gradientFrom="var(--color-primary-400)"
+                        gradientTo="var(--color-primary-600)"
+                        gradientSize={300}
+                      >
+                        {renderMessageContent(message.content, message.lobbyId, message.senderName)}
+                        <p className="text-xs text-neutral-500 mt-3 text-center">
+                          {mounted ? formatTime(message.sentAt) : ""}
+                        </p>
+                      </MagicCard>
+                    </div>
                   </div>
                 )
               }

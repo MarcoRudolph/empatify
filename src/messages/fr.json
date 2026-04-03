@@ -79,6 +79,7 @@
     "lobbyNotStarted": "Non démarré",
     "currentRound": "Tour actuel",
     "selectSongForRound": "Sélectionner une chanson pour ce tour",
+    "rateInRound": "Évaluez la chanson au tour {round}",
     "copyInviteLink": "Copier le lien d'invitation"
   },
   "lobby": {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
-import { getBaseUrl } from "@/lib/utils"
+import { sanitizeSpotifyOAuthReturnTo } from "@/lib/spotify/sanitizeReturnTo"
 
 /**
  * GET /api/spotify/auth
@@ -76,7 +76,9 @@ export async function GET(request: NextRequest) {
 
     // Build redirect URI - Spotify requires 127.0.0.1 (not localhost) for HTTP redirects
     const requestUrl = new URL(request.url)
-    
+    const returnToRaw = requestUrl.searchParams.get("return_to")
+    const returnTo = returnToRaw ? sanitizeSpotifyOAuthReturnTo(returnToRaw) : null
+
     // Get the Host header (contains what the client actually used to connect)
     const hostHeader = request.headers.get("host")
     
@@ -150,8 +152,13 @@ export async function GET(request: NextRequest) {
       "streaming",
     ].join(" ")
 
-    // Generate state parameter for CSRF protection
-    const state = Buffer.from(JSON.stringify({ userId: user.id })).toString("base64")
+    // Generate state parameter for CSRF protection (+ optional post-auth path)
+    const state = Buffer.from(
+      JSON.stringify({
+        userId: user.id,
+        ...(returnTo ? { returnTo } : {}),
+      })
+    ).toString("base64")
 
     // Build Spotify authorization URL
     const authUrl = new URL("https://accounts.spotify.com/authorize")
