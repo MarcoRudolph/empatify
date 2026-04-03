@@ -16,6 +16,7 @@ import { users, lobbies, lobbyParticipants, songs, ratings, friends } from '@/li
 import { eq, or, desc, and, inArray } from 'drizzle-orm';
 import { LobbyList } from './LobbyList'
 import { fetchDashboardData } from './fetchDashboardData';
+import { withCache } from '@/lib/cache';
 
 /**
  * Dashboard page - Main hub for users after login
@@ -46,19 +47,24 @@ export default async function DashboardPage({
   let dbUser: any = null;
 
   try {
-    // Get basic user info
-    const userRecord = await db
-      .select({
-        id: users.id,
-        email: users.email,
-        name: users.name,
-        avatarUrl: users.avatarUrl,
-        proPlan: users.proPlan,
-        createdAt: users.createdAt,
-      })
-      .from(users)
-      .where(eq(users.email, user.email!))
-      .limit(1);
+    // Get basic user info — cached 5 min (profile rarely changes)
+    const userRecord = await withCache(
+      `user:profile:${user.id}`,
+      300,
+      () =>
+        db
+          .select({
+            id: users.id,
+            email: users.email,
+            name: users.name,
+            avatarUrl: users.avatarUrl,
+            proPlan: users.proPlan,
+            createdAt: users.createdAt,
+          })
+          .from(users)
+          .where(eq(users.email, user.email!))
+          .limit(1)
+    );
 
     if (userRecord.length === 0) {
       // If user doesn't exist in database, create them
