@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server"
 import { db, postgresClient } from "@/lib/db"
 import { lobbies, lobbyParticipants, users, userMessages } from "@/lib/db/schema"
 import { eq, and, ne } from "drizzle-orm"
+import { invalidateCache } from "@/lib/cache"
 
 /**
  * POST /api/lobby/create
@@ -267,6 +268,9 @@ export async function POST(request: NextRequest) {
         // Don't fail the lobby creation if invites fail
       }
     }
+
+    // Invalidate the lobby list cache so the dashboard reflects the new lobby immediately
+    await invalidateCache(`lobbies:user:${userId}`)
 
     return NextResponse.json(
       {
