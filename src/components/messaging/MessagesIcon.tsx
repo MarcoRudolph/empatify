@@ -12,6 +12,9 @@ export function MessagesIcon({ locale }: MessagesIconProps) {
   const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {
+    // Prefetch messages page so navigation is instant
+    router.prefetch(`/${locale}/messages`)
+
     // Load unread count
     const loadUnreadCount = async () => {
       try {
@@ -31,7 +34,7 @@ export function MessagesIcon({ locale }: MessagesIconProps) {
     const interval = setInterval(loadUnreadCount, 30000)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [locale, router])
 
   const handleClick = () => {
     router.push(`/${locale}/messages`)

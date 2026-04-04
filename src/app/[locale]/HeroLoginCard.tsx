@@ -100,7 +100,7 @@ function HeroLoginCardInner() {
               className="w-full h-12 rounded-xl font-display font-black text-base transition-opacity duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               style={{
                 background: '#FF6B00',
-                color: '#ffffff',
+                color: '#000000',
                 animation: 'glow-cta 2.4s ease-in-out infinite',
               }}
             >

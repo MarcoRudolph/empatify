@@ -4,9 +4,46 @@ import { useState, useEffect } from "react"
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import { MagicCard } from "@/components/ui/magic-card"
-import { ShimmerButton } from "@/components/ui/shimmer-button"
 import { Music, Loader2, UserPlus } from "lucide-react"
 import { InviteFriendsModal } from "@/components/messaging/InviteFriendsModal"
+
+const ROUND_PROMPT_EXAMPLES: Record<string, string[]> = {
+  de: [
+    'Ein Lied, zu dem dein Vater tanzt',
+    'Ein Song für eine Autofahrt',
+    'Ein Lied, das dich zum Weinen bringt',
+    'Ein Song aus deiner Kindheit',
+    'Ein Lied, das auf jeder Party laufen muss',
+  ],
+  en: [
+    'A song your dad dances to',
+    'A song for a road trip',
+    'A song that makes you cry',
+    'A song from your childhood',
+    'A song you play at every party',
+  ],
+  pt: [
+    'Uma música que seu pai dança',
+    'Uma música para uma viagem de carro',
+    'Uma música que te faz chorar',
+    'Uma música da sua infância',
+    'Uma música que você toca em toda festa',
+  ],
+  fr: [
+    'Une chanson sur laquelle ton père danse',
+    'Une chanson pour un road trip',
+    'Une chanson qui te fait pleurer',
+    'Une chanson de ton enfance',
+    'Une chanson que tu mets à chaque fête',
+  ],
+  es: [
+    'Una canción que baila tu papá',
+    'Una canción para un viaje por carretera',
+    'Una canción que te hace llorar',
+    'Una canción de tu infancia',
+    'Una canción que pones en cada fiesta',
+  ],
+}
 
 interface CreateGameSectionProps {
   isProPlan: boolean
@@ -33,6 +70,7 @@ export function CreateGameSection({
       return next.map((_, i) => prev[i] ?? "")
     })
   }, [rounds])
+  const [showPrompts, setShowPrompts] = useState(false)
   const [isBlind, setIsBlind] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
   const [gameMode, setGameMode] = useState<"single-device" | "multi-device">("multi-device")
@@ -271,39 +309,53 @@ export function CreateGameSection({
 
         {/* Round Prompts */}
         <div>
-          <label className="block text-sm font-medium text-neutral-900 mb-2">
-            Round Prompts
-            <span className="text-xs text-neutral-400 ml-2">(optional)</span>
+          <label className="flex items-center gap-2.5 cursor-pointer select-none mb-2">
+            <input
+              type="checkbox"
+              checked={showPrompts}
+              onChange={(e) => setShowPrompts(e.target.checked)}
+              className="size-4 rounded border-neutral-300 text-primary-500 accent-[#FF6B00] cursor-pointer"
+            />
+            <span className="text-sm font-medium text-neutral-900">Round Prompts</span>
+            <span className="text-xs text-neutral-400">(optional)</span>
           </label>
-          <div className="space-y-2">
-            {Array.from({ length: rounds }, (_, i) => (
-              <input
-                key={i}
-                value={prompts[i] ?? ""}
-                onChange={(e) => {
-                  const next = [...prompts]
-                  next[i] = e.target.value
-                  setPrompts(next)
-                }}
-                placeholder={`Round ${i + 1} — e.g. "A song your dad dances to"`}
-                className="w-full px-4 py-2.5 border border-neutral-300 rounded-lg bg-neutral-50 text-neutral-900 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-              />
-            ))}
-          </div>
+          {showPrompts && (
+            <div className="space-y-2">
+              {Array.from({ length: rounds }, (_, i) => {
+                const examples = ROUND_PROMPT_EXAMPLES[localeFromPath] ?? ROUND_PROMPT_EXAMPLES.en
+                return (
+                  <input
+                    key={i}
+                    value={prompts[i] ?? ""}
+                    onChange={(e) => {
+                      const next = [...prompts]
+                      next[i] = e.target.value
+                      setPrompts(next)
+                    }}
+                    placeholder={`Round ${i + 1} — e.g. "${examples[i] ?? examples[0]}"`}
+                    className="w-full px-4 py-2.5 border border-neutral-300 rounded-lg bg-neutral-50 text-neutral-900 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                  />
+                )
+              })}
+            </div>
+          )}
         </div>
 
         {/* Blind Mode Toggle */}
         <label className="flex items-center gap-3 cursor-pointer select-none">
           <div
             onClick={() => setIsBlind(!isBlind)}
-            className={`relative w-10 h-6 rounded-full transition-colors duration-200 ${
-              isBlind ? "bg-primary-500" : "bg-neutral-300"
+            className={`relative w-10 h-6 rounded-full transition-all duration-200 ${
+              isBlind
+                ? "bg-transparent border-2 border-neutral-200"
+                : "bg-neutral-300"
             }`}
           >
             <span
               className={`absolute top-1 left-1 size-4 bg-white rounded-full shadow transition-transform duration-200 ${
-                isBlind ? "translate-x-4" : "translate-x-0"
+                isBlind ? "translate-x-4 shadow-md" : "translate-x-0"
               }`}
+              style={isBlind ? { top: '2px', left: '2px' } : {}}
             />
           </div>
           <div>
@@ -339,26 +391,25 @@ export function CreateGameSection({
         )}
 
         {/* Create Button */}
-        <ShimmerButton
+        <button
+          type="button"
           onClick={handleCreateGame}
           disabled={isCreating}
-          background="var(--color-primary-500)"
-          shimmerColor="var(--color-neutral-900)"
-          borderRadius="9999px"
-          className="w-full h-12 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="glow-cta w-full h-12 rounded-full font-display font-black text-base disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-opacity duration-200"
+          style={{ background: '#FF6B00', color: '#000000' }}
         >
           {isCreating ? (
-            <span className="flex items-center justify-center gap-2">
+            <>
               <Loader2 className="size-4 animate-spin" />
               <span>{tCommon("loading")}</span>
-            </span>
+            </>
           ) : (
-            <span className="flex items-center justify-center gap-2">
+            <>
               <Music className="size-4" />
               <span>{t("createGame")}</span>
-            </span>
+            </>
           )}
-        </ShimmerButton>
+        </button>
       </div>
 
       {/* Invite Friends Modal */}
