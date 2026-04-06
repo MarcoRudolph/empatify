@@ -64,8 +64,8 @@ function HeroLoginCardInner() {
       {isSent ? (
         <div className="text-center py-6">
           <CheckCircle2 className="size-12 text-primary-500 mx-auto mb-4" />
-          <p className="font-display font-black text-lg text-neutral-900">Check your email!</p>
-          <p className="text-sm text-neutral-500 mt-2 leading-relaxed">
+          <p className="font-display font-black text-lg text-[#0F0F0F]">Check your email!</p>
+          <p className="text-sm text-[#555555] mt-2 leading-relaxed">
             We sent you a magic link — click it to jump straight in.
           </p>
         </div>

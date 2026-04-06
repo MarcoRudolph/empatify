@@ -380,15 +380,14 @@ export function CreateGameSection({
             onClick={() => setIsBlind(!isBlind)}
             className={`relative w-10 h-6 rounded-full transition-all duration-200 ${
               isBlind
-                ? "bg-transparent border-2 border-neutral-200"
-                : "bg-neutral-300"
+                ? "bg-primary-500"
+                : "bg-[#555555]"
             }`}
           >
             <span
               className={`absolute top-1 left-1 size-4 bg-white rounded-full shadow transition-transform duration-200 ${
-                isBlind ? "translate-x-4 shadow-md" : "translate-x-0"
+                isBlind ? "translate-x-4" : "translate-x-0"
               }`}
-              style={isBlind ? { top: '2px', left: '2px' } : {}}
             />
           </div>
           <div>

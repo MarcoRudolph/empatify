@@ -241,7 +241,7 @@ export default function LoginPageClient() {
               role="status"
             >
               <CheckCircle2 className="size-12 text-primary-500 mx-auto mb-4" />
-              <p className="font-semibold text-lg text-black">
+              <p className="font-semibold text-lg text-white">
                 {t("magicLinkSent")}
               </p>
             </div>
