@@ -79,19 +79,20 @@ export async function GET(request: NextRequest) {
     const returnToRaw = requestUrl.searchParams.get("return_to")
     const returnTo = returnToRaw ? sanitizeSpotifyOAuthReturnTo(returnToRaw) : null
 
-    const hostHeader = request.headers.get("host")
-    const isLocalDev = hostHeader && (hostHeader.includes("localhost") || hostHeader.includes("127.0.0.1") || hostHeader.includes("0.0.0.0"))
+    const hostHeader = request.headers.get("host") ?? ""
+    const isLocalDev = hostHeader.includes("localhost") || hostHeader.includes("127.0.0.1") || hostHeader.includes("0.0.0.0")
 
     let baseUrl: string
 
     if (isLocalDev) {
       // Dev: use 127.0.0.1 (Spotify rejects localhost for HTTP)
-      const portMatch = (hostHeader ?? "").match(/:(\d+)$/)
+      const portMatch = hostHeader.match(/:(\d+)$/)
       const port = portMatch ? portMatch[1] : (requestUrl.port || "3000")
       baseUrl = `http://127.0.0.1:${port}`
     } else {
-      // Production: use NEXT_PUBLIC_APP_URL for a stable, canonical URI
-      baseUrl = (process.env.NEXT_PUBLIC_APP_URL ?? `${requestUrl.protocol}//${hostHeader}`).replace(/\/$/, "")
+      // Production: derive from the actual request host so the URI always
+      // matches whatever the user typed in the browser (www or non-www)
+      baseUrl = `${requestUrl.protocol}//${hostHeader}`
     }
 
     const redirectUri = `${baseUrl}/api/spotify/callback`
