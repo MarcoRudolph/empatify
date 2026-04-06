@@ -1,6 +1,8 @@
 import { defineConfig, devices } from '@playwright/test'
+import * as path from 'path'
 
 export default defineConfig({
+  globalSetup: path.resolve(__dirname, 'tests/e2e/global-setup.ts'),
   testDir: './tests/e2e',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -12,7 +14,7 @@ export default defineConfig({
     ['junit', { outputFile: 'tests/e2e/reports/results.xml' }]
   ],
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:3001',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure'
@@ -40,10 +42,15 @@ export default defineConfig({
     }
   ],
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:3000',
+    command: 'next dev -p 3001 -H 0.0.0.0',
+    url: 'http://localhost:3001',
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000
+    timeout: 120 * 1000,
+    // Override APP_URL so the auth callback redirects back to the test server,
+    // not the LAN IP or production URL set in .env
+    env: {
+      NEXT_PUBLIC_APP_URL: 'http://localhost:3001',
+    },
   }
 })
 

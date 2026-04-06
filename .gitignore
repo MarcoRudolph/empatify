@@ -37,5 +37,8 @@ next-env.d.ts
 
 # perf scripts — session tokens + output reports
 scripts/perf/auth-state.json
+
+# playwright — pre-baked auth sessions (contain real tokens, never commit)
+tests/e2e/.auth/
 scripts/perf/perf-report-*.json
 scripts/perf/perf-report-*.md

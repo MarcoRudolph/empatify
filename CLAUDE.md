@@ -76,68 +76,36 @@ Trial tracking: `users.ai_trial_started_at` + `users.ai_tokens_used`. Gate is in
 
 **OpenBrain** is the shared vector memory (Supabase project: `vdlucgmzmdjlnzomwfqa`). All Claude sessions store learnings, decisions, and progress there.
 
-### How to query
+### How to use Open Brain MCP
 
-**Semantic search** (2-step via edge function):
+The `open-brain` MCP is registered at user scope. Tools: `capture_thought`, `search_thoughts`, `list_thoughts`, `thought_stats`.
+
+If MCP tools are not available in the deferred tools list (check session), call via curl:
+
 ```bash
-# Step 1 — get embedding vector
-curl -X POST https://vdlucgmzmdjlnzomwfqa.supabase.co/functions/v1/embed-memory \
-  -H "Authorization: Bearer <ANON_KEY>" \
+# Search thoughts
+curl -s -X POST "https://vdlucgmzmdjlnzomwfqa.supabase.co/functions/v1/open-brain-mcp" \
+  -H "x-brain-key: 0c3d14b2d3e3cfe5a57610972c4f8e3d035f8901ff5fe38c8bd152225134f1aa" \
   -H "Content-Type: application/json" \
-  -d '{"query": "empatify pro plan category validation"}'
+  -d '{"jsonrpc":"2.0","method":"tools/call","id":1,"params":{"name":"search_thoughts","arguments":{"query":"empatify pro plan"}}}'
 
-# Step 2 — search (requires service role, use mcp2cli)
-uvx mcp2cli @supabase-openbrain execute_sql --sql "
-  SELECT topic, domain, memory_kind, LEFT(content, 300) AS preview
-  FROM public.memories
-  WHERE is_active = true AND namespace = 'marco'
-  ORDER BY created_at DESC LIMIT 20;
-"
-```
-
-**Keyword query:**
-```bash
-uvx mcp2cli @supabase-openbrain execute_sql --sql "
-  SELECT topic, domain, memory_kind, content
-  FROM public.memories
-  WHERE is_active = true AND namespace = 'marco'
-    AND topic ILIKE '%empatify%'
-  ORDER BY created_at DESC LIMIT 20;
-"
-```
-
-### Empatify entry patterns in OpenBrain
-
-When storing Empatify memories, use these domain/kind combinations:
-
-| What | domain | memory_kind |
-|---|---|---|
-| Feature decisions (Pro vs Free) | `decision` | `decision_record` |
-| DB schema changes / migrations | `coding_engineering` | `engineering_note` |
-| Game logic understanding | `project` | `distilled_fact` |
-| Implementation progress | `project` | `project_update` |
-| UX / product decisions | `decision` | `decision_record` |
-| AI cost / token analysis | `coding_engineering` | `engineering_note` |
-| Bug fixes | `coding_engineering` | `engineering_note` |
-
-Always set `is_project_related: true`. The `project_id` for Empatify memories should be consistent across sessions — query for it first:
-```sql
-SELECT DISTINCT metadata->>'project_name', project_id
-FROM public.memories
-WHERE namespace = 'marco' AND metadata->>'project_name' = 'empatify'
-LIMIT 1;
+# Capture thought
+curl -s -X POST "https://vdlucgmzmdjlnzomwfqa.supabase.co/functions/v1/open-brain-mcp" \
+  -H "x-brain-key: 0c3d14b2d3e3cfe5a57610972c4f8e3d035f8901ff5fe38c8bd152225134f1aa" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"tools/call","id":2,"params":{"name":"capture_thought","arguments":{"content":"[empatify] your learning here. metadata.domain: [project:empatify, ...]"}}}'
 ```
 
 ### What is stored in OpenBrain for Empatify
 
-As of 2026-04-02, the following context has been documented:
+As of 2026-04-06, the following context has been documented:
 
 - **Game core loop** — how lobbies, songs, ratings, and the leaderboard work
 - **Pro vs Free plan definition** — full feature table, trial logic ($1 budget / 4 weeks)
 - **AI category validation** — prompt optimisation (12 tokens vs 125 tokens, English yes/no)
 - **Feature specs** — Round Prompts, Blind Mode, Post-Game Mood Card, Playlist Export, Game History, Top 5 stat
-
-> **Note:** If `uvx mcp2cli @supabase-openbrain` fails with OAuth errors, the memories need to be inserted manually. The INSERT SQL can be generated from the OpenBrain skill at `C:\Users\Marco\.claude\skills\openbrain-memory-manager\SKILL.md`.
+- **Dashboard upsert fix** — atomic `onConflictDoUpdate` to prevent duplicate key on parallel logins
+- **Playwright test setup** — port 3001, global-setup storageState auth, webServer.env override for NEXT_PUBLIC_APP_URL
 
 ---
 

@@ -13,7 +13,7 @@ import { Link } from '@/i18n/routing';
 import NextLink from 'next/link';
 import { db } from '@/lib/db';
 import { users, lobbies, lobbyParticipants, songs, ratings, friends } from '@/lib/db/schema';
-import { eq, or, desc, and, inArray } from 'drizzle-orm';
+import { eq, or, desc, and, inArray, sql } from 'drizzle-orm';
 import { LobbyList } from './LobbyList'
 import { fetchDashboardData } from './fetchDashboardData';
 import { withCache } from '@/lib/cache';
@@ -47,13 +47,33 @@ export default async function DashboardPage({
   let dbUser: any = null;
 
   try {
-    // Get basic user info — cached 5 min (profile rarely changes)
+    const displayName =
+      user.user_metadata?.display_name ||
+      user.user_metadata?.full_name ||
+      user.email?.split("@")[0] ||
+      "User";
+
+    // Atomic upsert: insert on first visit, no-op on subsequent visits.
+    // Avoids the SELECT→INSERT race condition when parallel requests all see
+    // an empty cache and simultaneously attempt to create the same user.
     const userRecord = await withCache(
       `user:profile:${user.id}`,
       300,
       () =>
         db
-          .select({
+          .insert(users)
+          .values({
+            email: user.email!,
+            name: displayName,
+            avatarUrl: user.user_metadata?.avatar_url || null,
+          })
+          .onConflictDoUpdate({
+            target: users.email,
+            // SET email = EXCLUDED.email is a deliberate no-op: it keeps the
+            // existing row untouched while RETURNING still gives us the row.
+            set: { email: sql`excluded.email` },
+          })
+          .returning({
             id: users.id,
             email: users.email,
             name: users.name,
@@ -61,37 +81,9 @@ export default async function DashboardPage({
             proPlan: users.proPlan,
             createdAt: users.createdAt,
           })
-          .from(users)
-          .where(eq(users.email, user.email!))
-          .limit(1)
     );
 
-    if (userRecord.length === 0) {
-      // If user doesn't exist in database, create them
-      const displayName =
-        user.user_metadata?.display_name ||
-        user.user_metadata?.full_name ||
-        user.email?.split("@")[0] ||
-        "User";
-      const [newUser] = await db
-        .insert(users)
-        .values({
-          email: user.email!,
-          name: displayName,
-          avatarUrl: user.user_metadata?.avatar_url || null,
-        })
-        .returning({
-          id: users.id,
-          email: users.email,
-          name: users.name,
-          avatarUrl: users.avatarUrl,
-          proPlan: users.proPlan,
-          createdAt: users.createdAt,
-        });
-      dbUser = newUser;
-    } else {
-      dbUser = userRecord[0];
-    }
+    dbUser = userRecord[0];
   } catch (error: any) {
     // DrizzleQueryError has a 'cause' property with the actual PostgreSQL error
     const pgError = error?.cause || error;

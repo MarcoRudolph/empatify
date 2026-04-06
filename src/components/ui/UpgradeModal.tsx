@@ -9,21 +9,25 @@ interface UpgradeModalProps {
 }
 
 const FREE_FEATURES = [
-  "5 rounds per game (fixed)",
-  "\"All\" music category",
-  "Multi-device & single-device modes",
-  "Invite friends to games",
-  "Unlimited games",
+  "Up to 3 players per lobby",
+  "1–10 rounds, free choice",
+  "Category games — 4-week free trial (up to $1 AI cost)",
+  "Friends & in-game messaging",
+  "Last 3 games history",
+  "Playlist export (Top 3 songs)",
+  "Post-game Mood Card (blurred preview)",
 ]
 
-const PRO_FEATURES = [
-  "1–10 rounds per game",
-  "All music categories (80s, Hip-Hop, Techno…)",
-  "Multi-device & single-device modes",
-  "Invite friends to games",
-  "Unlimited games",
-  "Priority support",
-  "Early access to new features",
+const PRO_FEATURES: { text: string; highlight?: boolean }[] = [
+  { text: "Unlimited players per lobby", highlight: true },
+  { text: "1–10 rounds, free choice" },
+  { text: "All music categories — always on (80s, Hip-Hop, Techno…)", highlight: true },
+  { text: "Round Prompts — give each round a theme", highlight: true },
+  { text: "Blind Mode — hide who submitted which song", highlight: true },
+  { text: "Friends & in-game messaging" },
+  { text: "Full game history + Top 5 songs stat", highlight: true },
+  { text: "Full playlist export", highlight: true },
+  { text: "Post-game Mood Card — full & shareable", highlight: true },
 ]
 
 export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
@@ -73,7 +77,7 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
               </div>
               <div className="flex items-baseline gap-1">
                 <span className="font-display text-4xl font-black text-neutral-900">€0</span>
-                <span className="text-sm text-neutral-500">/ forever</span>
+                <span className="text-sm text-neutral-500">/ 4-week trial</span>
               </div>
             </div>
 
@@ -110,10 +114,10 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
             </div>
 
             <ul className="space-y-2.5 flex-1 mb-5 relative">
-              {PRO_FEATURES.map((feature, i) => (
-                <li key={feature} className="flex items-start gap-2.5 text-sm text-neutral-700">
-                  <Check className={`size-4 shrink-0 mt-0.5 ${i < 2 ? "text-primary-500" : "text-neutral-400"}`} />
-                  {feature}
+              {PRO_FEATURES.map(({ text, highlight }) => (
+                <li key={text} className="flex items-start gap-2.5 text-sm text-neutral-700">
+                  <Check className={`size-4 shrink-0 mt-0.5 ${highlight ? "text-primary-500" : "text-neutral-400"}`} />
+                  {text}
                 </li>
               ))}
             </ul>

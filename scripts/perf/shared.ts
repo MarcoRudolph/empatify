@@ -26,11 +26,11 @@ export interface FlowMetrics {
 export async function dismissCookies(page: Page): Promise<void> {
   try {
     await page.waitForSelector(
-      'button[data-ref="e204"], button:has-text("Nur essenzielle"), button:has-text("essential")',
+      'button[data-ref="e204"], button:has-text("Nur essenzielle")',
       { timeout: 4000 }
     )
     await page
-      .locator('button[data-ref="e204"], button:has-text("Nur essenzielle"), button:has-text("essential")')
+      .locator('button[data-ref="e204"], button:has-text("Nur essenzielle")')
       .first()
       .click()
   } catch {

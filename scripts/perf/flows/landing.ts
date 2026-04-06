@@ -24,7 +24,7 @@ export async function measureLanding(browser: Browser): Promise<FlowMetrics> {
     await dismissCookies(page)
 
     const keySelector = 'button:has-text("Continue with Google"), a:has-text("Continue with Google")'
-    await page.waitForSelector(keySelector, { timeout: 15000 })
+    await page.waitForSelector(keySelector, { state: 'attached', timeout: 15000 })
     const tti = Date.now() - navStart
 
     const { fcpMs, domContentLoadedMs } = await collectPaintMetrics(page)

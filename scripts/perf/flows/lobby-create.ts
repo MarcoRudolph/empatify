@@ -1,8 +1,8 @@
 /**
- * flows/lobby-create.ts — create a lobby from dashboard → reach lobby page
+ * flows/lobby-create.ts — create a lobby via API → measure lobby page load
  *
- * Returns FlowMetrics + the created lobby ID (passed to lobby-join and select-song).
- * Key selector: player list or round count — indicates lobby is fully loaded.
+ * Uses page.evaluate() to call /api/lobby/create directly with the page's auth cookies.
+ * Avoids React hydration timing issues from trying to click the UI button.
  */
 
 import { Browser } from '@playwright/test'
@@ -28,34 +28,36 @@ export async function measureLobbyCreate(browser: Browser): Promise<LobbyCreateR
   const getApiTimings = attachApiCollector(page)
 
   try {
-    await page.goto(`${BASE_URL}/dashboard`, { waitUntil: 'domcontentloaded' })
+    const navStart = Date.now()
+
+    // Load dashboard first so the page context has all auth cookies active
+    await page.goto(`${BASE_URL}/en/dashboard`, { waitUntil: 'domcontentloaded' })
     await dismissCookies(page)
 
-    // Open create-game modal / section
-    const createBtn = page.locator('button:has-text("Create Game"), button:has-text("Spiel erstellen")').first()
-    await createBtn.waitFor({ state: 'visible', timeout: 15000 })
-    await createBtn.click()
+    // Call the API directly from page context — uses auth cookies without UI interaction
+    const result = await page.evaluate(async () => {
+      const res = await fetch('/api/lobby/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rounds: 3 }),
+        credentials: 'include',
+      })
+      const body = await res.json()
+      return { status: res.status, body }
+    })
 
-    // Submit the game creation form with defaults (no category, standard rounds)
-    // Try "Start" or "Create" button inside the modal/form
-    const submitBtn = page
-      .locator('button[type="submit"], button:has-text("Start"), button:has-text("Starten"), button:has-text("Create Lobby")')
-      .first()
-    await submitBtn.waitFor({ state: 'visible', timeout: 8000 })
+    if (result.status !== 200 && result.status !== 201) {
+      throw new Error(`API ${result.status}: ${JSON.stringify(result.body).slice(0, 300)}`)
+    }
 
-    const navStart = Date.now()
-    await submitBtn.click()
+    const lobbyId: string = result.body?.lobby?.id
+    if (!lobbyId) throw new Error(`No lobbyId in response: ${JSON.stringify(result.body)}`)
 
-    // Wait for redirect to /lobby/[id]
-    await page.waitForURL(/\/lobby\//, { timeout: 20000 })
-    const lobbyUrl = page.url()
-    const lobbyIdMatch = lobbyUrl.match(/\/lobby\/([^/?#]+)/)
-    const lobbyId = lobbyIdMatch ? lobbyIdMatch[1] : null
-
-    // Wait for lobby to be interactive (player list)
+    // Navigate to the lobby page and measure load time
+    await page.goto(`${BASE_URL}/en/lobby/${lobbyId}`, { waitUntil: 'domcontentloaded' })
     const keySelector =
-      '[data-testid="lobby-player-list"], [data-testid="player-count"], h2:has-text("Lobby"), h1:has-text("Lobby")'
-    await page.waitForSelector(keySelector, { timeout: 15000 })
+      '[data-testid="lobby-player-list"], [data-testid="player-count"], h2:has-text("Lobby"), h1:has-text("Lobby"), [class*="lobby"]'
+    await page.waitForSelector(keySelector, { state: 'attached', timeout: 15000 })
     const tti = Date.now() - navStart
 
     const { fcpMs, domContentLoadedMs } = await collectPaintMetrics(page)

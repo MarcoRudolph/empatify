@@ -39,9 +39,6 @@ export const Footer: React.FC<{ locale: string }> = async ({ locale }) => {
                 empatify
               </span>
             </div>
-            <p className="text-sm text-neutral-500 leading-relaxed max-w-xs">
-              {t('description')}
-            </p>
             <p className="text-xs text-neutral-400 mt-1.5">
               {t('developedBy')}{' '}
               <a

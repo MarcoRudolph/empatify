@@ -218,18 +218,6 @@ export default async function LandingPage({
             {t('about.description')}
           </p>
 
-          {/* Subtle brand repeat — no duplicate CTA button */}
-          <div className="flex items-center justify-center gap-3 text-neutral-400">
-            <div className="spin-slow text-primary-500/60 size-6">
-              <FlowerIcon className="size-6" />
-            </div>
-            <span className="font-display text-sm font-black tracking-widest uppercase text-neutral-400">
-              empatify
-            </span>
-            <div className="spin-slow text-primary-500/60 size-6" style={{ animationDirection: 'reverse' }}>
-              <FlowerIcon className="size-6" />
-            </div>
-          </div>
         </div>
       </section>
 
