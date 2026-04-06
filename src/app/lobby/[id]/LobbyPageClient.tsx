@@ -186,7 +186,7 @@ export function LobbyPageClient({
           aria-label={t("back")}
         >
           <ArrowLeft className="size-4 transition-transform duration-200 group-hover:-translate-x-0.5" />
-          <span>{t("back")} {tDashboard("title")}</span>
+          <span>{tDashboard("title")}</span>
         </button>
 
         {/* Header */}

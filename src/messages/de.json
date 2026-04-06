@@ -82,11 +82,14 @@
     "gameModeMultiDeviceDescription": "Jeder Spieler tritt mit seinem eigenen Gerät bei",
     "lobbyRunning": "Läuft",
     "lobbyFinished": "Beendet",
+    "showFinished": "Beendete anzeigen ({count})",
+    "hideFinished": "Beendete ausblenden",
     "lobbyNotStarted": "Nicht gestartet",
     "currentRound": "Aktuelle Runde",
     "selectSongForRound": "Song für diese Runde auswählen",
     "rateInRound": "Song in Runde {round} bewerten",
-    "copyInviteLink": "Invite-Link kopieren"
+    "copyInviteLink": "Invite-Link kopieren",
+    "promptNotViable": "Fast keine Songs passen zu diesem Prompt."
   },
   "lobby": {
     "create": "Lobby erstellen",
@@ -153,6 +156,8 @@
     "noScores": "No Scores",
     "noScoresDescription": "Noch keine Runde abgeschlossen. Sobald Songs bewertet wurden, erscheinen hier die Ergebnisse.",
     "categoryMismatch": "Der Song passt nicht. Die festgelegte Kategorie für dieses Spiel lautet: {category}.",
+    "promptMismatchWarning": "Dieser Song passt möglicherweise nicht zum Prompt — dein Team wird urteilen.",
+    "promptLabel": "Runden-Prompt",
     "songSaveError": "Fehler beim Speichern des Songs",
     "savingSong": "Song wird gespeichert...",
     "searchPlaceholder": "Suche nach Songs, Artists oder Alben...",

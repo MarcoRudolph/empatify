@@ -74,57 +74,26 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Build redirect URI - Spotify requires 127.0.0.1 (not localhost) for HTTP redirects
+    // Build redirect URI
     const requestUrl = new URL(request.url)
     const returnToRaw = requestUrl.searchParams.get("return_to")
     const returnTo = returnToRaw ? sanitizeSpotifyOAuthReturnTo(returnToRaw) : null
 
-    // Get the Host header (contains what the client actually used to connect)
     const hostHeader = request.headers.get("host")
-    
-    // Extract port from host header or request URL
-    let port = requestUrl.port
-    if (!port && hostHeader) {
-      const hostPortMatch = hostHeader.match(/:(\d+)$/)
-      if (hostPortMatch) {
-        port = hostPortMatch[1]
-      }
-    }
-    // Default to 3000 for development if no port found
-    if (!port) {
-      port = requestUrl.protocol === "https:" ? "443" : "3000"
-    }
-    
+    const isLocalDev = hostHeader && (hostHeader.includes("localhost") || hostHeader.includes("127.0.0.1") || hostHeader.includes("0.0.0.0"))
+
     let baseUrl: string
-    
-    // If host header contains localhost or 0.0.0.0, convert to 127.0.0.1
-    if (hostHeader && (hostHeader.includes("localhost") || hostHeader.includes("0.0.0.0"))) {
-      // Extract port from host header if present
-      const hostPortMatch = hostHeader.match(/:(\d+)$/)
-      const extractedPort = hostPortMatch ? hostPortMatch[1] : port
-      baseUrl = `http://127.0.0.1:${extractedPort}`
-    } else if (hostHeader && !hostHeader.includes("0.0.0.0") && !hostHeader.includes("localhost")) {
-      // Use the Host header as-is for non-localhost addresses
-      const protocol = requestUrl.protocol || "http:"
-      baseUrl = `${protocol}//${hostHeader}`
-    } else {
-      // Fallback: use 127.0.0.1 with extracted port
+
+    if (isLocalDev) {
+      // Dev: use 127.0.0.1 (Spotify rejects localhost for HTTP)
+      const portMatch = (hostHeader ?? "").match(/:(\d+)$/)
+      const port = portMatch ? portMatch[1] : (requestUrl.port || "3000")
       baseUrl = `http://127.0.0.1:${port}`
+    } else {
+      // Production: use NEXT_PUBLIC_APP_URL for a stable, canonical URI
+      baseUrl = (process.env.NEXT_PUBLIC_APP_URL ?? `${requestUrl.protocol}//${hostHeader}`).replace(/\/$/, "")
     }
-    
-    // Final safety check: ensure no localhost or 0.0.0.0 remains
-    if (baseUrl.includes("localhost")) {
-      const portMatch = baseUrl.match(/:(\d+)/)
-      const finalPort = portMatch ? portMatch[1] : port
-      baseUrl = `http://127.0.0.1:${finalPort}`
-    }
-    
-    if (baseUrl.includes("0.0.0.0")) {
-      const portMatch = baseUrl.match(/:(\d+)/)
-      const finalPort = portMatch ? portMatch[1] : port
-      baseUrl = `http://127.0.0.1:${finalPort}`
-    }
-    
+
     const redirectUri = `${baseUrl}/api/spotify/callback`
     
     // Log for debugging - IMPORTANT: This shows what Redirect URI you need to register in Spotify Dashboard

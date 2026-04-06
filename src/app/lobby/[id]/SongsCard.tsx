@@ -489,6 +489,18 @@ export function SongsCard({
         </h2>
       </div>
 
+      {/* Active round prompt */}
+      {!isGameFinished && lobby.roundPrompts?.[selectedRound - 1] && (
+        <div className="mb-4 px-3 py-2.5 bg-primary-500/10 border border-primary-500/20 rounded-xl">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-primary-500 mb-0.5">
+            {t("promptLabel")}
+          </p>
+          <p className="text-sm font-semibold text-neutral-900">
+            {lobby.roundPrompts[selectedRound - 1]}
+          </p>
+        </div>
+      )}
+
       {/* Round Tabs — segmented control */}
       <div className="mb-6">
         <div className="inline-flex items-center gap-1 bg-neutral-200 rounded-full p-1 flex-wrap">

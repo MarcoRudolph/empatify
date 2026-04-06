@@ -44,6 +44,7 @@ export function SelectSongPageClient() {
   const [visibleResults, setVisibleResults] = useState(10)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<ErrorMessage | null>(null)
+  const [promptWarning, setPromptWarning] = useState<string | null>(null)
   const [category, setCategory] = useState<string | null>(null)
   const [roundPrompts, setRoundPrompts] = useState<string[] | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -157,7 +158,14 @@ export function SelectSongPageClient() {
       })
 
       if (response.ok) {
-        router.push(`/${locale}/lobby/${lobbyId}?round=${roundNumber}`)
+        const data = await response.json()
+        if (data.warning?.code === "PROMPT_MISMATCH") {
+          setPromptWarning(t("promptMismatchWarning"))
+          // Redirect after short delay so user sees the warning
+          setTimeout(() => router.push(`/${locale}/lobby/${lobbyId}?round=${roundNumber}`), 2500)
+        } else {
+          router.push(`/${locale}/lobby/${lobbyId}?round=${roundNumber}`)
+        }
       } else {
         const data = await response.json()
         const errorCode = data.error?.code
@@ -226,6 +234,32 @@ export function SelectSongPageClient() {
 
   return (
     <div className="min-h-screen bg-neutral-50 p-4 md:p-8">
+      {/* Prompt mismatch warning — amber, dismissible */}
+      {promptWarning && (
+        <section
+          className="fixed top-4 left-4 right-4 z-50 animate-in slide-in-from-top-2 duration-300"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <div className="max-w-2xl mx-auto">
+            <div className="p-4 rounded-xl border border-yellow-300 bg-yellow-50 shadow-lg">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="size-5 text-yellow-600 shrink-0 mt-0.5" aria-hidden />
+                <p className="flex-1 text-sm font-medium text-yellow-900">{promptWarning}</p>
+                <button
+                  type="button"
+                  onClick={() => setPromptWarning(null)}
+                  className="text-yellow-700 hover:text-yellow-900 rounded-lg p-1 shrink-0 transition-colors duration-200"
+                  aria-label={tCommon("close")}
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Error toast - token contrast: error surface, dark text */}
       {error && (
         <section

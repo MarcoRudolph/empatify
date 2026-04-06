@@ -83,11 +83,14 @@
     "gameModeMultiDeviceDescription": "Each player joins with their own device",
     "lobbyRunning": "Running",
     "lobbyFinished": "Finished",
+    "showFinished": "Show finished ({count})",
+    "hideFinished": "Hide finished",
     "lobbyNotStarted": "Not started",
     "currentRound": "Current Round",
     "selectSongForRound": "Select song for this round",
     "rateInRound": "Rate the song in round {round}",
-    "copyInviteLink": "Copy Invite Link"
+    "copyInviteLink": "Copy Invite Link",
+    "promptNotViable": "Almost no songs fit into that prompt."
   },
   "lobby": {
     "create": "Create Lobby",
@@ -151,6 +154,8 @@
     "noScores": "No Scores",
     "noScoresDescription": "No rounds completed yet. Once songs have been rated, results will appear here.",
     "categoryMismatch": "The song does not match. The specified category for this game is: {category}.",
+    "promptMismatchWarning": "This song may not fit the prompt — your team will judge.",
+    "promptLabel": "Round Prompt",
     "songSaveError": "Error saving song",
     "savingSong": "Saving song...",
     "searchPlaceholder": "Search songs, artists, or albums...",

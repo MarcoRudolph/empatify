@@ -63,6 +63,7 @@ export function CreateGameSection({
   const [rounds, setRounds] = useState(5)
   const [category, setCategory] = useState("all")
   const [prompts, setPrompts] = useState<string[]>(Array(5).fill(""))
+  const [promptWarnings, setPromptWarnings] = useState<Record<number, boolean>>({})
 
   useEffect(() => {
     setPrompts((prev) => {
@@ -80,6 +81,26 @@ export function CreateGameSection({
     typeof window !== "undefined"
       ? window.location.pathname.match(/^\/(de|en|pt|fr|es)(\/|$)/)?.[1] ?? "en"
       : "en"
+
+  const checkPromptViability = async (index: number, value: string) => {
+    if (!value.trim()) {
+      setPromptWarnings((prev) => { const next = { ...prev }; delete next[index]; return next })
+      return
+    }
+    try {
+      const res = await fetch("/api/ai/validate-prompt-viability", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: value.trim() }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setPromptWarnings((prev) => ({ ...prev, [index]: data.viable === false }))
+      }
+    } catch {
+      // Fail silent — don't block creation
+    }
+  }
 
   const categories = [
     { value: "all", label: tLobby("categoryAll") },
@@ -324,17 +345,29 @@ export function CreateGameSection({
               {Array.from({ length: rounds }, (_, i) => {
                 const examples = ROUND_PROMPT_EXAMPLES[localeFromPath] ?? ROUND_PROMPT_EXAMPLES.en
                 return (
-                  <input
-                    key={i}
-                    value={prompts[i] ?? ""}
-                    onChange={(e) => {
-                      const next = [...prompts]
-                      next[i] = e.target.value
-                      setPrompts(next)
-                    }}
-                    placeholder={`Round ${i + 1} — e.g. "${examples[i] ?? examples[0]}"`}
-                    className="w-full px-4 py-2.5 border border-neutral-300 rounded-lg bg-neutral-50 text-neutral-900 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-                  />
+                  <div key={i}>
+                    <input
+                      value={prompts[i] ?? ""}
+                      onChange={(e) => {
+                        const next = [...prompts]
+                        next[i] = e.target.value
+                        setPrompts(next)
+                        // Clear warning while typing
+                        if (promptWarnings[i]) {
+                          setPromptWarnings((prev) => { const n = { ...prev }; delete n[i]; return n })
+                        }
+                      }}
+                      onBlur={(e) => checkPromptViability(i, e.target.value)}
+                      placeholder={`Round ${i + 1} — e.g. "${examples[i] ?? examples[0]}"`}
+                      className="w-full px-4 py-2.5 border border-neutral-300 rounded-lg bg-neutral-50 text-neutral-900 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                    />
+                    {promptWarnings[i] && (
+                      <p className="mt-1 text-xs text-yellow-700 flex items-center gap-1">
+                        <span>⚠</span>
+                        {t("promptNotViable")}
+                      </p>
+                    )}
+                  </div>
                 )
               })}
             </div>

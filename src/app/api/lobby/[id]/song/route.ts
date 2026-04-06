@@ -72,9 +72,9 @@ export async function POST(
       )
     }
 
-    // Get lobby to check if category is set
+    // Get lobby to check category and round prompts
     const [lobby] = await db
-      .select({ category: lobbies.category })
+      .select({ category: lobbies.category, roundPrompts: lobbies.roundPrompts })
       .from(lobbies)
       .where(eq(lobbies.id, lobbyId))
       .limit(1)
@@ -237,7 +237,57 @@ export async function POST(
       })
     }
 
-    return NextResponse.json({ success: true }, { status: 200 })
+    // Check round prompt fit (Pro only, warning only — never blocks)
+    let promptWarning: { code: string; message: string } | null = null
+    const roundPrompt = lobby.roundPrompts?.[roundNumber - 1]
+    if (roundPrompt) {
+      try {
+        const [proUser] = await db
+          .select({ proPlan: users.proPlan })
+          .from(users)
+          .where(eq(users.id, dbUser.id))
+          .limit(1)
+
+        if (proUser?.proPlan) {
+          const accessToken = await getClientCredentialsToken()
+          if (accessToken) {
+            const trackResponse = await fetch(
+              `https://api.spotify.com/v1/tracks/${spotifyTrackId}`,
+              { headers: { Authorization: `Bearer ${accessToken}` } }
+            )
+            if (trackResponse.ok) {
+              const trackData = await trackResponse.json()
+              const songName = trackData.name
+              const artistName = trackData.artists?.[0]?.name || ""
+              const fullSongName = artistName ? `${songName} - ${artistName}` : songName
+
+              const validationResponse = await fetch(
+                `${request.nextUrl.origin}/api/ai/validate-song-prompt`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ songName: fullSongName, prompt: roundPrompt }),
+                }
+              )
+              if (validationResponse.ok) {
+                const validationData = await validationResponse.json()
+                if (validationData.fits === false) {
+                  promptWarning = { code: "PROMPT_MISMATCH", message: "prompt_mismatch" }
+                }
+              }
+            }
+          }
+        }
+      } catch (promptError: any) {
+        // Fail open — never block on prompt validation error
+        console.warn("Prompt validation error, ignoring:", promptError?.message)
+      }
+    }
+
+    return NextResponse.json(
+      { success: true, ...(promptWarning ? { warning: promptWarning } : {}) },
+      { status: 200 }
+    )
   } catch (error: any) {
     console.error("Error saving song:", error)
     return NextResponse.json(

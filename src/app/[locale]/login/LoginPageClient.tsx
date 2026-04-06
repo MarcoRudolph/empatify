@@ -237,11 +237,11 @@ export default function LoginPageClient() {
 
           {isMagicLinkSent ? (
             <div
-              className="p-4 bg-neutral-100 border border-neutral-300 rounded-lg flex items-start gap-3"
+              className="py-6 text-center"
               role="status"
             >
-              <CheckCircle2 className="size-5 text-primary-600 shrink-0 mt-0.5" />
-              <p className="text-sm font-medium text-neutral-900">
+              <CheckCircle2 className="size-12 text-primary-500 mx-auto mb-4" />
+              <p className="font-semibold text-lg text-black">
                 {t("magicLinkSent")}
               </p>
             </div>

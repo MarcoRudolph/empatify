@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import NextLink from 'next/link';
 import { useTranslations } from 'next-intl';
-import { Music, Calendar, Star, Trophy } from 'lucide-react';
+import { Music, Calendar, Star, Trophy, ChevronDown, ChevronUp } from 'lucide-react';
 import { LobbyMenu } from './LobbyMenu';
 
 interface Lobby {
@@ -43,8 +43,13 @@ function relativeDate(dateStr: string): string {
 
 export function LobbyList({ lobbies, user, locale }: LobbyListProps) {
   const [loadingLobbyId, setLoadingLobbyId] = useState<string | null>(null);
+  const [showFinished, setShowFinished] = useState(false);
   const t = useTranslations('dashboard');
   const tLobby = useTranslations('lobby');
+
+  const activeLobbies = lobbies.filter((l) => l.status !== 'finished');
+  const finishedLobbies = lobbies.filter((l) => l.status === 'finished');
+  const visibleLobbies = showFinished ? lobbies : activeLobbies;
 
   const getCategoryLabel = (cat: string | null) => {
     if (!cat) return tLobby('categoryAll');
@@ -75,7 +80,7 @@ export function LobbyList({ lobbies, user, locale }: LobbyListProps) {
 
   return (
     <div className="space-y-3">
-      {lobbies.map((lobby) => {
+      {visibleLobbies.map((lobby) => {
         const statusInfo = getStatusInfo(lobby.status || 'not_started');
         const isWinner =
           lobby.status === 'finished' &&
@@ -217,6 +222,25 @@ export function LobbyList({ lobbies, user, locale }: LobbyListProps) {
           </NextLink>
         );
       })}
+
+      {finishedLobbies.length > 0 && (
+        <button
+          onClick={() => setShowFinished((v) => !v)}
+          className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-700 transition-colors duration-200 mt-1 mx-auto"
+        >
+          {showFinished ? (
+            <>
+              <ChevronUp className="size-4" />
+              {t('hideFinished')}
+            </>
+          ) : (
+            <>
+              <ChevronDown className="size-4" />
+              {t('showFinished', { count: finishedLobbies.length })}
+            </>
+          )}
+        </button>
+      )}
     </div>
   );
 }

@@ -81,11 +81,14 @@
     "gameModeMultiDeviceDescription": "Cada jugador se une con su propio dispositivo",
     "lobbyRunning": "En curso",
     "lobbyFinished": "Finalizado",
+    "showFinished": "Mostrar finalizados ({count})",
+    "hideFinished": "Ocultar finalizados",
     "lobbyNotStarted": "No iniciado",
     "currentRound": "Ronda actual",
     "selectSongForRound": "Seleccionar canción para esta ronda",
     "rateInRound": "Valora la canción en la ronda {round}",
-    "copyInviteLink": "Copiar enlace de invitación"
+    "copyInviteLink": "Copiar enlace de invitación",
+    "promptNotViable": "Casi ninguna canción encaja en ese prompt."
   },
   "lobby": {
     "create": "Crear sala",
@@ -149,6 +152,8 @@
     "noScores": "Sin Puntuaciones",
     "noScoresDescription": "Aún no se ha completado ninguna ronda. Una vez que se hayan calificado las canciones, los resultados aparecerán aquí.",
     "categoryMismatch": "La canción no coincide. La categoría especificada para este juego es: {category}.",
+    "promptMismatchWarning": "Esta canción puede no encajar con el prompt — tu equipo lo juzgará.",
+    "promptLabel": "Prompt de ronda",
     "songSaveError": "Error al guardar la canción",
     "savingSong": "Guardando canción...",
     "searchPlaceholder": "Busca canciones, artistas o álbumes...",
