@@ -71,7 +71,7 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
           {/* Free Plan */}
           <div className="rounded-xl border border-neutral-300 bg-neutral-100 p-5 flex flex-col">
             <div className="mb-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-200 text-neutral-600 text-xs font-semibold uppercase tracking-wider mb-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-300 text-neutral-800 text-xs font-semibold uppercase tracking-wider mb-3">
                 <Music2 className="size-3.5" />
                 Free Plan
               </div>
@@ -83,22 +83,22 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
 
             <ul className="space-y-2.5 flex-1 mb-5">
               {FREE_FEATURES.map((feature) => (
-                <li key={feature} className="flex items-start gap-2.5 text-sm text-neutral-600">
-                  <Check className="size-4 text-neutral-400 shrink-0 mt-0.5" />
+                <li key={feature} className="flex items-start gap-2.5 text-sm text-neutral-700">
+                  <Check className="size-4 text-neutral-500 shrink-0 mt-0.5" />
                   {feature}
                 </li>
               ))}
             </ul>
 
             <div className="mt-auto">
-              <div className="w-full py-2.5 rounded-lg border border-neutral-300 bg-neutral-200 text-center text-sm font-semibold text-neutral-500 cursor-default select-none">
+              <div className="w-full py-2.5 rounded-lg border border-neutral-300 bg-neutral-200 text-center text-sm font-semibold text-neutral-700 cursor-default select-none">
                 Current Plan
               </div>
             </div>
           </div>
 
           {/* Pro Plan */}
-          <div className="rounded-xl border-2 border-primary-500 bg-white p-5 flex flex-col relative overflow-hidden shadow-lg shadow-primary-500/10">
+          <div className="rounded-xl border-2 border-primary-500 bg-neutral-200 p-5 flex flex-col relative overflow-hidden shadow-lg shadow-primary-500/10">
             {/* Glow */}
             <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary-500/10 rounded-full blur-2xl pointer-events-none" />
 

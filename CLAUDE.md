@@ -117,3 +117,39 @@ As of 2026-04-06, the following context has been documented:
 - **Brand mark:** FlowerIcon SVG (7 circles) + `.spin-slow` CSS class + "empatify" in Unbounded weight-900. See `DESIGN.md` in global Claude rules.
 - **API errors:** Always return `{ error: { code, message, status } }` — consistent shape across all routes.
 - **Category validation:** Always fail open — if AI call fails, allow the song. Never block on AI outage.
+
+---
+
+## ⚠️ Color Contrast — Inverted Neutral Token System (CRITICAL)
+
+This project uses an **inverted neutral scale** in `src/styles/tokens.css`. The `neutral-*` numbers do NOT match Tailwind's default light→dark direction. They are flipped:
+
+| Token | Hex | Visual |
+|---|---|---|
+| `--color-neutral-50`  | `#0F0F0F` | near-black (page bg) |
+| `--color-neutral-75`  | `#141414` | |
+| `--color-neutral-100` | `#1A1A1A` | dark surface (cards) |
+| `--color-neutral-200` | `#222222` | |
+| `--color-neutral-300` | `#2B2B2B` | borders |
+| `--color-neutral-400` | `#6B6B6B` | muted icons |
+| `--color-neutral-500` | `#9A9A9A` | muted text |
+| `--color-neutral-700` | `#D1D1D1` | body text on dark |
+| `--color-neutral-800` | `#E5E5E5` | |
+| `--color-neutral-900` | `#FFFFFF` | **WHITE** — primary text |
+
+**Consequences — read before writing any color class:**
+
+1. **`text-neutral-900` is WHITE**, not near-black. `text-neutral-50` is near-black.
+2. **NEVER use `bg-white`** in this repo. It is literal `#FFFFFF` and does not participate in the token system. Paired with `text-neutral-900` it gives **white-on-white**. Use `bg-neutral-100` / `bg-neutral-200` for card surfaces.
+3. **NEVER use `text-black`** with a token-based neutral background. You will get black-on-black on dark surfaces.
+4. **`text-neutral-600` is undefined** in `tokens.css` and falls back to Tailwind's default `#525252` — nearly invisible on `bg-neutral-100`. Use `text-neutral-700` (`#D1D1D1`) for body text instead.
+5. **Before shipping any UI with a background color change**, mentally trace: *what is the hex of this bg, what is the hex of the text on it?* If you can't answer both, look them up in `tokens.css`.
+
+**Contrast sanity checklist** (apply on every new/edited component):
+- [ ] Background uses a token (`bg-neutral-*`, `bg-primary-*`, `bg-accent-*`) — not `bg-white` / `bg-black`.
+- [ ] Text on dark surfaces: `text-neutral-900` (white) for headings, `text-neutral-700` for body, `text-neutral-500` only for hints/labels.
+- [ ] Text on colored surfaces (`bg-primary-500`, etc.): use literal `text-white` — NOT `text-neutral-900` (same result but explicit intent signals it's not a token-surface).
+- [ ] Avoid `text-neutral-600` — undefined, low contrast.
+- [ ] Disabled/muted text on dark card: `text-neutral-500` minimum, never `text-neutral-400` for readable text.
+
+**When in doubt:** open `src/styles/tokens.css`, look up the hex of both your `bg-*` and `text-*` class, and verify they differ by at least ~80 lightness points.

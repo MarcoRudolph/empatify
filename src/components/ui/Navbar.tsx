@@ -4,11 +4,12 @@ import { useState, useEffect, useRef } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { createClient } from "@/lib/supabase/client"
-import { User, Settings, LogOut, ChevronDown, ArrowLeft } from "lucide-react"
+import { User, Settings, LogOut, ChevronDown, ArrowLeft, Zap } from "lucide-react"
 import { Link } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
 import { MessagesIcon } from "@/components/messaging/MessagesIcon"
 import { LanguagePicker } from "@/components/ui/LanguagePicker"
+import { UpgradeModal } from "@/components/ui/UpgradeModal"
 
 /**
  * Navbar component for authenticated pages
@@ -19,11 +20,27 @@ export function Navbar({ locale }: { locale: string }) {
   const pathname = usePathname()
   const t = useTranslations("common")
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isProPlan, setIsProPlan] = useState(true) // default true to hide upgrade until loaded
+  const [isUpgradeOpen, setIsUpgradeOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
 
   // Check if we can go back (not on dashboard)
   const canGoBack = pathname !== `/${locale}/dashboard` && pathname !== `/${locale}`
+
+  // Fetch user plan status
+  useEffect(() => {
+    async function checkPlan() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user?.email) return
+      const res = await fetch(`/api/user/plan`)
+      if (res.ok) {
+        const data = await res.json()
+        setIsProPlan(data.proPlan ?? false)
+      }
+    }
+    checkPlan()
+  }, [])
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -47,11 +64,12 @@ export function Navbar({ locale }: { locale: string }) {
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    router.push(`/${locale}/login`)
+    router.push(`/${locale}`)
     router.refresh()
   }
 
   return (
+    <>
     <nav className="fixed top-0 left-0 right-0 z-50 bg-neutral-50 border-b border-neutral-300">
       <div className="max-w-container mx-auto px-6">
         <div className="flex items-center justify-between h-16">
@@ -84,10 +102,30 @@ export function Navbar({ locale }: { locale: string }) {
             </Link>
           </div>
 
-          {/* Right Side - Messages Icon + Language Picker + User Dropdown */}
+          {/* Right Side - Messages Icon + Plan Badge + Language Picker + User Dropdown */}
           <div className="flex items-center gap-2">
             {/* Messages Icon */}
             <MessagesIcon locale={locale} />
+
+            {/* Plan Badge — desktop only, mobile shows plan in dashboard welcome line */}
+            {isProPlan ? (
+              <span
+                className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary-500 text-white text-[10px] font-bold uppercase tracking-wider select-none"
+                aria-label="Pro plan"
+              >
+                <Zap className="size-3" />
+                Pro
+              </span>
+            ) : (
+              <button
+                onClick={() => setIsUpgradeOpen(true)}
+                className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-700 hover:text-primary-500 text-[10px] font-bold uppercase tracking-wider border border-neutral-300 hover:border-primary-500 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                aria-label="Free plan — click to upgrade"
+                title={t("upgrade")}
+              >
+                Free
+              </button>
+            )}
 
             {/* Language Picker */}
             <LanguagePicker locale={locale} />
@@ -113,6 +151,18 @@ export function Navbar({ locale }: { locale: string }) {
             {/* Dropdown Menu */}
             {isDropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-neutral-100 border border-neutral-300 rounded-lg shadow-lg z-50 overflow-hidden">
+                {!isProPlan && (
+                  <button
+                    onClick={() => {
+                      setIsDropdownOpen(false)
+                      setIsUpgradeOpen(true)
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-primary-500 hover:bg-neutral-200 focus:bg-neutral-200 focus:outline-none transition-colors duration-200 text-left"
+                  >
+                    <Zap className="size-4" />
+                    <span className="text-sm font-semibold">{t("upgrade")}</span>
+                  </button>
+                )}
                 <Link
                   href="/settings"
                   onClick={() => setIsDropdownOpen(false)}
@@ -135,6 +185,8 @@ export function Navbar({ locale }: { locale: string }) {
         </div>
       </div>
     </nav>
+    <UpgradeModal isOpen={isUpgradeOpen} onClose={() => setIsUpgradeOpen(false)} />
+    </>
   )
 }
 

@@ -245,17 +245,31 @@ export default async function DashboardPage({
       {/* Main Content */}
       <div className="relative z-10 max-w-container mx-auto px-6 pt-24 pb-12 md:pt-28 md:pb-20">
         {/* Header Section */}
-        <div className="mb-12">
+        <div className="mb-12 text-center">
           <h1 className="font-display text-4xl md:text-5xl font-black tracking-tight text-neutral-900 mb-3">
             {t('title')}
           </h1>
           <p className="text-lg text-neutral-500 leading-relaxed">
             {t('welcomeBack')}, <span className="font-semibold text-neutral-700">{user.email?.split('@')[0]}</span>
           </p>
+          {/* Mobile-only plan indicator — desktop gets the navbar badge instead */}
+          <p className="sm:hidden mt-2 text-sm text-neutral-500">
+            {isProPlan ? (
+              <span className="inline-flex items-center gap-1.5">
+                <span aria-hidden="true">⭐</span>
+                <span>{t('enjoyProPlan')}</span>
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5">
+                <span aria-hidden="true">🎵</span>
+                <span>{t('enjoyFreePlan')}</span>
+              </span>
+            )}
+          </p>
         </div>
 
         {/* Quick Actions */}
-        <div className="flex flex-col md:flex-row gap-6 mb-12">
+        <div className="flex flex-col md:flex-row gap-6 mb-12 justify-center items-center">
           {/* Link Spotify Button - Hidden, using Client Credentials Flow instead */}
           {/* <SpotifyLinkButton locale={locale} /> */}
           
