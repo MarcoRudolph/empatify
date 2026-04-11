@@ -126,12 +126,31 @@ export async function POST(request: NextRequest) {
 
     // Start playback with first track, then add rest to queue
     try {
-      // First, start playback with the first track
+      // Find an available device — prefer active, fall back to first available
+      const devicesResponse = await spotifyClient.getMyDevices()
+      const devices = devicesResponse.body.devices || []
+      const targetDevice = devices.find(d => d.is_active) || devices[0]
+
+      if (!targetDevice || !targetDevice.id) {
+        return NextResponse.json(
+          {
+            error: {
+              code: "NO_ACTIVE_DEVICE",
+              message: "No Spotify device found. Please open Spotify on a device and try again.",
+              status: 404,
+            },
+          },
+          { status: 404 }
+        )
+      }
+
+      // Start playback on the target device with the first track
       await spotifyClient.play({
+        device_id: targetDevice.id,
         uris: [`spotify:track:${trackIds[0]}`],
       })
 
-      // Add remaining tracks to queue
+      // Add remaining tracks to queue on the same device
       for (let i = 1; i < trackIds.length; i++) {
         await spotifyClient.addToQueue(`spotify:track:${trackIds[i]}`)
         // Small delay to avoid rate limiting
