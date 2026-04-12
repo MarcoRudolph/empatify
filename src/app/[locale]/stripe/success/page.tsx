@@ -1,6 +1,8 @@
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import { CheckCircle2, Zap, Music2, Star, Sparkles, Trophy, Users } from 'lucide-react';
+import { MagicCard } from '@/components/ui/magic-card';
+import { ShimmerButton } from '@/components/ui/shimmer-button';
 
 /** Flower-of-life derived icon — 7 overlapping circles, stroke only */
 function FlowerIcon({ className }: { className?: string }) {
@@ -32,102 +34,102 @@ export default async function StripeSuccessPage({
   const { locale } = await params;
   const t = await getTranslations('common');
 
+  const benefits = [
+    {
+      title: "Unlimited Players",
+      description: "Invite everyone. No more limits on lobby size.",
+      icon: Users,
+      color: "#FF6B00" // primary-500
+    },
+    {
+      title: "Premium Game Modes",
+      description: "Round Prompts & Blind Mode. Fresh ways to play.",
+      icon: Sparkles,
+      color: "#1DB954" // spotify-accent
+    },
+    {
+      title: "Stats & History",
+      description: "Full game history and Top 5 songs statistics.",
+      icon: Trophy,
+      color: "#FF6B00"
+    },
+    {
+      title: "Full Export",
+      description: "Export every song from every game to Spotify.",
+      icon: Music2,
+      color: "#1DB954"
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-neutral-50 flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      {/* Background Glows */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary-500/20 blur-[120px] pointer-events-none animate-pulse" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-accent-spotify/15 blur-[120px] pointer-events-none animate-pulse" style={{ animationDelay: '1s' }} />
+      {/* Background Glows - subtle and vibrant */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary-500/20 blur-[140px] pointer-events-none animate-pulse" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-accent-spotify/15 blur-[140px] pointer-events-none animate-pulse" style={{ animationDelay: '1s' }} />
 
-      <div className="relative z-10 max-w-xl w-full text-center space-y-10">
+      <div className="relative z-10 max-w-2xl w-full text-center space-y-12">
         
         {/* Logo Section */}
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-6">
           <div className="relative">
-             <div className="spin-slow text-primary-500 size-16">
-                <FlowerIcon className="size-16" />
+             <div className="spin-slow text-primary-500 size-24">
+                <FlowerIcon className="size-24" />
              </div>
-             <div className="absolute -bottom-1 -right-1 bg-accent-spotify rounded-full p-1 shadow-lg ring-4 ring-neutral-50">
-               <CheckCircle2 className="size-5 text-neutral-50" />
+             <div className="absolute -bottom-1 -right-1 bg-accent-spotify rounded-full p-2 shadow-lg ring-8 ring-neutral-50">
+               <CheckCircle2 className="size-8 text-neutral-900" />
              </div>
           </div>
-          <div className="space-y-1">
-            <span className="font-display text-xl font-black tracking-tight text-neutral-900 uppercase opacity-50">
-              empatify
+          <div className="space-y-3">
+            <span className="font-display text-2xl font-black tracking-widest text-primary-500 uppercase opacity-80">
+              PRO ACCESS
             </span>
-            <h1 className="font-display text-5xl md:text-6xl font-black tracking-tighter text-neutral-900 leading-none">
-              Welcome to <span className="text-primary-500">Pro</span>
+            <h1 className="font-display text-6xl md:text-7xl font-black tracking-tighter text-neutral-900 leading-none">
+              Welcome aboard<span className="text-primary-500">.</span>
             </h1>
           </div>
         </div>
 
-        {/* Benefits Grid - Magic UI inspired */}
+        {/* Benefits Grid - Glassmorphism + Magic UI */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="group relative p-6 rounded-2xl bg-neutral-100 border border-neutral-200 shadow-sm transition-all duration-300 hover:border-primary-500/50 hover:shadow-primary-500/10">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
-            <div className="relative flex flex-col items-center md:items-start text-center md:text-left gap-3">
-              <div className="size-10 rounded-xl bg-primary-500/10 flex items-center justify-center text-primary-500">
-                <Users className="size-6" />
+          {benefits.map((benefit) => (
+            <MagicCard 
+              key={benefit.title}
+              className="p-8 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 flex flex-col items-center md:items-start text-center md:text-left gap-4 transition-all hover:scale-[1.02]"
+              gradientFrom={benefit.color}
+              gradientTo="transparent"
+              gradientSize={200}
+              gradientOpacity={0.3}
+            >
+              <div 
+                className="size-14 rounded-2xl flex items-center justify-center shadow-lg shadow-black/20"
+                style={{ backgroundColor: benefit.color, color: '#FFFFFF' }}
+              >
+                <benefit.icon className="size-7" />
               </div>
               <div>
-                <h3 className="font-bold text-neutral-900">Unlimited Players</h3>
-                <p className="text-sm text-neutral-500">Invite everyone. No more limits on lobby size.</p>
+                <h3 className="font-bold text-white text-xl mb-1">{benefit.title}</h3>
+                <p className="text-neutral-400 text-sm leading-relaxed">{benefit.description}</p>
               </div>
-            </div>
-          </div>
-
-          <div className="group relative p-6 rounded-2xl bg-neutral-100 border border-neutral-200 shadow-sm transition-all duration-300 hover:border-accent-spotify/50 hover:shadow-accent-spotify/10">
-            <div className="absolute inset-0 bg-gradient-to-br from-accent-spotify/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
-            <div className="relative flex flex-col items-center md:items-start text-center md:text-left gap-3">
-              <div className="size-10 rounded-xl bg-accent-spotify/10 flex items-center justify-center text-accent-spotify">
-                <Sparkles className="size-6" />
-              </div>
-              <div>
-                <h3 className="font-bold text-neutral-900">Premium Game Modes</h3>
-                <p className="text-sm text-neutral-500">Round Prompts & Blind Mode. Fresh ways to play.</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="group relative p-6 rounded-2xl bg-neutral-100 border border-neutral-200 shadow-sm transition-all duration-300 hover:border-primary-500/50 hover:shadow-primary-500/10">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
-            <div className="relative flex flex-col items-center md:items-start text-center md:text-left gap-3">
-              <div className="size-10 rounded-xl bg-primary-500/10 flex items-center justify-center text-primary-500">
-                <Trophy className="size-6" />
-              </div>
-              <div>
-                <h3 className="font-bold text-neutral-900">Stats & History</h3>
-                <p className="text-sm text-neutral-500">Full game history and Top 5 songs statistics.</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="group relative p-6 rounded-2xl bg-neutral-100 border border-neutral-200 shadow-sm transition-all duration-300 hover:border-accent-spotify/50 hover:shadow-accent-spotify/10">
-            <div className="absolute inset-0 bg-gradient-to-br from-accent-spotify/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
-            <div className="relative flex flex-col items-center md:items-start text-center md:text-left gap-3">
-              <div className="size-10 rounded-xl bg-accent-spotify/10 flex items-center justify-center text-accent-spotify">
-                <Music2 className="size-6" />
-              </div>
-              <div>
-                <h3 className="font-bold text-neutral-900">Full Export</h3>
-                <p className="text-sm text-neutral-500">Export every song from every game to Spotify.</p>
-              </div>
-            </div>
-          </div>
+            </MagicCard>
+          ))}
         </div>
 
         {/* Action Button */}
-        <div className="flex flex-col items-center gap-4 pt-4">
-          <Link
-            href="/dashboard"
-            className="group relative inline-flex items-center justify-center h-14 px-10 rounded-full bg-primary-500 text-neutral-50 font-black text-lg tracking-tight shadow-xl shadow-primary-500/20 hover:bg-primary-600 hover:shadow-primary-600/30 active:scale-95 transition-all duration-200 overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <span className="relative z-10 flex items-center gap-2">
-              Back to Dashboard
-              <Zap className="size-5 fill-neutral-50" />
-            </span>
+        <div className="flex flex-col items-center gap-6 pt-6">
+          <Link href="/dashboard" className="w-full max-w-[440px]">
+            <ShimmerButton
+              background="#FF6B00" // Explicit orange
+              shimmerColor="#FFFFFF"
+              borderRadius="9999px"
+              className="w-full h-16 font-black text-xl tracking-tight shadow-2xl shadow-primary-500/40"
+            >
+              <div className="flex items-center gap-3 text-white">
+                Back to Dashboard
+                <Zap className="size-6 fill-white" />
+              </div>
+            </ShimmerButton>
           </Link>
-          <p className="text-xs text-neutral-500 font-medium">
+          <p className="text-base text-neutral-500 font-medium">
             Your Pro features are active immediately. Have fun!
           </p>
         </div>
