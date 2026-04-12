@@ -214,15 +214,15 @@
     "nameAlreadyTaken": "This name is already taken. Please choose another name.",
     "nameUpdateSuccess": "Name saved successfully",
     "nameUpdateError": "Error saving name",
-    "viralCardTitle": "My Pro Viral Card",
-    "shareViralCard": "Share my musical profile"
+    "viralCardTitle": "Sonic Soul",
+    "shareViralCard": "Share this Card"
   },
   "viralCard": {
-    "title": "My Musical Soul",
+    "title": "knows their people",
     "topSongs": "My Top 3 Tracks",
     "avgRating": "Average Empathy Score",
     "gamesPlayed": "Total Games Played",
-    "footer": "Find out if your friends know your taste"
+    "footer": "empatify"
   },
   "stats": {
     "title": "Statistics",

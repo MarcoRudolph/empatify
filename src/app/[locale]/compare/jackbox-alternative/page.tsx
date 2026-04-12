@@ -93,7 +93,7 @@ export default function JackboxAlternativePage() {
 
           <div>
             <h2 className="text-xl font-semibold text-white mb-3">When Empatify beats Jackbox</h2>
-            <ul className="list-disc list-inside space-y-2 text-neutral-300">
+            <ul className="list-disc list-inside space-y-2 text-neutral-200">
               <li>You want something free with no purchase barrier</li>
               <li>Your group is into music and Spotify</li>
               <li>You're playing remotely and don't want to coordinate a download</li>
@@ -103,7 +103,7 @@ export default function JackboxAlternativePage() {
 
           <div>
             <h2 className="text-xl font-semibold text-white mb-3">When Jackbox is the better pick</h2>
-            <ul className="list-disc list-inside space-y-2 text-neutral-300">
+            <ul className="list-disc list-inside space-y-2 text-neutral-200">
               <li>You want variety across many game types in one pack</li>
               <li>Your group prefers drawing or word games over music</li>
               <li>You're willing to pay for more polished production</li>

@@ -278,15 +278,12 @@ export function EmpathyPlayground() {
                 <div className="text-center">
                   <p className="text-neutral-400 mb-6 text-lg">Think you can read your real friends? Give it a shot.</p>
                   <div className="flex flex-wrap justify-center gap-4">
-                    <ShimmerButton
+                    <button
                       onClick={reset}
-                      background="rgba(255,255,255,0.05)"
-                      shimmerColor="#ffffff"
-                      borderRadius="9999px"
-                      className="px-8 h-14 border border-white/10 font-bold"
+                      className="px-8 h-14 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/20 transition-all font-bold"
                     >
                       Try Another Song
-                    </ShimmerButton>
+                    </button>
                     <Link href="/">
                       <ShimmerButton
                         background="#FF6B00"
