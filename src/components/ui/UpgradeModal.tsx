@@ -1,6 +1,5 @@
-"use client"
-
-import { X, Check, Zap, Music2, Shuffle, Star } from "lucide-react"
+import { useState } from "react"
+import { X, Check, Zap, Music2, Shuffle, Star, Loader2 } from "lucide-react"
 import { ShimmerButton } from "@/components/ui/shimmer-button"
 
 interface UpgradeModalProps {
@@ -31,7 +30,35 @@ const PRO_FEATURES: { text: string; highlight?: boolean }[] = [
 ]
 
 export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
+  const [isLoading, setIsLoading] = useState(false)
+
   if (!isOpen) return null
+
+  const handleUpgrade = async () => {
+    try {
+      setIsLoading(true)
+      const response = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+
+      const data = await response.json()
+
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        console.error("Failed to create checkout session:", data.error)
+        alert(data.error?.message || "Failed to start checkout. Please try again.")
+      }
+    } catch (error) {
+      console.error("Error during upgrade:", error)
+      alert("An unexpected error occurred. Please try again.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <div
@@ -127,13 +154,16 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
               shimmerColor="var(--color-neutral-900)"
               borderRadius="9999px"
               className="w-full h-11 font-semibold"
-              onClick={() => {
-                window.location.href = "mailto:marco@rudolpho-ai.de?subject=Empatify Pro Plan"
-              }}
+              disabled={isLoading}
+              onClick={handleUpgrade}
             >
               <span className="flex items-center justify-center gap-2">
-                <Star className="size-4" />
-                Upgrade to Pro
+                {isLoading ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Star className="size-4" />
+                )}
+                {isLoading ? "Loading..." : "Upgrade to Pro"}
               </span>
             </ShimmerButton>
           </div>
@@ -155,3 +185,4 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
     </div>
   )
 }
+

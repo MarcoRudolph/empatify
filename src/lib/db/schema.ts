@@ -11,6 +11,8 @@ export const users = pgTable('users', {
   name: varchar('name', { length: 255 }).notNull().unique(),
   avatarUrl: text('avatar_url'),
   proPlan: boolean('pro_plan').default(false).notNull(),
+  stripeCustomerId: varchar('stripe_customer_id', { length: 255 }),
+  stripeSubscriptionId: varchar('stripe_subscription_id', { length: 255 }),
   aiTrialStartedAt: timestamp('ai_trial_started_at', { withTimezone: true }),
   aiTokensUsed: integer('ai_tokens_used').default(0).notNull(),
   // Spotify OAuth tokens
