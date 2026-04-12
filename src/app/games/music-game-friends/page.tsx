@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { SeoPageShell } from '../page-shell';
+import { EmpathyPlayground } from '@/components/seo/EmpathyPlayground';
 
 export const metadata: Metadata = {
   title: 'Music Games to Play with Friends Online | Empatify',
@@ -53,6 +54,8 @@ export default function MusicGameFriendsPage() {
               to rate it, you're revealing exactly how well you know them — and how well they know you.
             </p>
           </div>
+
+          <EmpathyPlayground />
 
           <div>
             <h2 className="text-xl font-semibold text-white mb-3">Best online music games for friend groups (2026)</h2>

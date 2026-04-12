@@ -215,7 +215,16 @@
     "nameRequired": "Der Name darf nicht leer sein",
     "nameAlreadyTaken": "Dieser Name ist bereits vergeben. Bitte wähle einen anderen Namen.",
     "nameUpdateSuccess": "Name erfolgreich gespeichert",
-    "nameUpdateError": "Fehler beim Speichern des Namens"
+    "nameUpdateError": "Fehler beim Speichern des Namens",
+    "viralCardTitle": "Mein Pro Viral Card",
+    "shareViralCard": "Teile mein musikalisches Profil"
+  },
+  "viralCard": {
+    "title": "Meine Musikalische Seele",
+    "topSongs": "Meine Top 3 Tracks",
+    "avgRating": "Durchschnittliche Empathie-Bewertung",
+    "gamesPlayed": "Gespielte Spiele gesamt",
+    "footer": "Finde heraus, ob deine Freunde deinen Geschmack kennen"
   },
   "stats": {
     "title": "Statistiken",

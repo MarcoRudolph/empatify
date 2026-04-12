@@ -41,6 +41,9 @@ export default async function SettingsPage({
         name: users.name,
         avatarUrl: users.avatarUrl,
         proPlan: users.proPlan,
+        totalGamesPlayed: users.totalGamesPlayed,
+        averageRatingReceived: users.averageRatingReceived,
+        topSongs: users.topSongs,
         createdAt: users.createdAt,
       })
       .from(users)
@@ -67,6 +70,9 @@ export default async function SettingsPage({
           name: users.name,
           avatarUrl: users.avatarUrl,
           proPlan: users.proPlan,
+          totalGamesPlayed: users.totalGamesPlayed,
+          averageRatingReceived: users.averageRatingReceived,
+          topSongs: users.topSongs,
           createdAt: users.createdAt,
         });
       dbUser = newUser;
@@ -121,6 +127,9 @@ export default async function SettingsPage({
             name: users.name,
             avatarUrl: users.avatarUrl,
             proPlan: users.proPlan,
+            totalGamesPlayed: users.totalGamesPlayed,
+            averageRatingReceived: users.averageRatingReceived,
+            topSongs: users.topSongs,
             createdAt: users.createdAt,
           })
           .from(users)
@@ -144,6 +153,7 @@ export default async function SettingsPage({
       <SettingsPageClient 
         locale={locale} 
         user={user} 
+        dbUser={dbUser}
         isSpotifyLinked={isSpotifyLinked}
       />
     </>

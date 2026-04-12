@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { SeoPageShell } from '../page-shell';
+import { EmpathyPlayground } from '@/components/seo/EmpathyPlayground';
 
 export const metadata: Metadata = {
   title: 'Spotify Quiz Multiplayer — Play Online with Friends | Empatify',
@@ -46,6 +47,8 @@ export default function SpotifyQuizMultiplayerPage() {
               from 1–10. Highest average score wins.
             </p>
           </div>
+
+          <EmpathyPlayground />
 
           <div>
             <h2 className="text-xl font-semibold text-white mb-3">What makes it multiplayer</h2>

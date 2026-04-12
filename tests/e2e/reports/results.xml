@@ -1,0 +1,18 @@
+<testsuites id="" name="" tests="6" failures="0" skipped="0" errors="0" time="46.983596000000006">
+<testsuite name="full-game-flow.spec.ts" timestamp="2026-04-12T13:18:40.828Z" hostname="Mobile Chrome" tests="3" failures="0" skipped="0" time="15.6" errors="0">
+<testcase name="Full Game Flow — Core Mechanics › Host and Guest complete a 1-round game" classname="full-game-flow.spec.ts" time="11.604">
+</testcase>
+<testcase name="Pro Plan Features Flow › Pro user creates a Blind Mode game with Round Prompts" classname="full-game-flow.spec.ts" time="2.389">
+</testcase>
+<testcase name="Pro Plan Features Flow › Upgrade flow from Dashboard" classname="full-game-flow.spec.ts" time="1.607">
+</testcase>
+</testsuite>
+<testsuite name="full-game-flow.spec.ts" timestamp="2026-04-12T13:18:40.828Z" hostname="Mobile Safari" tests="3" failures="0" skipped="0" time="23.886" errors="0">
+<testcase name="Full Game Flow — Core Mechanics › Host and Guest complete a 1-round game" classname="full-game-flow.spec.ts" time="17.442">
+</testcase>
+<testcase name="Pro Plan Features Flow › Pro user creates a Blind Mode game with Round Prompts" classname="full-game-flow.spec.ts" time="3.749">
+</testcase>
+<testcase name="Pro Plan Features Flow › Upgrade flow from Dashboard" classname="full-game-flow.spec.ts" time="2.695">
+</testcase>
+</testsuite>
+</testsuites>

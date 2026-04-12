@@ -20,6 +20,11 @@ export const users = pgTable('users', {
   spotifyRefreshToken: text('spotify_refresh_token'),
   spotifyTokenExpiresAt: timestamp('spotify_token_expires_at', { withTimezone: true }),
   spotifyUserId: varchar('spotify_user_id', { length: 255 }),
+  // Statistics for Viral Card
+  totalGamesPlayed: integer('total_games_played').default(0).notNull(),
+  totalSongsSuggested: integer('total_songs_suggested').default(0).notNull(),
+  averageRatingReceived: text('average_rating_received').default('0.0').notNull(),
+  topSongs: text('top_songs').array(), // Stores up to 3 Spotify track IDs or JSON strings
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
 

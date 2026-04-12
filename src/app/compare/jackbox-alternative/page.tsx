@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { SeoPageShell } from '../../games/page-shell';
+import { EmpathyPlayground } from '@/components/seo/EmpathyPlayground';
 
 export const metadata: Metadata = {
   title: 'Free Jackbox Alternative Online — No Purchase Required | Empatify',
@@ -87,6 +88,8 @@ export default function JackboxAlternativePage() {
               </table>
             </div>
           </div>
+
+          <EmpathyPlayground />
 
           <div>
             <h2 className="text-xl font-semibold text-white mb-3">When Empatify beats Jackbox</h2>
