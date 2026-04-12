@@ -3,6 +3,8 @@ import Footer from '@/components/ui/Footer';
 import { Users, Music2, Trophy } from 'lucide-react';
 import OAuthCallbackHandler from './OAuthCallbackHandler';
 import { HeroLoginCard } from './HeroLoginCard';
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 
 /** Flower-of-life derived icon — 7 overlapping circles, stroke only */
 function FlowerIcon({ className }: { className?: string }) {
@@ -55,6 +57,16 @@ export default async function LandingPage({
 }) {
   const { locale } = await params;
   const resolvedSearchParams = await searchParams;
+
+  // Check for existing session
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // If user is logged in, redirect to dashboard
+  // Only redirect if NOT in the middle of an OAuth callback
+  if (user && !resolvedSearchParams.code) {
+    redirect(`/${locale}/dashboard`);
+  }
 
   // OAuth callback
   if (resolvedSearchParams.code) {

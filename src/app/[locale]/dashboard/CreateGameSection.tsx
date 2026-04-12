@@ -428,7 +428,7 @@ export function CreateGameSection({
           onClick={handleCreateGame}
           disabled={isCreating}
           className="glow-cta w-full h-12 rounded-full font-display font-black text-base disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-opacity duration-200"
-          style={{ background: '#FF6B00', color: '#000000' }}
+          style={{ background: '#FF6B00', color: '#FFFFFF' }}
         >
           {isCreating ? (
             <>
