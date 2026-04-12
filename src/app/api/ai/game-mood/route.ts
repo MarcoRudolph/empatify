@@ -11,7 +11,18 @@ export async function POST(request: NextRequest) {
   const apiKey = process.env.CHATGPT_APIKEY
   if (!apiKey) return NextResponse.json({ error: { code: "CONFIG_ERROR", status: 500 } }, { status: 500 })
 
-  const { songs } = await request.json() as { songs: SongEntry[] }
+  let body;
+  try {
+    body = await request.json();
+  } catch (e) {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+  
+  const { songs } = body as { songs: SongEntry[] }
+
+  if (!songs || !Array.isArray(songs) || songs.length === 0) {
+    return NextResponse.json({ error: "No songs provided" }, { status: 400 });
+  }
 
   const songList = songs.map(s => `- ${s.playerName}: "${s.trackName} - ${s.artist}"`).join('\n')
   const prompt = `Songs submitted:\n${songList}\n\nAnalyse collective mood (2 sentences max). Compare each player's music personality (1 sentence each, first name only). Suggest one next-game theme (max 10 words).\nReply only in JSON: {"collective_mood":"...","profiles":{"NAME":"..."},"next_prompt":"..."}`

@@ -49,6 +49,12 @@ async function saveAuthState(baseURL: string, email: string, outputPath: string)
   )
   await page.waitForURL(/\/dashboard/, { timeout: 30_000 })
 
+  // Set cookie consent in localStorage to prevent the banner from blocking clicks
+  await page.evaluate(() => {
+    localStorage.setItem('cookie-consent', 'accepted');
+    localStorage.setItem('cookie-consent-timestamp', new Date().toISOString());
+  });
+
   // Persist the full browser state (HttpOnly SSR cookies + localStorage)
   await context.storageState({ path: outputPath })
   await browser.close()

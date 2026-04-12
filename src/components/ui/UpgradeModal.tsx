@@ -70,11 +70,11 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
 
       {/* Panel */}
       <div
-        className="relative z-10 w-full max-w-2xl bg-neutral-50 rounded-2xl shadow-2xl border border-neutral-200 overflow-hidden"
+        className="relative z-10 w-full max-w-2xl bg-neutral-50 rounded-2xl shadow-2xl border border-neutral-200 overflow-hidden flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-neutral-200">
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-neutral-200 shrink-0">
           <div>
             <h2 className="font-display text-2xl font-black tracking-tight text-neutral-900">
               Choose your plan
@@ -92,85 +92,86 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
           </button>
         </div>
 
-        {/* Cards */}
-        <div className="p-6 grid sm:grid-cols-2 gap-4">
-
-          {/* Free Plan */}
-          <div className="rounded-xl border border-neutral-300 bg-neutral-100 p-5 flex flex-col">
-            <div className="mb-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-300 text-neutral-800 text-xs font-semibold uppercase tracking-wider mb-3">
-                <Music2 className="size-3.5" />
-                Free Plan
+        {/* Cards - Scrollable area */}
+        <div className="p-6 overflow-y-auto custom-scrollbar">
+          <div className="grid sm:grid-cols-2 gap-4">
+            {/* Free Plan */}
+            <div className="rounded-xl border border-neutral-300 bg-neutral-100 p-5 flex flex-col">
+              <div className="mb-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-300 text-neutral-800 text-xs font-semibold uppercase tracking-wider mb-3">
+                  <Music2 className="size-3.5" />
+                  Free Plan
+                </div>
+                <div className="flex items-baseline gap-1">
+                  <span className="font-display text-4xl font-black text-neutral-900">€0</span>
+                  <span className="text-sm text-neutral-500">/ 4-week trial</span>
+                </div>
               </div>
-              <div className="flex items-baseline gap-1">
-                <span className="font-display text-4xl font-black text-neutral-900">€0</span>
-                <span className="text-sm text-neutral-500">/ 4-week trial</span>
-              </div>
-            </div>
 
-            <ul className="space-y-2.5 flex-1 mb-5">
-              {FREE_FEATURES.map((feature) => (
-                <li key={feature} className="flex items-start gap-2.5 text-sm text-neutral-700">
-                  <Check className="size-4 text-neutral-500 shrink-0 mt-0.5" />
-                  {feature}
-                </li>
-              ))}
-            </ul>
+              <ul className="space-y-2.5 flex-1 mb-5">
+                {FREE_FEATURES.map((feature) => (
+                  <li key={feature} className="flex items-start gap-2.5 text-sm text-neutral-700">
+                    <Check className="size-4 text-neutral-500 shrink-0 mt-0.5" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
 
-            <div className="mt-auto">
-              <div className="w-full py-2.5 rounded-lg border border-neutral-300 bg-neutral-200 text-center text-sm font-semibold text-neutral-700 cursor-default select-none">
-                Current Plan
-              </div>
-            </div>
-          </div>
-
-          {/* Pro Plan */}
-          <div className="rounded-xl border-2 border-primary-500 bg-neutral-200 p-5 flex flex-col relative overflow-hidden shadow-lg shadow-primary-500/10">
-            {/* Glow */}
-            <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary-500/10 rounded-full blur-2xl pointer-events-none" />
-
-            <div className="mb-4 relative">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-500 text-white text-xs font-semibold uppercase tracking-wider mb-3">
-                <Zap className="size-3.5" />
-                Pro Plan
-              </div>
-              <div className="flex items-baseline gap-1">
-                <span className="font-display text-4xl font-black text-neutral-900">€4.99</span>
-                <span className="text-sm text-neutral-500">/ month</span>
+              <div className="mt-auto">
+                <div className="w-full py-2.5 rounded-lg border border-neutral-300 bg-neutral-200 text-center text-sm font-semibold text-neutral-700 cursor-default select-none">
+                  Current Plan
+                </div>
               </div>
             </div>
 
-            <ul className="space-y-2.5 flex-1 mb-5 relative">
-              {PRO_FEATURES.map(({ text, highlight }) => (
-                <li key={text} className="flex items-start gap-2.5 text-sm text-neutral-700">
-                  <Check className={`size-4 shrink-0 mt-0.5 ${highlight ? "text-primary-500" : "text-neutral-400"}`} />
-                  {text}
-                </li>
-              ))}
-            </ul>
+            {/* Pro Plan */}
+            <div className="rounded-xl border-2 border-primary-500 bg-neutral-200 p-5 flex flex-col relative overflow-hidden shadow-lg shadow-primary-500/10">
+              {/* Glow */}
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary-500/10 rounded-full blur-2xl pointer-events-none" />
 
-            <ShimmerButton
-              background="var(--color-primary-500)"
-              shimmerColor="var(--color-neutral-900)"
-              borderRadius="9999px"
-              className="w-full h-11 font-semibold"
-              disabled={isLoading}
-              onClick={handleUpgrade}
-            >
-              <span className="flex items-center justify-center gap-2">
-                {isLoading ? (
-                  <Loader2 className="size-4 animate-spin" />
-                ) : (
-                  <Star className="size-4" />
-                )}
-                {isLoading ? "Loading..." : "Upgrade to Pro"}
-              </span>
-            </ShimmerButton>
+              <div className="mb-4 relative">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-500 text-white text-xs font-semibold uppercase tracking-wider mb-3">
+                  <Zap className="size-3.5" />
+                  Pro Plan
+                </div>
+                <div className="flex items-baseline gap-1">
+                  <span className="font-display text-4xl font-black text-neutral-900">€4.99</span>
+                  <span className="text-sm text-neutral-500">/ month</span>
+                </div>
+              </div>
+
+              <ul className="space-y-2.5 flex-1 mb-5 relative">
+                {PRO_FEATURES.map(({ text, highlight }) => (
+                  <li key={text} className="flex items-start gap-2.5 text-sm text-neutral-700">
+                    <Check className={`size-4 shrink-0 mt-0.5 ${highlight ? "text-primary-500" : "text-neutral-400"}`} />
+                    {text}
+                  </li>
+                ))}
+              </ul>
+
+              <ShimmerButton
+                background="var(--color-primary-500)"
+                shimmerColor="var(--color-neutral-900)"
+                borderRadius="9999px"
+                className="w-full h-11 font-semibold"
+                disabled={isLoading}
+                onClick={handleUpgrade}
+              >
+                <span className="flex items-center justify-center gap-2">
+                  {isLoading ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Star className="size-4" />
+                  )}
+                  {isLoading ? "Loading..." : "Upgrade to Pro"}
+                </span>
+              </ShimmerButton>
+            </div>
           </div>
         </div>
 
         {/* Footer note */}
-        <div className="px-6 pb-6 text-center">
+        <div className="px-6 pb-6 text-center border-t border-neutral-200 pt-4 shrink-0">
           <p className="text-xs text-neutral-400">
             Questions? Contact{" "}
             <a
