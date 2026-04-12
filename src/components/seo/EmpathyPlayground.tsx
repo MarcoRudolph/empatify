@@ -103,10 +103,12 @@ export function EmpathyPlayground() {
     // Trap/Hip-Hop detection
     let jaydenRating = 2
     let jaydenQuote = "Mid. My grandma listens to this."
-    if (fullText.includes("trap") || fullText.includes("scott") || fullText.includes("drake") || fullText.includes("hip hop") || fullText.includes("beat") || fullText.includes("future")) {
+    const trapArtists = ["trap", "scott", "drake", "hip hop", "beat", "future", "21 savage", "metro boomin", "lil baby", "gunna", "playboi carti", "lil uzi vert", "young thug", "kendrick lamar", "kanye", "ye", "ice spice", "sexyy red", "doechii"];
+    
+    if (trapArtists.some(artist => fullText.includes(artist))) {
       jaydenRating = 10
       jaydenQuote = "This beat is literal fire! Straight to the playlist. 🔥"
-    } else if (fullText.includes("rock") || fullText.includes("jazz")) {
+    } else if (fullText.includes("rock") || fullText.includes("jazz") || fullText.includes("country")) {
       jaydenRating = 1
       jaydenQuote = "Boring. Where are the 808s?"
     }
@@ -114,10 +116,12 @@ export function EmpathyPlayground() {
     // Pop/Radio detection
     let lenaRating = 4
     let lenaQuote = "Never heard this on the radio..."
-    if (fullText.includes("pop") || fullText.includes("gaga") || fullText.includes("swift") || fullText.includes("bieber") || fullText.includes("charts") || fullText.includes("dua lipa")) {
+    const popArtists = ["pop", "gaga", "swift", "bieber", "charts", "dua lipa", "rihanna", "beyonce", "ariana grande", "sabrina carpenter", "the weeknd", "bruno mars", "katy perry", "ed sheeran", "harry styles", "olivia rodrigo", "billie eilish", "tate mcrae"];
+    
+    if (popArtists.some(artist => fullText.includes(artist))) {
       lenaRating = 9
       lenaQuote = "OMG I love this song! Let's dance! ✨"
-    } else if (fullText.includes("metal") || fullText.includes("death")) {
+    } else if (fullText.includes("metal") || fullText.includes("death") || fullText.includes("techno")) {
       lenaRating = 1
       lenaQuote = "Too loud, makes my head hurt."
     }
