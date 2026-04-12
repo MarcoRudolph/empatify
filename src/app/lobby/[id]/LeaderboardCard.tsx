@@ -1,9 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Trophy, Medal, Award } from "lucide-react"
+import { Trophy, Medal, Award, Share2, Music, Loader2 } from "lucide-react"
 import { MagicCard } from "@/components/ui/magic-card"
 import { MoodCard } from "@/components/ui/MoodCard"
+import { ShimmerButton } from "@/components/ui/shimmer-button"
 import { useTranslations } from "next-intl"
 
 interface LeaderboardEntry {
@@ -20,6 +21,7 @@ interface LeaderboardEntry {
 }
 
 interface LeaderboardCardProps {
+  lobbyId: string
   leaderboard: LeaderboardEntry[]
   hasScores?: boolean // Whether any rounds have been completed with ratings
   isGameFinished?: boolean
@@ -29,10 +31,11 @@ interface LeaderboardCardProps {
  * Leaderboard Card
  * Displays player rankings based on average ratings
  */
-export function LeaderboardCard({ leaderboard, hasScores = false, isGameFinished = false }: LeaderboardCardProps) {
+export function LeaderboardCard({ lobbyId, leaderboard, hasScores = false, isGameFinished = false }: LeaderboardCardProps) {
   const t = useTranslations("lobby")
   const tGame = useTranslations("game")
   const [moodData, setMoodData] = useState<{ collective_mood: string; profiles: Record<string, string>; next_prompt: string } | null>(null)
+  const [isExporting, setIsExporting] = useState(false)
 
   useEffect(() => {
     if (!isGameFinished) return
@@ -50,6 +53,32 @@ export function LeaderboardCard({ leaderboard, hasScores = false, isGameFinished
       .then(data => data && !data.error && setMoodData(data))
       .catch(() => null)
   }, [isGameFinished, leaderboard])
+
+  const handleExportPlaylist = async () => {
+    try {
+      setIsExporting(true)
+      const res = await fetch("/api/spotify/playlist/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lobbyId }),
+      })
+
+      const data = await res.json()
+
+      if (res.ok && data.playlistUrl) {
+        window.open(data.playlistUrl, "_blank")
+      } else if (data.code === "SPOTIFY_NOT_LINKED") {
+        alert("Please link your Spotify account in settings to export playlists.")
+      } else {
+        alert(data.error || "Failed to create playlist")
+      }
+    } catch (error) {
+      console.error("Export error:", error)
+      alert("An unexpected error occurred")
+    } finally {
+      setIsExporting(false)
+    }
+  }
 
   const getRankIcon = (index: number) => {
     if (index === 0) return <Trophy className="size-5 md:size-6 text-yellow-500" />
@@ -107,11 +136,33 @@ export function LeaderboardCard({ leaderboard, hasScores = false, isGameFinished
       gradientTo="var(--color-primary-600)"
       gradientSize={400}
     >
-      <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
-        <Trophy className="size-5 md:size-6 text-primary-500" />
-        <h2 className="text-xl md:text-2xl font-bold text-neutral-900">
-          Leaderboard
-        </h2>
+      <div className="flex items-center justify-between mb-4 md:mb-6">
+        <div className="flex items-center gap-2 md:gap-3">
+          <Trophy className="size-5 md:size-6 text-primary-500" />
+          <h2 className="text-xl md:text-2xl font-bold text-neutral-900">
+            Leaderboard
+          </h2>
+        </div>
+
+        {isGameFinished && (
+          <ShimmerButton
+            onClick={handleExportPlaylist}
+            disabled={isExporting}
+            background="var(--color-accent-spotify)"
+            shimmerColor="var(--color-neutral-900)"
+            borderRadius="9999px"
+            className="h-10 px-4 flex items-center gap-2 shadow-lg disabled:opacity-50"
+          >
+            {isExporting ? (
+              <Loader2 className="size-4 animate-spin text-neutral-900" />
+            ) : (
+              <Music className="size-4 text-neutral-900 fill-neutral-900" />
+            )}
+            <span className="font-bold text-sm text-neutral-900 whitespace-nowrap">
+              {isExporting ? "Exporting..." : "Export as Playlist"}
+            </span>
+          </ShimmerButton>
+        )}
       </div>
 
       <div className="space-y-2 md:space-y-3">
@@ -214,4 +265,5 @@ export function LeaderboardCard({ leaderboard, hasScores = false, isGameFinished
     </MagicCard>
   )
 }
+
 

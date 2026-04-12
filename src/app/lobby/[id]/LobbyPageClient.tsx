@@ -238,6 +238,7 @@ export function LobbyPageClient({
           */}
           <div className={`md:col-span-2 lg:col-span-4 ${isGameFinished ? 'order-1 md:order-3' : 'order-2 md:order-3'}`}>
             <LeaderboardCard 
+              lobbyId={lobby.id}
               leaderboard={leaderboard} 
               hasScores={leaderboard.some(entry => entry.averageRating > 0)}
               isGameFinished={isGameFinished}

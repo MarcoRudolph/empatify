@@ -119,6 +119,8 @@ export async function GET(request: NextRequest) {
       "user-read-currently-playing",
       "playlist-read-private",
       "playlist-read-collaborative",
+      "playlist-modify-public",
+      "playlist-modify-private",
       "streaming",
     ].join(" ")
 
