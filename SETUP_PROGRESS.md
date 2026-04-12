@@ -41,6 +41,7 @@
 - ✅ Supabase middleware setup
 - ✅ Spotify Web API client
 - ✅ Stripe client configuration
+- ✅ Stripe subscription integration (Checkout & Webhooks)
 - ✅ Environment variable template (.env.example)
 
 ## 🚧 In Progress / Next Steps
