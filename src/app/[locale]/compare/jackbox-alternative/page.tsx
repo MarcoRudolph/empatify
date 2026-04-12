@@ -61,27 +61,27 @@ export default function JackboxAlternativePage() {
                 <tbody className="divide-y divide-neutral-800">
                   <tr>
                     <td className="py-3 pr-6 text-neutral-400 font-medium">Price</td>
-                    <td className="py-3 pr-6 text-neutral-200">$9.99–$29.99 per pack</td>
+                    <td className="py-3 pr-6 text-white font-medium">$9.99–$29.99 per pack</td>
                     <td className="py-3 text-orange-400 font-bold">Free</td>
                   </tr>
                   <tr>
                     <td className="py-3 pr-6 text-neutral-400 font-medium">Download required</td>
-                    <td className="py-3 pr-6 text-neutral-200">Yes (host needs Steam/console)</td>
+                    <td className="py-3 pr-6 text-white font-medium">Yes (host needs Steam/console)</td>
                     <td className="py-3 text-orange-400 font-bold">No — browser only</td>
                   </tr>
                   <tr>
                     <td className="py-3 pr-6 text-neutral-400 font-medium">Players</td>
-                    <td className="py-3 pr-6 text-neutral-200">Up to 8 (varies by game)</td>
+                    <td className="py-3 pr-6 text-white font-medium">Up to 8 (varies by game)</td>
                     <td className="py-3 text-orange-400 font-bold">3 free / unlimited Pro</td>
                   </tr>
                   <tr>
                     <td className="py-3 pr-6 text-neutral-400 font-medium">Music-based</td>
-                    <td className="py-3 pr-6 text-neutral-200">Some packs only</td>
+                    <td className="py-3 pr-6 text-white font-medium">Some packs only</td>
                     <td className="py-3 text-orange-400 font-bold">Yes — Spotify integration</td>
                   </tr>
                   <tr>
                     <td className="py-3 pr-6 text-neutral-400 font-medium">Accounts needed</td>
-                    <td className="py-3 pr-6 text-neutral-200">Host needs Steam</td>
+                    <td className="py-3 pr-6 text-white font-medium">Host needs Steam</td>
                     <td className="py-3 text-orange-400 font-bold">Guests join without account</td>
                   </tr>
                 </tbody>

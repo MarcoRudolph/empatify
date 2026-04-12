@@ -90,7 +90,9 @@ export function EmpathyPlayground() {
     // Rock/Metal detection
     let dieterRating = 3
     let dieterQuote = "Is that a computer playing? No thanks."
-    if (fullText.includes("rock") || fullText.includes("metal") || fullText.includes("metallica") || fullText.includes("ac/dc") || fullText.includes("nirvana")) {
+    const rockBands = ["rock", "metal", "metallica", "ac/dc", "nirvana", "system of a down", "korn", "slipknot", "linkin park", "rammstein", "iron maiden", "black sabbath", "led zeppelin", "guns n' roses"];
+    
+    if (rockBands.some(band => fullText.includes(band))) {
       dieterRating = 9
       dieterQuote = "Finally! Some real instruments. 🤘"
     } else if (fullText.includes("pop") || fullText.includes("rap")) {
