@@ -582,7 +582,6 @@ export function SettingsPageClient({
                 </div>
               </div>
             </MagicCard>
-          )}
 
           {/* Danger Zone */}
           <MagicCard
