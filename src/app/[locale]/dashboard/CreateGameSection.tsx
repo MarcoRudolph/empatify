@@ -378,10 +378,12 @@ export function CreateGameSection({
         <label className="flex items-center gap-3 cursor-pointer select-none">
           <div
             onClick={() => setIsBlind(!isBlind)}
-            className={`relative w-10 h-6 rounded-full transition-all duration-200 ${
+            role="switch"
+            aria-checked={isBlind}
+            className={`relative w-10 h-6 rounded-full border transition-all duration-200 ${
               isBlind
-                ? "bg-primary-500"
-                : "bg-[#555555]"
+                ? "bg-[#FF6B00] border-[#FF6B00] shadow-[0_0_0_2px_rgba(255,107,0,0.25)]"
+                : "bg-[#555555] border-[#6B6B6B]"
             }`}
           >
             <span
@@ -427,8 +429,8 @@ export function CreateGameSection({
           type="button"
           onClick={handleCreateGame}
           disabled={isCreating}
-          className="glow-cta w-full h-12 rounded-full font-display font-black text-base disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-opacity duration-200"
-          style={{ background: '#FF6B00', color: '#FFFFFF' }}
+          className="glow-cta w-full h-12 rounded-full font-display font-black text-base text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-opacity duration-200"
+          style={{ backgroundColor: '#FF6B00', color: '#FFFFFF' }}
         >
           {isCreating ? (
             <>
