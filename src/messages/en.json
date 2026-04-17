@@ -224,6 +224,15 @@
     "gamesPlayed": "Total Games Played",
     "footer": "empatify"
   },
+  "share": {
+    "shareCard": "Share my Sonic Soul",
+    "title": "Share your Sonic Soul",
+    "copy": "Copy link",
+    "copied": "Copied!",
+    "download": "Download image",
+    "caption": "Check out {name}'s Sonic Soul on Empatify — do you know your friends' music?",
+    "playOnEmpatify": "Play on Empatify"
+  },
   "stats": {
     "title": "Statistics",
     "wins": "Wins",

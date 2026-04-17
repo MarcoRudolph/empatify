@@ -3,6 +3,7 @@
 import { useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { toPng } from "html-to-image"
+import { ShareSoulModal } from "@/components/ui/ShareSoulModal"
 import { useTranslations } from "next-intl"
 import { createClient } from "@/lib/supabase/client"
 import { MagicCard } from "@/components/ui/magic-card"
@@ -59,6 +60,7 @@ export function SettingsPageClient({
   const tCommon = useTranslations("common")
   const tDashboard = useTranslations("dashboard")
   const tViral = useTranslations("viralCard")
+  const tShare = useTranslations("share")
   const supabase = createClient()
 
   const [displayName, setDisplayName] = useState(
@@ -80,6 +82,7 @@ export function SettingsPageClient({
   const [success, setSuccess] = useState<string | null>(null)
   const [nameError, setNameError] = useState<string | null>(null)
   const [isSharing, setIsSharing] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
   const viralCardRef = useRef<HTMLDivElement>(null)
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -126,13 +129,18 @@ export function SettingsPageClient({
     }
   }
 
-  const handleShareCard = async () => {
+  const shareHandle = dbUser?.name || displayName
+  const shareUrl = `${typeof window !== "undefined" ? window.location.origin : "https://empatify.de"}/${locale}/u/${encodeURIComponent(shareHandle)}`
+
+  const handleOpenShare = () => {
+    setShareOpen(true)
+  }
+
+  const handleDownloadCardPng = async () => {
     const node = viralCardRef.current
     if (!node) return
 
-    const shareUrl = "https://empatify.de"
-    const shareText = `${displayName} ${tViral("title")}! Check it out on Empatify.`
-    const fileName = `sonic-soul-${(dbUser?.name || "empatify").toLowerCase().replace(/[^a-z0-9]+/g, "-")}.png`
+    const fileName = `sonic-soul-${shareHandle.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.png`
 
     setIsSharing(true)
     setError(null)
@@ -149,39 +157,14 @@ export function SettingsPageClient({
         },
       })
 
-      const blob = await (await fetch(dataUrl)).blob()
-      const file = new File([blob], fileName, { type: "image/png" })
-
-      const shareData: ShareData & { files?: File[] } = {
-        title: "Sonic Soul — Empatify",
-        text: `${shareText} ${shareUrl}`,
-        url: shareUrl,
-        files: [file],
-      }
-
-      const nav = navigator as Navigator & {
-        canShare?: (data: ShareData & { files?: File[] }) => boolean
-      }
-
-      if (nav.canShare?.({ files: [file] }) && nav.share) {
-        await nav.share(shareData)
-      } else if (nav.share) {
-        await nav.share({ title: shareData.title, text: shareData.text, url: shareUrl })
-      } else {
-        const link = document.createElement("a")
-        link.href = dataUrl
-        link.download = fileName
-        link.click()
-        try {
-          await navigator.clipboard.writeText(`${shareText} ${shareUrl}`)
-        } catch {}
-        setSuccess(tCommon("copyLinkSuccess") || "Card downloaded — paste the link from clipboard!")
-      }
+      const link = document.createElement("a")
+      link.href = dataUrl
+      link.download = fileName
+      link.click()
     } catch (err) {
       const e = err as { name?: string; message?: string }
-      if (e?.name === "AbortError") return
-      console.error("Error sharing sonic soul card:", err)
-      setError(e?.message || "Could not share the card")
+      console.error("Error generating sonic soul image:", err)
+      setError(e?.message || "Could not generate the image")
     } finally {
       setIsSharing(false)
     }
@@ -636,7 +619,7 @@ export function SettingsPageClient({
                 </div>
                 
                 <button
-                  onClick={handleShareCard}
+                  onClick={handleOpenShare}
                   disabled={isSharing}
                   data-html2image-ignore="true"
                   className="bg-white text-black hover:bg-neutral-200 disabled:opacity-60 disabled:cursor-not-allowed px-6 py-3 rounded-2xl font-black text-sm transition-all active:scale-95 flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
@@ -695,6 +678,20 @@ export function SettingsPageClient({
           </MagicCard>
         </div>
       </div>
+
+      <ShareSoulModal
+        isOpen={shareOpen}
+        onClose={() => setShareOpen(false)}
+        shareUrl={shareUrl}
+        onDownloadImage={handleDownloadCardPng}
+        labels={{
+          title: tShare("title"),
+          copy: tShare("copy"),
+          copied: tShare("copied"),
+          download: tShare("download"),
+          caption: tShare("caption", { name: displayName }),
+        }}
+      />
     </div>
   )
 }

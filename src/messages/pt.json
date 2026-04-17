@@ -356,6 +356,15 @@
       "email": "Email",
       "phone": "Telefone"
     }
+  },
+  "share": {
+    "shareCard": "Compartilhar minha Sonic Soul",
+    "title": "Compartilhe sua Sonic Soul",
+    "copy": "Copiar link",
+    "copied": "Copiado!",
+    "download": "Baixar imagem",
+    "caption": "Confira a Sonic Soul de {name} no Empatify — você conhece o gosto musical dos seus amigos?",
+    "playOnEmpatify": "Jogar no Empatify"
   }
 }
 
