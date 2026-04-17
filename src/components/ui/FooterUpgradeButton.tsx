@@ -1,23 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { UpgradeModal } from "./UpgradeModal"
-import { createClient } from "@/lib/supabase/client"
 
 export function FooterUpgradeButton({ label }: { label: string }) {
   const [open, setOpen] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const supabase = createClient()
-
-  useEffect(() => {
-    async function checkUser() {
-      const { data: { user } } = await supabase.auth.getUser()
-      setIsLoggedIn(!!user)
-    }
-    checkUser()
-  }, [])
-
-  if (!isLoggedIn) return null
 
   return (
     <>

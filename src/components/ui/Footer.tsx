@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import { locales } from '@/i18n';
 import { FooterUpgradeButton } from './FooterUpgradeButton';
+import { createClient } from '@/lib/supabase/server';
 
 function FlowerIcon({ className }: { className?: string }) {
   return (
@@ -23,6 +24,10 @@ export const Footer: React.FC<{ locale: string }> = async ({ locale }) => {
   const localeLabels: Record<string, string> = {
     en: 'EN', de: 'DE', pt: 'PT', fr: 'FR', es: 'ES',
   };
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const isLoggedIn = !!user;
 
   return (
     <footer className="relative border-t border-neutral-300 bg-neutral-75">
@@ -60,9 +65,11 @@ export const Footer: React.FC<{ locale: string }> = async ({ locale }) => {
                 {t('service.title')}
               </p>
               <ul className="space-y-2.5">
-                <li>
-                  <FooterUpgradeButton label="Upgrade" />
-                </li>
+                {isLoggedIn && (
+                  <li>
+                    <FooterUpgradeButton label="Upgrade" />
+                  </li>
+                )}
                 <li>
                   <Link
                     href="/documentation"
