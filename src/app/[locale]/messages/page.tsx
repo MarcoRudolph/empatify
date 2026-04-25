@@ -12,19 +12,16 @@ export default async function MessagesPage({ params }: MessagesPageProps) {
   const { locale } = await params
 
   const supabase = await createClient()
-  const [authResult, messages] = await Promise.all([
-    supabase.auth.getUser(),
-    getMessages({ locale }),
-  ])
-
   const {
     data: { user },
     error: authError,
-  } = authResult
+  } = await supabase.auth.getUser()
 
   if (authError || !user) {
     redirect(`/${locale}/login`)
   }
+
+  const messages = await getMessages({ locale })
 
   return (
     <NextIntlClientProvider messages={messages}>
