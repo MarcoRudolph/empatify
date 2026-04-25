@@ -29,5 +29,3 @@ export default async function MessagesPage({ params }: MessagesPageProps) {
     </NextIntlClientProvider>
   )
 }
-
-// autoresearch smoke test 1777109939
