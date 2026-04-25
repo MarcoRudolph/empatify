@@ -45,6 +45,7 @@ export function MessagesIcon({ locale }: MessagesIconProps) {
   return (
     <button
       onClick={handleClick}
+      data-testid="nav-messages"
       className="relative flex items-center justify-center w-10 h-10 rounded-lg hover:bg-neutral-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-all duration-200"
       aria-label={`Messages${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
     >

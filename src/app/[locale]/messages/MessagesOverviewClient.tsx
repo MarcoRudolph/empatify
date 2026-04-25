@@ -130,19 +130,22 @@ export function MessagesOverviewClient({ locale }: MessagesOverviewClientProps) 
         </div>
 
         {conversations.length === 0 ? (
-          <MagicCard
-            className="p-12 rounded-2xl shadow-lg text-center"
-            gradientFrom="var(--color-primary-500)"
-            gradientTo="var(--color-primary-600)"
-            gradientSize={400}
-          >
-            <p className="text-neutral-600">{t("noMessages")}</p>
-          </MagicCard>
+          <div data-testid="messages-empty-state">
+            <MagicCard
+              className="p-12 rounded-2xl shadow-lg text-center"
+              gradientFrom="var(--color-primary-500)"
+              gradientTo="var(--color-primary-600)"
+              gradientSize={400}
+            >
+              <p className="text-neutral-600">{t("noMessages")}</p>
+            </MagicCard>
+          </div>
         ) : (
           <div className="space-y-3">
             {conversations.map((conversation) => (
               <button
                 key={conversation.userId}
+                data-testid="message-item"
                 type="button"
                 onClick={(e) => {
                   e.preventDefault()
