@@ -1,21 +1,16 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 interface MessagesIconProps {
   locale: string
 }
 
 export function MessagesIcon({ locale }: MessagesIconProps) {
-  const router = useRouter()
   const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {
-    // Prefetch messages page so navigation is instant
-    router.prefetch(`/${locale}/messages`)
-
-    // Load unread count
     const loadUnreadCount = async () => {
       try {
         const response = await fetch("/api/messages/unread-count")
@@ -30,21 +25,17 @@ export function MessagesIcon({ locale }: MessagesIconProps) {
 
     loadUnreadCount()
 
-    // Poll for updates every 30 seconds
     const interval = setInterval(loadUnreadCount, 30000)
 
     return () => clearInterval(interval)
-  }, [locale, router])
-
-  const handleClick = () => {
-    router.push(`/${locale}/messages`)
-  }
+  }, [locale])
 
   const displayCount = unreadCount > 9 ? "10+" : unreadCount.toString()
 
   return (
-    <button
-      onClick={handleClick}
+    <Link
+      href={`/${locale}/messages`}
+      prefetch={true}
       data-testid="nav-messages"
       className="relative flex items-center justify-center w-10 h-10 rounded-lg hover:bg-neutral-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-all duration-200"
       aria-label={`Messages${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
@@ -64,6 +55,6 @@ export function MessagesIcon({ locale }: MessagesIconProps) {
           {displayCount}
         </span>
       )}
-    </button>
+    </Link>
   )
 }
