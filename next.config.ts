@@ -9,9 +9,6 @@ const nextConfig: NextConfig & Record<string, any> = {
     // Disable type checking during builds (warnings only, not blocking)
     ignoreBuildErrors: true,
   },
-  experimental: {
-    optimizePackageImports: ['lucide-react', 'motion'],
-  },
   webpack: (config, { isServer }) => {
     // Fix for @supabase/ssr cookie dependency resolution
     if (!isServer) {
