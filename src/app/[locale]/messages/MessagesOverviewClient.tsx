@@ -75,14 +75,12 @@ export function MessagesOverviewClient({ locale }: MessagesOverviewClientProps) 
     router.push(`/${locale}/messages/${userId}`)
   }
 
-  // First-paint shell: avoid hydrating the full Navbar (brand logo, dropdowns,
-  // language picker, etc.) before mount. A height-matched skeleton bar holds
-  // the layout so there's no shift when the real Navbar mounts in the next
-  // render. formatTime's inner !mounted guard handles Date hydration safety.
+  // Don't render content until mounted to avoid hydration issues
+  // This prevents hydration mismatches with MagicCard and other client-side components
   if (!mounted) {
     return (
       <div className="min-h-screen bg-neutral-50 pt-16">
-        <div className="fixed top-0 left-0 right-0 z-50 h-16 bg-neutral-50 border-b border-neutral-300" aria-hidden="true" />
+        <Navbar locale={locale} />
         <div className="max-w-container mx-auto px-6 py-8">
           <div data-testid="messages-empty-state" className="flex items-center justify-center py-12">
             <Loader2 className="size-8 animate-spin text-primary-500" />
