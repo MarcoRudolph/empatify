@@ -82,7 +82,7 @@ export function MessagesOverviewClient({ locale }: MessagesOverviewClientProps) 
       <div className="min-h-screen bg-neutral-50 pt-16">
         <Navbar locale={locale} />
         <div className="max-w-container mx-auto px-6 py-8">
-          <div className="flex items-center justify-center py-12">
+          <div data-testid="messages-empty-state" className="flex items-center justify-center py-12">
             <Loader2 className="size-8 animate-spin text-primary-500" />
           </div>
         </div>
@@ -106,7 +106,7 @@ export function MessagesOverviewClient({ locale }: MessagesOverviewClientProps) 
             </button>
             <h1 className="text-3xl font-bold text-neutral-900">{t("messages")}</h1>
           </div>
-          <div className="flex items-center justify-center py-12">
+          <div data-testid="messages-empty-state" className="flex items-center justify-center py-12">
             <Loader2 className="size-8 animate-spin text-primary-500" />
           </div>
         </div>
