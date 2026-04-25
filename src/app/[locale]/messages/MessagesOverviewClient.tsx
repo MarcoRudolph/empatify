@@ -4,13 +4,8 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { ArrowLeft, Loader2 } from "lucide-react"
-import dynamic from "next/dynamic"
+import { MagicCard } from "@/components/ui/magic-card"
 import { Navbar } from "@/components/ui/Navbar"
-
-const MagicCard = dynamic(
-  () => import("@/components/ui/magic-card").then((m) => ({ default: m.MagicCard })),
-  { ssr: false, loading: () => null }
-)
 
 interface Conversation {
   userId: string
