@@ -56,3 +56,4 @@ scripts/perf/perf-report-*.md
 .env
 .env.local
 .env.*.local
+.vercel
