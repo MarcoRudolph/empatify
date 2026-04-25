@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
+import { getMessages } from "next-intl/server"
+import { NextIntlClientProvider } from "next-intl"
 import { MessagesOverviewClient } from "./MessagesOverviewClient"
 
 interface MessagesPageProps {
@@ -19,5 +21,11 @@ export default async function MessagesPage({ params }: MessagesPageProps) {
     redirect(`/${locale}/login`)
   }
 
-  return <MessagesOverviewClient locale={locale} />
+  const messages = await getMessages({ locale })
+
+  return (
+    <NextIntlClientProvider messages={messages}>
+      <MessagesOverviewClient locale={locale} />
+    </NextIntlClientProvider>
+  )
 }
