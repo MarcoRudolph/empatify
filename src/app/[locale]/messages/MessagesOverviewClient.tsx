@@ -75,23 +75,10 @@ export function MessagesOverviewClient({ locale }: MessagesOverviewClientProps) 
     router.push(`/${locale}/messages/${userId}`)
   }
 
-  // Don't render content until mounted to avoid hydration issues
-  // This prevents hydration mismatches with MagicCard and other client-side components
-  if (!mounted) {
-    return (
-      <div className="min-h-screen bg-neutral-50 pt-16">
-        <Navbar locale={locale} />
-        <div className="max-w-container mx-auto px-6 py-8">
-          <div data-testid="messages-empty-state" className="flex items-center justify-center py-12">
-            <Loader2 className="size-8 animate-spin text-primary-500" />
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Also ensure conversations are loaded before rendering MagicCard components
-  if (isLoading) {
+  // Show loading shell while data fetches OR before mount.
+  // formatTime's inner !mounted guard handles the only real hydration risk
+  // (Date-dependent text), so the outer mount gate is unnecessary.
+  if (!mounted || isLoading) {
     return (
       <div className="min-h-screen bg-neutral-50 pt-16">
         <Navbar locale={locale} />
