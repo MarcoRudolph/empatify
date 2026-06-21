@@ -188,7 +188,15 @@
     "roundStatusRated": "Bewertet",
     "roundStatusTrackChosen": "Track gewählt",
     "roundStatusOpen": "Offen",
-    "roundStatusTapToOpen": "Öffnen"
+    "roundStatusTapToOpen": "Öffnen",
+    "roundStatusActive": "Aktive Runde",
+    "roundUserNoTrack": "Du hast noch keinen Track gewählt.",
+    "roundUserTrackSelected": "Du hast einen Track gewählt.",
+    "roundUserTrackRated": "Dein Track wurde von allen bewertet.",
+    "roundUserForgotToRate": "Du musst noch einen oder mehrere Tracks bewerten.",
+    "roundGroupTracksMissing": "{count} Spieler müssen noch einen Track hinzufügen.",
+    "roundGroupRatingsMissing": "{count} Bewertung(en) fehlen noch in dieser Runde.",
+    "roundGroupAllRatingsPresent": "Alle Tracks sind drin und alle Bewertungen sind fertig."
   },
   "game": {
     "round": "Runde",

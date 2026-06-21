@@ -186,7 +186,15 @@
     "roundStatusRated": "Rated",
     "roundStatusTrackChosen": "Track chosen",
     "roundStatusOpen": "Open",
-    "roundStatusTapToOpen": "Tap to open"
+    "roundStatusTapToOpen": "Tap to open",
+    "roundStatusActive": "Active round",
+    "roundUserNoTrack": "You have not selected a track yet.",
+    "roundUserTrackSelected": "You selected a track.",
+    "roundUserTrackRated": "Your track has been rated by everyone.",
+    "roundUserForgotToRate": "You still need to rate one or more tracks.",
+    "roundGroupTracksMissing": "{count} player(s) still need to add a track.",
+    "roundGroupRatingsMissing": "{count} rating(s) still missing in this round.",
+    "roundGroupAllRatingsPresent": "All tracks are in and all ratings are complete."
   },
   "game": {
     "round": "Round",

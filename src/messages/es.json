@@ -184,7 +184,15 @@
     "roundStatusRated": "Puntuada",
     "roundStatusTrackChosen": "Tema elegido",
     "roundStatusOpen": "Abierta",
-    "roundStatusTapToOpen": "Toca para abrir"
+    "roundStatusTapToOpen": "Toca para abrir",
+    "roundStatusActive": "Ronda activa",
+    "roundUserNoTrack": "Todavía no has elegido un tema.",
+    "roundUserTrackSelected": "Has elegido un tema.",
+    "roundUserTrackRated": "Todos han puntuado tu tema.",
+    "roundUserForgotToRate": "Todavía tienes que puntuar uno o más temas.",
+    "roundGroupTracksMissing": "{count} jugador(es) todavía tienen que añadir un tema.",
+    "roundGroupRatingsMissing": "Faltan {count} puntuación(es) en esta ronda.",
+    "roundGroupAllRatingsPresent": "Todos los temas están listos y todas las puntuaciones están completas."
   },
   "game": {
     "round": "Ronda",

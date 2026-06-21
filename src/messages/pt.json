@@ -184,7 +184,15 @@
     "roundStatusRated": "Avaliada",
     "roundStatusTrackChosen": "Faixa escolhida",
     "roundStatusOpen": "Aberta",
-    "roundStatusTapToOpen": "Toque para abrir"
+    "roundStatusTapToOpen": "Toque para abrir",
+    "roundStatusActive": "Rodada ativa",
+    "roundUserNoTrack": "Você ainda não escolheu uma faixa.",
+    "roundUserTrackSelected": "Você escolheu uma faixa.",
+    "roundUserTrackRated": "Sua faixa foi avaliada por todos.",
+    "roundUserForgotToRate": "Você ainda precisa avaliar uma ou mais faixas.",
+    "roundGroupTracksMissing": "{count} jogador(es) ainda precisam adicionar uma faixa.",
+    "roundGroupRatingsMissing": "Ainda faltam {count} avaliação(ões) nesta rodada.",
+    "roundGroupAllRatingsPresent": "Todas as faixas estão prontas e todas as avaliações foram feitas."
   },
   "game": {
     "round": "Rodada",

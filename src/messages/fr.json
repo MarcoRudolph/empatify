@@ -184,7 +184,15 @@
     "roundStatusRated": "Noté",
     "roundStatusTrackChosen": "Titre choisi",
     "roundStatusOpen": "Ouvert",
-    "roundStatusTapToOpen": "Appuie pour ouvrir"
+    "roundStatusTapToOpen": "Appuie pour ouvrir",
+    "roundStatusActive": "Tour actif",
+    "roundUserNoTrack": "Tu n’as pas encore choisi de titre.",
+    "roundUserTrackSelected": "Tu as choisi un titre.",
+    "roundUserTrackRated": "Ton titre a été noté par tout le monde.",
+    "roundUserForgotToRate": "Tu dois encore noter un ou plusieurs titres.",
+    "roundGroupTracksMissing": "{count} joueur(s) doivent encore ajouter un titre.",
+    "roundGroupRatingsMissing": "Il manque encore {count} note(s) dans ce tour.",
+    "roundGroupAllRatingsPresent": "Tous les titres sont là et toutes les notes sont terminées."
   },
   "game": {
     "round": "Tour",

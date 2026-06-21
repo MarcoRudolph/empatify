@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Check, Music, Play, Loader2, Plus, Edit2, Trash2, Star, X } from "lucide-react"
+import { AlertTriangle, CheckCircle2, Circle, Clock3, Music, Music2, Play, Loader2, Plus, Edit2, Trash2, Star, User, Users, X } from "lucide-react"
 import { MagicCard } from "@/components/ui/magic-card"
 import { ShimmerButton } from "@/components/ui/shimmer-button"
 import { useTranslations } from "next-intl"
@@ -116,7 +116,12 @@ export function SongsCard({
   const [isPlayingAll, setIsPlayingAll] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const [bouncingRound, setBouncingRound] = useState<number | null>(null)
+  const [growingRound, setGrowingRound] = useState<number | null>(null)
+  const [activeRoundHint, setActiveRoundHint] = useState<{
+    round: number
+    type: "user" | "group"
+    label: string
+  } | null>(null)
   const trackDetailsRef = useRef<Record<string, SpotifyTrack>>({})
 
   // Keep ref in sync with state
@@ -393,9 +398,6 @@ export function SongsCard({
   }
 
   // Calculate round status for the mobile-first round selector.
-  // - chosen: current user already picked a song for this round
-  // - ownSongFullyRated: every other player rated the current user's song
-  // - hasUnratedSongs: current user still has songs to rate in this round
   const getRoundStatus = (round: number) => {
     const roundSongs = songs.filter(s => s.roundNumber === round)
     const songsToRate = roundSongs.filter(s => s.suggestedBy !== currentUserId)
@@ -404,37 +406,53 @@ export function SongsCard({
       ? ratings.filter(r => r.songId === ownSong.id && r.givenBy !== currentUserId)
       : []
     const expectedRatingsForOwnSong = Math.max(participants.length - 1, 0)
-    
-    if (songsToRate.length === 0) {
-      return {
-        hasUnratedSongs: false,
-        totalRatings: 0,
-        hasOwnSong: Boolean(ownSong),
-        ownSongFullyRated: Boolean(ownSong) && expectedRatingsForOwnSong > 0 && ownSongRatings.length >= expectedRatingsForOwnSong,
-      }
-    }
-    
-    const roundRatings = ratings.filter(r => 
+    const ownRatingsGiven = ratings.filter(r => 
       roundSongs.some(s => s.id === r.songId) && r.givenBy === currentUserId
     )
+    const expectedRatingsForRound = roundSongs.length * Math.max(participants.length - 1, 0)
+    const roundRatingCount = ratings.filter(r => roundSongs.some(s => s.id === r.songId)).length
+    const missingTrackCount = Math.max(participants.length - roundSongs.length, 0)
+    const missingRatingCount = Math.max(expectedRatingsForRound - roundRatingCount, 0)
+    const hasUnratedSongs = ownRatingsGiven.length < songsToRate.length
+    const ownSongFullyRated = Boolean(ownSong) && expectedRatingsForOwnSong > 0 && ownSongRatings.length >= expectedRatingsForOwnSong
+    const userState = !ownSong
+      ? "noTrack"
+      : hasUnratedSongs
+        ? "forgotToRate"
+        : ownSongFullyRated
+          ? "trackRated"
+          : "trackSelected"
+    const groupState = missingTrackCount > 0
+      ? "tracksMissing"
+      : missingRatingCount > 0
+        ? "ratingsMissing"
+        : "allRatingsPresent"
     
     return {
-      hasUnratedSongs: roundRatings.length < songsToRate.length,
-      totalRatings: roundRatings.length,
+      hasUnratedSongs,
+      totalRatings: ownRatingsGiven.length,
       hasOwnSong: Boolean(ownSong),
-      ownSongFullyRated: Boolean(ownSong) && expectedRatingsForOwnSong > 0 && ownSongRatings.length >= expectedRatingsForOwnSong,
+      ownSongFullyRated,
+      missingTrackCount,
+      missingRatingCount,
+      userState,
+      groupState,
     }
   }
 
-  // Check if user has rated at least one song overall
-  const hasRatedAnySong = ratings.some(r => r.givenBy === currentUserId)
   
   const handleRoundChange = (round: number) => {
     setSelectedRound(round)
-    setBouncingRound(round)
+    setGrowingRound(round)
     window.setTimeout(() => {
-      setBouncingRound((current) => (current === round ? null : current))
-    }, 450)
+      setGrowingRound((current) => (current === round ? null : current))
+    }, 220)
+  }
+
+  const toggleRoundHint = (round: number, type: "user" | "group", label: string) => {
+    setActiveRoundHint((current) =>
+      current?.round === round && current.type === type ? null : { round, type, label }
+    )
   }
 
   // Check if all participants have songs for current round
@@ -494,6 +512,63 @@ export function SongsCard({
     window.location.href = `/api/spotify/auth?return_to=${encodeURIComponent(returnTo)}`
   }
 
+  const getUserStatusLabel = (status: ReturnType<typeof getRoundStatus>) => {
+    if (status.userState === "noTrack") return t("roundUserNoTrack")
+    if (status.userState === "forgotToRate") return t("roundUserForgotToRate")
+    if (status.userState === "trackRated") return t("roundUserTrackRated")
+    return t("roundUserTrackSelected")
+  }
+
+  const getGroupStatusLabel = (status: ReturnType<typeof getRoundStatus>) => {
+    if (status.groupState === "tracksMissing") {
+      return t("roundGroupTracksMissing", { count: status.missingTrackCount })
+    }
+    if (status.groupState === "ratingsMissing") {
+      return t("roundGroupRatingsMissing", { count: status.missingRatingCount })
+    }
+    return t("roundGroupAllRatingsPresent")
+  }
+
+  const getUserStatusIcon = (status: ReturnType<typeof getRoundStatus>) => {
+    const label = getUserStatusLabel(status)
+    const colorClass =
+      status.userState === "trackRated"
+        ? "text-accent-spotify"
+        : status.userState === "trackSelected"
+          ? "text-primary-500"
+          : status.userState === "forgotToRate"
+            ? "text-yellow-500"
+            : "text-neutral-500"
+    const StateIcon =
+      status.userState === "trackRated"
+        ? CheckCircle2
+        : status.userState === "trackSelected"
+          ? Music2
+          : status.userState === "forgotToRate"
+            ? AlertTriangle
+            : Circle
+
+    return { label, colorClass, StateIcon, BaseIcon: User }
+  }
+
+  const getGroupStatusIcon = (status: ReturnType<typeof getRoundStatus>) => {
+    const label = getGroupStatusLabel(status)
+    const colorClass =
+      status.groupState === "allRatingsPresent"
+        ? "text-accent-spotify"
+        : status.groupState === "ratingsMissing"
+          ? "text-yellow-500"
+          : "text-neutral-500"
+    const StateIcon =
+      status.groupState === "allRatingsPresent"
+        ? CheckCircle2
+        : status.groupState === "ratingsMissing"
+          ? Clock3
+          : Circle
+
+    return { label, colorClass, StateIcon, BaseIcon: Users }
+  }
+
   return (
     <MagicCard
       className="p-4 md:p-6 rounded-2xl shadow-lg border border-neutral-300"
@@ -526,56 +601,89 @@ export function SongsCard({
           {Array.from({ length: lobby.maxRounds }, (_, i) => i + 1).map((round) => {
             const roundStatus = getRoundStatus(round)
             const isActive = selectedRound === round
-            const isBouncing = bouncingRound === round
-            const showNeedsRating = hasRatedAnySong && roundStatus.hasUnratedSongs && !isGameFinished
-            const showComplete = roundStatus.ownSongFullyRated
-            const showChosen = roundStatus.hasOwnSong && !showComplete
+            const isGrowing = growingRound === round
+            const userIcon = getUserStatusIcon(roundStatus)
+            const groupIcon = getGroupStatusIcon(roundStatus)
+            const activeHint = activeRoundHint?.round === round ? activeRoundHint : null
+            const UserBaseIcon = userIcon.BaseIcon
+            const UserStateIcon = userIcon.StateIcon
+            const GroupBaseIcon = groupIcon.BaseIcon
+            const GroupStateIcon = groupIcon.StateIcon
 
             return (
-              <button
+              <div
                 key={round}
-                type="button"
+                role="button"
+                tabIndex={0}
                 onClick={() => handleRoundChange(round)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault()
+                    handleRoundChange(round)
+                  }
+                }}
                 className={cn(
-                  "group relative min-h-14 rounded-2xl border px-3 py-2 text-left shadow-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 active:scale-95",
-                  "bg-neutral-100/80 hover:bg-neutral-200",
+                  "relative min-h-[74px] cursor-pointer rounded-2xl border bg-neutral-100/80 px-3 py-2.5 text-left shadow-sm outline-none transition-[transform,border-color,box-shadow,background-color] duration-200 ease-out hover:bg-neutral-200 focus-visible:ring-2 focus-visible:ring-primary-500",
                   isActive
                     ? "border-primary-500 shadow-[0_0_0_1px_rgba(255,107,0,0.35),0_10px_24px_rgba(255,107,0,0.14)]"
                     : "border-neutral-300",
-                  showChosen && "border-accent-spotify/50 text-accent-spotify",
-                  showComplete && "text-neutral-900",
-                  isBouncing && "animate-bounce"
+                  isGrowing && "scale-[1.06]"
                 )}
                 aria-current={isActive ? "true" : undefined}
               >
-                <span className="flex items-center justify-between gap-2">
+                <div className="flex items-start justify-between gap-2">
                   <span
                     className={cn(
-                      "text-sm font-bold leading-none",
-                      showChosen ? "text-accent-spotify" : "text-neutral-900"
+                      "text-sm leading-none text-neutral-900 transition-[font-weight] duration-150",
+                      isActive ? "font-black" : "font-bold"
                     )}
                   >
                     {t("round")} {round}
                   </span>
-                  {showComplete ? (
-                    <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-spotify text-white">
-                      <Check className="size-4" aria-hidden="true" />
-                    </span>
-                  ) : showNeedsRating ? (
-                    <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-primary-500 text-xs font-black text-white animate-pulse">
-                      !
-                    </span>
-                  ) : null}
-                </span>
-                <span
-                  className={cn(
-                    "mt-1 block text-[11px] font-medium leading-none",
-                    showChosen ? "text-accent-spotify" : "text-neutral-500"
-                  )}
-                >
-                  {showComplete ? t("roundStatusRated") : showChosen ? t("roundStatusTrackChosen") : isActive ? t("roundStatusOpen") : t("roundStatusTapToOpen")}
-                </span>
-              </button>
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    <button
+                      type="button"
+                      title={userIcon.label}
+                      aria-label={userIcon.label}
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        toggleRoundHint(round, "user", userIcon.label)
+                      }}
+                      className={cn(
+                        "relative inline-flex size-7 items-center justify-center rounded-full bg-neutral-200 transition-colors hover:bg-neutral-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
+                        userIcon.colorClass
+                      )}
+                    >
+                      <UserBaseIcon className="size-4" aria-hidden="true" />
+                      <UserStateIcon className="absolute -right-1 -top-1 size-3.5 rounded-full bg-neutral-100" aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      title={groupIcon.label}
+                      aria-label={groupIcon.label}
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        toggleRoundHint(round, "group", groupIcon.label)
+                      }}
+                      className={cn(
+                        "relative inline-flex size-7 items-center justify-center rounded-full bg-neutral-200 transition-colors hover:bg-neutral-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
+                        groupIcon.colorClass
+                      )}
+                    >
+                      <GroupBaseIcon className="size-4" aria-hidden="true" />
+                      <GroupStateIcon className="absolute -right-1 -top-1 size-3.5 rounded-full bg-neutral-100" aria-hidden="true" />
+                    </button>
+                  </div>
+                </div>
+                <p className="mt-2 text-[11px] font-medium leading-snug text-neutral-500">
+                  {isActive ? t("roundStatusActive") : t("roundStatusTapToOpen")}
+                </p>
+                {activeHint && (
+                  <div className="mt-2 rounded-xl border border-neutral-300 bg-neutral-200/80 px-2 py-1.5 text-[11px] font-medium leading-snug text-neutral-900 shadow-sm">
+                    {activeHint.label}
+                  </div>
+                )}
+              </div>
             )
           })}
         </div>
