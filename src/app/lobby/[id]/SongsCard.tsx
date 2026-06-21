@@ -623,7 +623,7 @@ export function SongsCard({
                   }
                 }}
                 className={cn(
-                  "relative min-h-[74px] cursor-pointer rounded-2xl border bg-neutral-100/80 px-3 py-2.5 text-left shadow-sm outline-none transition-[transform,border-color,box-shadow,background-color] duration-200 ease-out hover:bg-neutral-200 focus-visible:ring-2 focus-visible:ring-primary-500",
+                  "relative min-h-[52px] cursor-pointer rounded-2xl border bg-neutral-100/80 px-3 py-2.5 text-left shadow-sm outline-none transition-[transform,border-color,box-shadow,background-color] duration-200 ease-out hover:bg-neutral-200 focus-visible:ring-2 focus-visible:ring-primary-500",
                   isActive
                     ? "border-primary-500 shadow-[0_0_0_1px_rgba(255,107,0,0.35),0_10px_24px_rgba(255,107,0,0.14)]"
                     : "border-neutral-300",
@@ -675,9 +675,6 @@ export function SongsCard({
                     </button>
                   </div>
                 </div>
-                <p className="mt-2 text-[11px] font-medium leading-snug text-neutral-500">
-                  {isActive ? t("roundStatusActive") : t("roundStatusTapToOpen")}
-                </p>
                 {activeHint && (
                   <div className="mt-2 rounded-xl border border-neutral-300 bg-neutral-200/80 px-2 py-1.5 text-[11px] font-medium leading-snug text-neutral-900 shadow-sm">
                     {activeHint.label}
