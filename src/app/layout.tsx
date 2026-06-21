@@ -17,12 +17,35 @@ const outfit = Outfit({
 });
 
 const baseUrl =
-  process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  process.env.NEXT_PUBLIC_APP_URL ?? "https://www.empatify.de";
+
+const socialPreview = "/og/empatify-preview.png";
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
-  title: "Empatify ..chill game",
-  description: "Pick tracks your friends will love! Match the group's music taste to get the highest ratings for your song choices. The best curator wins!",
+  title: "Empatify — Pick songs your friends will love",
+  description: "Join a multiplayer music game: choose tracks, match your friends' taste, and see who is the best curator.",
+  openGraph: {
+    title: "Empatify — Pick songs your friends will love",
+    description: "Join the lobby, match the group's music taste, and become the best curator.",
+    url: baseUrl,
+    siteName: "Empatify",
+    images: [
+      {
+        url: socialPreview,
+        width: 1200,
+        height: 630,
+        alt: "Empatify multiplayer music game preview",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Empatify — Pick songs your friends will love",
+    description: "Join the lobby, match the group's music taste, and become the best curator.",
+    images: [socialPreview],
+  },
 };
 
 export default function RootLayout({
