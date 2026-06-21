@@ -82,6 +82,17 @@
     "gameModeMultiDevice": "Cada um joga em seu próprio dispositivo",
     "gameModeSingleDeviceDescription": "Todos os jogadores usam este dispositivo juntos",
     "gameModeMultiDeviceDescription": "Cada jogador entra com seu próprio dispositivo",
+    "blindMode": "Modo Cego",
+    "blindModeShortDescription": "Esconde quem escolheu cada música até todos avaliarem.",
+    "blindModeInfoLabel": "O que é o Modo Cego?",
+    "blindModeModalClose": "Fechar explicação do Modo Cego",
+    "blindModeModalEyebrow": "Virada do jogo",
+    "blindModeModalTitle": "Modo Cego deixa tudo mais real",
+    "blindModeModalIntro": "No Modo Cego, ninguém vê quem escolheu cada música durante a avaliação. Você julga a faixa, não a pessoa por trás dela.",
+    "blindModeModalPoint1": "As músicas aparecem sem nomes, então ninguém dá nota alta só para o melhor amigo nem derruba alguém de propósito.",
+    "blindModeModalPoint2": "Depois que todos avaliarem, os nomes aparecem e a sala pode adivinhar quem escolheu o quê.",
+    "blindModeModalPoint3": "O jogo fica mais surpreendente, mais justo e muito mais engraçado quando a revelação foge totalmente do esperado.",
+    "blindModeModalBottomLine": "Use quando quiser avaliações honestas e uma revelação maior.",
     "lobbyRunning": "Em andamento",
     "lobbyFinished": "Finalizado",
     "showFinished": "Mostrar finalizados ({count})",
@@ -122,7 +133,7 @@
     "round": "Rodada",
     "of": "de",
     "suggestSong": "Sugerir Música",
-    "rateSong": "Avaliar Música",
+    "rateSong": "Avaliar música",
     "averageRating": "Avaliação Média",
     "bestSong": "Melhor Música",
     "individualRatings": "Avaliações Individuais",
@@ -144,7 +155,6 @@
     "editSong": "Editar",
     "deleteSong": "Excluir",
     "actions": "Ações",
-    "rateSong": "Avaliar música",
     "yourRating": "Sua avaliação",
     "confirmDeleteSong": "Tem certeza de que deseja excluir esta música?",
     "songDeleted": "Música excluída",
@@ -170,7 +180,11 @@
     "tooLateDescription": "Este jogo já terminou. Mas você ainda pode ver os resultados e o vencedor.",
     "spotifyLinkTapAgain": "Toque novamente para entrar com o Spotify",
     "spotifyPremiumQueueHint": "Conta Spotify Premium necessária para fila de reprodução",
-    "spotifyLinkUsePromptBelow": "Use «Vincular Spotify» abaixo para conectar sua conta."
+    "spotifyLinkUsePromptBelow": "Use «Vincular Spotify» abaixo para conectar sua conta.",
+    "roundStatusRated": "Avaliada",
+    "roundStatusTrackChosen": "Faixa escolhida",
+    "roundStatusOpen": "Aberta",
+    "roundStatusTapToOpen": "Toque para abrir"
   },
   "game": {
     "round": "Rodada",
@@ -367,4 +381,3 @@
     "playOnEmpatify": "Jogar no Empatify"
   }
 }
-

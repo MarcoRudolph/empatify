@@ -82,6 +82,17 @@
     "gameModeMultiDevice": "Chacun joue sur son propre appareil",
     "gameModeSingleDeviceDescription": "Tous les joueurs utilisent cet appareil ensemble",
     "gameModeMultiDeviceDescription": "Chaque joueur rejoint avec son propre appareil",
+    "blindMode": "Mode aveugle",
+    "blindModeShortDescription": "Cache qui a choisi chaque chanson jusqu’à ce que tout le monde ait noté.",
+    "blindModeInfoLabel": "Qu’est-ce que le mode aveugle ?",
+    "blindModeModalClose": "Fermer l’explication du mode aveugle",
+    "blindModeModalEyebrow": "Twist de jeu",
+    "blindModeModalTitle": "Le mode aveugle rend le jeu plus vrai",
+    "blindModeModalIntro": "En mode aveugle, personne ne voit qui a choisi quelle chanson pendant les votes. Tu notes le son, pas la personne derrière.",
+    "blindModeModalPoint1": "Les chansons apparaissent sans noms, donc personne ne booste son/sa meilleur(e) pote ni ne descend quelqu’un exprès.",
+    "blindModeModalPoint2": "Quand tout le monde a voté, les noms sont révélés et le lobby peut deviner qui a choisi quoi.",
+    "blindModeModalPoint3": "Ça rend le jeu plus surprenant, plus juste et beaucoup plus drôle quand la révélation sort de nulle part.",
+    "blindModeModalBottomLine": "Active-le si tu veux des notes honnêtes et un vrai moment de reveal.",
     "lobbyRunning": "En cours",
     "lobbyFinished": "Terminé",
     "showFinished": "Afficher les terminés ({count})",
@@ -122,7 +133,7 @@
     "round": "Tour",
     "of": "de",
     "suggestSong": "Suggérer une chanson",
-    "rateSong": "Évaluer la chanson",
+    "rateSong": "Noter cette chanson",
     "averageRating": "Note moyenne",
     "bestSong": "Meilleure Chanson",
     "individualRatings": "Notes individuelles",
@@ -144,7 +155,6 @@
     "editSong": "Modifier",
     "deleteSong": "Supprimer",
     "actions": "Actions",
-    "rateSong": "Noter cette chanson",
     "yourRating": "Ta note",
     "confirmDeleteSong": "Êtes-vous sûr de vouloir supprimer cette chanson ?",
     "songDeleted": "Chanson supprimée",
@@ -170,7 +180,11 @@
     "tooLateDescription": "Ce jeu est déjà terminé. Mais vous pouvez toujours consulter les résultats et le gagnant.",
     "spotifyLinkTapAgain": "Appuyez à nouveau pour vous connecter à Spotify",
     "spotifyPremiumQueueHint": "Un compte Spotify Premium est requis pour la file d’attente",
-    "spotifyLinkUsePromptBelow": "Utilisez « Lier Spotify » ci-dessous pour connecter votre compte."
+    "spotifyLinkUsePromptBelow": "Utilisez « Lier Spotify » ci-dessous pour connecter votre compte.",
+    "roundStatusRated": "Noté",
+    "roundStatusTrackChosen": "Titre choisi",
+    "roundStatusOpen": "Ouvert",
+    "roundStatusTapToOpen": "Appuie pour ouvrir"
   },
   "game": {
     "round": "Tour",
@@ -367,4 +381,3 @@
     "playOnEmpatify": "Jouer sur Empatify"
   }
 }
-

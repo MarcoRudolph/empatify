@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Music, Play, Loader2, Plus, Edit2, Trash2, Star, X } from "lucide-react"
+import { Check, Music, Play, Loader2, Plus, Edit2, Trash2, Star, X } from "lucide-react"
 import { MagicCard } from "@/components/ui/magic-card"
 import { ShimmerButton } from "@/components/ui/shimmer-button"
 import { useTranslations } from "next-intl"
@@ -116,6 +116,7 @@ export function SongsCard({
   const [isPlayingAll, setIsPlayingAll] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [bouncingRound, setBouncingRound] = useState<number | null>(null)
   const trackDetailsRef = useRef<Record<string, SpotifyTrack>>({})
 
   // Keep ref in sync with state
@@ -266,13 +267,13 @@ export function SongsCard({
     }
   }
 
-  const handleAddSong = (participantId: string) => {
+  const handleAddSong = () => {
     // Navigate to song selection page
     const locale = document.cookie.split(';').find(c => c.trim().startsWith('NEXT_LOCALE='))?.split('=')[1] || "en"
     router.push(`/${locale}/lobby/${lobby.id}/select-song?round=${selectedRound}`)
   }
 
-  const handleEditSong = (participantId: string) => {
+  const handleEditSong = () => {
     // Navigate to song selection page to change the song
     const locale = document.cookie.split(';').find(c => c.trim().startsWith('NEXT_LOCALE='))?.split('=')[1] || "en"
     router.push(`/${locale}/lobby/${lobby.id}/select-song?round=${selectedRound}`)
@@ -391,14 +392,26 @@ export function SongsCard({
     return `${minutes}:${seconds.toString().padStart(2, "0")}`
   }
 
-  // Calculate which rounds need rating indicators (!)
-  // Show indicator only if user has rated at least one song, and there are unrated songs in that round
+  // Calculate round status for the mobile-first round selector.
+  // - chosen: current user already picked a song for this round
+  // - ownSongFullyRated: every other player rated the current user's song
+  // - hasUnratedSongs: current user still has songs to rate in this round
   const getRoundStatus = (round: number) => {
     const roundSongs = songs.filter(s => s.roundNumber === round)
     const songsToRate = roundSongs.filter(s => s.suggestedBy !== currentUserId)
+    const ownSong = roundSongs.find(s => s.suggestedBy === currentUserId)
+    const ownSongRatings = ownSong
+      ? ratings.filter(r => r.songId === ownSong.id && r.givenBy !== currentUserId)
+      : []
+    const expectedRatingsForOwnSong = Math.max(participants.length - 1, 0)
     
     if (songsToRate.length === 0) {
-      return { hasUnratedSongs: false, totalRatings: 0 }
+      return {
+        hasUnratedSongs: false,
+        totalRatings: 0,
+        hasOwnSong: Boolean(ownSong),
+        ownSongFullyRated: Boolean(ownSong) && expectedRatingsForOwnSong > 0 && ownSongRatings.length >= expectedRatingsForOwnSong,
+      }
     }
     
     const roundRatings = ratings.filter(r => 
@@ -407,7 +420,9 @@ export function SongsCard({
     
     return {
       hasUnratedSongs: roundRatings.length < songsToRate.length,
-      totalRatings: roundRatings.length
+      totalRatings: roundRatings.length,
+      hasOwnSong: Boolean(ownSong),
+      ownSongFullyRated: Boolean(ownSong) && expectedRatingsForOwnSong > 0 && ownSongRatings.length >= expectedRatingsForOwnSong,
     }
   }
 
@@ -416,6 +431,10 @@ export function SongsCard({
   
   const handleRoundChange = (round: number) => {
     setSelectedRound(round)
+    setBouncingRound(round)
+    window.setTimeout(() => {
+      setBouncingRound((current) => (current === round ? null : current))
+    }, 450)
   }
 
   // Check if all participants have songs for current round
@@ -501,32 +520,60 @@ export function SongsCard({
         </div>
       )}
 
-      {/* Round Tabs — segmented control */}
+      {/* Round Buttons — richer mobile-first status selector */}
       <div className="mb-6">
-        <div className="inline-flex items-center gap-1 bg-neutral-200 rounded-full p-1 flex-wrap">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
           {Array.from({ length: lobby.maxRounds }, (_, i) => i + 1).map((round) => {
             const roundStatus = getRoundStatus(round)
             const isActive = selectedRound === round
-            const showIndicator = hasRatedAnySong && roundStatus.hasUnratedSongs && !isGameFinished
+            const isBouncing = bouncingRound === round
+            const showNeedsRating = hasRatedAnySong && roundStatus.hasUnratedSongs && !isGameFinished
+            const showComplete = roundStatus.ownSongFullyRated
+            const showChosen = roundStatus.hasOwnSong && !showComplete
 
             return (
               <button
                 key={round}
+                type="button"
                 onClick={() => handleRoundChange(round)}
                 className={cn(
-                  "relative px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
+                  "group relative min-h-14 rounded-2xl border px-3 py-2 text-left shadow-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 active:scale-95",
+                  "bg-neutral-100/80 hover:bg-neutral-200",
                   isActive
-                    ? "bg-primary-500 text-white shadow-sm"
-                    : "text-neutral-500 hover:text-neutral-700"
+                    ? "border-primary-500 shadow-[0_0_0_1px_rgba(255,107,0,0.35),0_10px_24px_rgba(255,107,0,0.14)]"
+                    : "border-neutral-300",
+                  showChosen && "border-accent-spotify/50 text-accent-spotify",
+                  showComplete && "text-neutral-900",
+                  isBouncing && "animate-bounce"
                 )}
+                aria-current={isActive ? "true" : undefined}
               >
-                <span className="flex items-center gap-1.5">
-                  <span>{t("round")} {round}</span>
-                  {showIndicator && (
-                    <span className="text-[var(--color-error)] font-bold text-lg animate-pulse">
+                <span className="flex items-center justify-between gap-2">
+                  <span
+                    className={cn(
+                      "text-sm font-bold leading-none",
+                      showChosen ? "text-accent-spotify" : "text-neutral-900"
+                    )}
+                  >
+                    {t("round")} {round}
+                  </span>
+                  {showComplete ? (
+                    <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-spotify text-white">
+                      <Check className="size-4" aria-hidden="true" />
+                    </span>
+                  ) : showNeedsRating ? (
+                    <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-primary-500 text-xs font-black text-white animate-pulse">
                       !
                     </span>
+                  ) : null}
+                </span>
+                <span
+                  className={cn(
+                    "mt-1 block text-[11px] font-medium leading-none",
+                    showChosen ? "text-accent-spotify" : "text-neutral-500"
                   )}
+                >
+                  {showComplete ? t("roundStatusRated") : showChosen ? t("roundStatusTrackChosen") : isActive ? t("roundStatusOpen") : t("roundStatusTapToOpen")}
                 </span>
               </button>
             )
@@ -693,7 +740,7 @@ export function SongsCard({
                       // Current user hasn't selected a song - show prominent add button (only if game not finished)
                       <div className="py-2">
                         <ShimmerButton
-                          onClick={() => handleAddSong(row.participant.id)}
+                          onClick={handleAddSong}
                           background="var(--color-accent-spotify)"
                           shimmerColor="var(--color-neutral-900)"
                           borderRadius="9999px"
@@ -757,7 +804,7 @@ export function SongsCard({
                         {isCurrentUser && row.ratings.length === 0 && (
                           <>
                             <button
-                              onClick={() => handleEditSong(row.participant.id)}
+                              onClick={handleEditSong}
                               className="hidden md:block p-1.5 text-neutral-500 hover:text-primary-500 hover:bg-primary-500/10 rounded transition-colors"
                               aria-label={t("editSong")}
                               title={t("editSong")}
@@ -856,13 +903,13 @@ export function SongsCard({
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           onClick={handleCloseRating}
         >
-          <MagicCard
-            className="p-6 md:p-8 rounded-2xl shadow-2xl max-w-md w-full"
-            gradientFrom="var(--color-primary-500)"
-            gradientTo="var(--color-primary-600)"
-            gradientSize={400}
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="max-w-md w-full" onClick={(event) => event.stopPropagation()}>
+            <MagicCard
+              className="p-6 md:p-8 rounded-2xl shadow-2xl w-full"
+              gradientFrom="var(--color-primary-500)"
+              gradientTo="var(--color-primary-600)"
+              gradientSize={400}
+            >
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl md:text-2xl font-bold text-neutral-900">
                 {t("rateSong")}
@@ -910,7 +957,8 @@ export function SongsCard({
                 <span className="text-sm">{tCommon("loading")}</span>
               </div>
             )}
-          </MagicCard>
+            </MagicCard>
+          </div>
         </div>
       )}
     </MagicCard>

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { db, postgresClient } from "@/lib/db"
-import { lobbies, lobbyParticipants, users } from "@/lib/db/schema"
+import { lobbies, lobbyParticipants, ratings, songs, users } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 import { NextIntlClientProvider } from "next-intl"
 import { getMessages } from "next-intl/server"

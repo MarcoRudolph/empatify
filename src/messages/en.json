@@ -84,6 +84,17 @@
     "gameModeMultiDevice": "Everyone plays on their own device",
     "gameModeSingleDeviceDescription": "All players use this device together",
     "gameModeMultiDeviceDescription": "Each player joins with their own device",
+    "blindMode": "Blind Mode",
+    "blindModeShortDescription": "Hide who picked each song until everyone rated it.",
+    "blindModeInfoLabel": "What is Blind Mode?",
+    "blindModeModalClose": "Close Blind Mode explanation",
+    "blindModeModalEyebrow": "Game twist",
+    "blindModeModalTitle": "Blind Mode keeps it real",
+    "blindModeModalIntro": "In Blind Mode, nobody sees who picked which song while rating. You judge the track, not the friend behind it.",
+    "blindModeModalPoint1": "Songs show up without names, so no one can boost their bestie or roast someone on purpose.",
+    "blindModeModalPoint2": "After everyone has rated, the names are revealed and the lobby can guess who picked what.",
+    "blindModeModalPoint3": "It makes the game more surprising, more fair, and way funnier when the reveal is totally unexpected.",
+    "blindModeModalBottomLine": "Use it when you want honest ratings and a bigger reveal moment.",
     "lobbyRunning": "Running",
     "lobbyFinished": "Finished",
     "showFinished": "Show finished ({count})",
@@ -124,7 +135,7 @@
     "round": "Round",
     "of": "of",
     "suggestSong": "Suggest Song",
-    "rateSong": "Rate Song",
+    "rateSong": "Rate this song",
     "averageRating": "Average Rating",
     "bestSong": "Best Song",
     "individualRatings": "Individual Ratings",
@@ -146,7 +157,6 @@
     "editSong": "Edit",
     "deleteSong": "Delete",
     "actions": "Actions",
-    "rateSong": "Rate this song",
     "yourRating": "Your rating",
     "confirmDeleteSong": "Are you sure you want to delete this song?",
     "songDeleted": "Song deleted",
@@ -172,7 +182,11 @@
     "tooLateDescription": "This game has already finished. But you can still view the results and the winner.",
     "spotifyLinkTapAgain": "Tap again to sign in with Spotify",
     "spotifyPremiumQueueHint": "Premium account required for queue playback",
-    "spotifyLinkUsePromptBelow": "Use “Link Spotify” below to connect your account."
+    "spotifyLinkUsePromptBelow": "Use “Link Spotify” below to connect your account.",
+    "roundStatusRated": "Rated",
+    "roundStatusTrackChosen": "Track chosen",
+    "roundStatusOpen": "Open",
+    "roundStatusTapToOpen": "Tap to open"
   },
   "game": {
     "round": "Round",
@@ -382,4 +396,3 @@
     }
   }
 }
-

@@ -82,6 +82,17 @@
     "gameModeMultiDevice": "Cada uno juega en su propio dispositivo",
     "gameModeSingleDeviceDescription": "Todos los jugadores usan este dispositivo juntos",
     "gameModeMultiDeviceDescription": "Cada jugador se une con su propio dispositivo",
+    "blindMode": "Modo ciego",
+    "blindModeShortDescription": "Oculta quién eligió cada canción hasta que todos la hayan puntuado.",
+    "blindModeInfoLabel": "¿Qué es el Modo ciego?",
+    "blindModeModalClose": "Cerrar explicación del Modo ciego",
+    "blindModeModalEyebrow": "Giro del juego",
+    "blindModeModalTitle": "El Modo ciego lo hace más real",
+    "blindModeModalIntro": "En Modo ciego, nadie ve quién eligió cada canción mientras puntúa. Juzgas el tema, no a la persona detrás.",
+    "blindModeModalPoint1": "Las canciones aparecen sin nombres, así nadie sube la nota a su bestie ni baja a alguien a propósito.",
+    "blindModeModalPoint2": "Cuando todos hayan puntuado, se revelan los nombres y el lobby puede adivinar quién eligió qué.",
+    "blindModeModalPoint3": "Hace el juego más sorprendente, más justo y mucho más divertido cuando la revelación no era lo que esperabas.",
+    "blindModeModalBottomLine": "Úsalo cuando quieras puntuaciones honestas y un reveal más fuerte.",
     "lobbyRunning": "En curso",
     "lobbyFinished": "Finalizado",
     "showFinished": "Mostrar finalizados ({count})",
@@ -144,7 +155,6 @@
     "editSong": "Editar",
     "deleteSong": "Eliminar",
     "actions": "Acciones",
-    "rateSong": "Calificar canción",
     "yourRating": "Tu calificación",
     "confirmDeleteSong": "¿Estás seguro de que quieres eliminar esta canción?",
     "songDeleted": "Canción eliminada",
@@ -170,7 +180,11 @@
     "tooLateDescription": "Este juego ya ha terminado. Pero aún puedes ver los resultados y al ganador.",
     "spotifyLinkTapAgain": "Toca de nuevo para iniciar sesión en Spotify",
     "spotifyPremiumQueueHint": "Se requiere cuenta Premium de Spotify para la cola de reproducción",
-    "spotifyLinkUsePromptBelow": "Usa «Vincular Spotify» abajo para conectar tu cuenta."
+    "spotifyLinkUsePromptBelow": "Usa «Vincular Spotify» abajo para conectar tu cuenta.",
+    "roundStatusRated": "Puntuada",
+    "roundStatusTrackChosen": "Tema elegido",
+    "roundStatusOpen": "Abierta",
+    "roundStatusTapToOpen": "Toca para abrir"
   },
   "game": {
     "round": "Ronda",
@@ -367,4 +381,3 @@
     "playOnEmpatify": "Jugar en Empatify"
   }
 }
-

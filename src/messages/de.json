@@ -83,6 +83,17 @@
     "gameModeMultiDevice": "Jeder spielt auf seinem Gerät mit",
     "gameModeSingleDeviceDescription": "Alle Spieler nutzen dieses Gerät gemeinsam",
     "gameModeMultiDeviceDescription": "Jeder Spieler tritt mit seinem eigenen Gerät bei",
+    "blindMode": "Blind Mode",
+    "blindModeShortDescription": "Versteckt, wer welchen Song gewählt hat, bis alle bewertet haben.",
+    "blindModeInfoLabel": "Was ist Blind Mode?",
+    "blindModeModalClose": "Blind-Mode-Erklärung schließen",
+    "blindModeModalEyebrow": "Game-Twist",
+    "blindModeModalTitle": "Blind Mode macht es ehrlicher",
+    "blindModeModalIntro": "Im Blind Mode sieht beim Bewerten niemand, wer welchen Song gepickt hat. Du bewertest den Track — nicht die Person dahinter.",
+    "blindModeModalPoint1": "Songs erscheinen ohne Namen, damit niemand extra für den Bestie hochvotet oder jemanden absichtlich runterzieht.",
+    "blindModeModalPoint2": "Wenn alle bewertet haben, werden die Namen aufgedeckt und die Lobby kann raten, wer was gepickt hat.",
+    "blindModeModalPoint3": "Das macht das Spiel überraschender, fairer und viel lustiger, wenn der Reveal komplett anders kommt als gedacht.",
+    "blindModeModalBottomLine": "Aktivier es, wenn du ehrliche Ratings und einen größeren Reveal-Moment willst.",
     "lobbyRunning": "Läuft",
     "lobbyFinished": "Beendet",
     "showFinished": "Beendete anzeigen ({count})",
@@ -123,7 +134,7 @@
     "round": "Runde",
     "of": "von",
     "suggestSong": "Song vorschlagen",
-    "rateSong": "Song bewerten",
+    "rateSong": "Track bewerten",
     "averageRating": "Durchschnittsbewertung",
     "bestSong": "Bester Song",
     "individualRatings": "Einzelbewertungen",
@@ -148,7 +159,6 @@
     "editSong": "Bearbeiten",
     "deleteSong": "Löschen",
     "actions": "Aktionen",
-    "rateSong": "Track bewerten",
     "yourRating": "Deine Bewertung",
     "confirmDeleteSong": "Möchtest du diesen Song wirklich löschen?",
     "songDeleted": "Song gelöscht",
@@ -174,7 +184,11 @@
     "tooLateDescription": "Dieses Spiel ist bereits beendet. Du kannst dir aber die Ergebnisse und den Gewinner ansehen.",
     "spotifyLinkTapAgain": "Nochmal tippen, um dich bei Spotify anzumelden",
     "spotifyPremiumQueueHint": "Für die Wiedergabe aller Songs in der Warteschlange ist Spotify Premium nötig",
-    "spotifyLinkUsePromptBelow": "Nutze unten „Spotify verknüpfen“, um dein Konto zu verbinden."
+    "spotifyLinkUsePromptBelow": "Nutze unten „Spotify verknüpfen“, um dein Konto zu verbinden.",
+    "roundStatusRated": "Bewertet",
+    "roundStatusTrackChosen": "Track gewählt",
+    "roundStatusOpen": "Offen",
+    "roundStatusTapToOpen": "Öffnen"
   },
   "game": {
     "round": "Runde",
@@ -384,4 +398,3 @@
     }
   }
 }
-

@@ -1,49 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import { MagicCard } from "@/components/ui/magic-card"
-import { Music, Loader2, UserPlus } from "lucide-react"
+import { Info, Loader2, Music, UserPlus, X } from "lucide-react"
 import { InviteFriendsModal } from "@/components/messaging/InviteFriendsModal"
-
-const ROUND_PROMPT_EXAMPLES: Record<string, string[]> = {
-  de: [
-    'Ein Lied, zu dem dein Vater tanzt',
-    'Ein Song für eine Autofahrt',
-    'Ein Lied, das dich zum Weinen bringt',
-    'Ein Song aus deiner Kindheit',
-    'Ein Lied, das auf jeder Party laufen muss',
-  ],
-  en: [
-    'A song your dad dances to',
-    'A song for a road trip',
-    'A song that makes you cry',
-    'A song from your childhood',
-    'A song you play at every party',
-  ],
-  pt: [
-    'Uma música que seu pai dança',
-    'Uma música para uma viagem de carro',
-    'Uma música que te faz chorar',
-    'Uma música da sua infância',
-    'Uma música que você toca em toda festa',
-  ],
-  fr: [
-    'Une chanson sur laquelle ton père danse',
-    'Une chanson pour un road trip',
-    'Une chanson qui te fait pleurer',
-    'Une chanson de ton enfance',
-    'Une chanson que tu mets à chaque fête',
-  ],
-  es: [
-    'Una canción que baila tu papá',
-    'Una canción para un viaje por carretera',
-    'Una canción que te hace llorar',
-    'Una canción de tu infancia',
-    'Una canción que pones en cada fiesta',
-  ],
-}
 
 interface CreateGameSectionProps {
   isProPlan: boolean
@@ -51,7 +13,6 @@ interface CreateGameSectionProps {
 }
 
 export function CreateGameSection({
-  isProPlan,
   currentUserName,
 }: CreateGameSectionProps) {
   const router = useRouter()
@@ -62,17 +23,8 @@ export function CreateGameSection({
 
   const [rounds, setRounds] = useState(5)
   const [category, setCategory] = useState("all")
-  const [prompts, setPrompts] = useState<string[]>(Array(5).fill(""))
-  const [promptWarnings, setPromptWarnings] = useState<Record<number, boolean>>({})
-
-  useEffect(() => {
-    setPrompts((prev) => {
-      const next = Array(rounds).fill("")
-      return next.map((_, i) => prev[i] ?? "")
-    })
-  }, [rounds])
-  const [showPrompts, setShowPrompts] = useState(false)
   const [isBlind, setIsBlind] = useState(false)
+  const [isBlindModeInfoOpen, setIsBlindModeInfoOpen] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
   const [gameMode, setGameMode] = useState<"single-device" | "multi-device">("multi-device")
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
@@ -81,26 +33,6 @@ export function CreateGameSection({
     typeof window !== "undefined"
       ? window.location.pathname.match(/^\/(de|en|pt|fr|es)(\/|$)/)?.[1] ?? "en"
       : "en"
-
-  const checkPromptViability = async (index: number, value: string) => {
-    if (!value.trim()) {
-      setPromptWarnings((prev) => { const next = { ...prev }; delete next[index]; return next })
-      return
-    }
-    try {
-      const res = await fetch("/api/ai/validate-prompt-viability", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: value.trim() }),
-      })
-      if (res.ok) {
-        const data = await res.json()
-        setPromptWarnings((prev) => ({ ...prev, [index]: data.viable === false }))
-      }
-    } catch {
-      // Fail silent — don't block creation
-    }
-  }
 
   const categories = [
     { value: "all", label: tLobby("categoryAll") },
@@ -130,7 +62,6 @@ export function CreateGameSection({
         rounds,
         category: category === "all" ? null : category,
         gameMode,
-        roundPrompts: prompts,
         isBlind,
       }
       console.log("Creating lobby with:", requestBody)
@@ -193,8 +124,6 @@ export function CreateGameSection({
       }
 
       const lobbyId = data.lobby.id
-      const lobbyLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/${localeFromPath}/lobby/${lobbyId}`
-
       // Send invites if friends were selected
       if (selectedFriendIds.size > 0) {
         try {
@@ -328,77 +257,45 @@ export function CreateGameSection({
           </select>
         </div>
 
-        {/* Round Prompts */}
-        <div>
-          <label className="flex items-center gap-2.5 cursor-pointer select-none mb-2">
-            <input
-              type="checkbox"
-              checked={showPrompts}
-              onChange={(e) => setShowPrompts(e.target.checked)}
-              className="size-4 rounded border-neutral-300 text-primary-500 accent-[#FF6B00] cursor-pointer"
-            />
-            <span className="text-sm font-medium text-neutral-900">Round Prompts</span>
-            <span className="text-xs text-neutral-400">(optional)</span>
-          </label>
-          {showPrompts && (
-            <div className="space-y-2">
-              {Array.from({ length: rounds }, (_, i) => {
-                const examples = ROUND_PROMPT_EXAMPLES[localeFromPath] ?? ROUND_PROMPT_EXAMPLES.en
-                return (
-                  <div key={i}>
-                    <input
-                      value={prompts[i] ?? ""}
-                      onChange={(e) => {
-                        const next = [...prompts]
-                        next[i] = e.target.value
-                        setPrompts(next)
-                        // Clear warning while typing
-                        if (promptWarnings[i]) {
-                          setPromptWarnings((prev) => { const n = { ...prev }; delete n[i]; return n })
-                        }
-                      }}
-                      onBlur={(e) => checkPromptViability(i, e.target.value)}
-                      placeholder={`Round ${i + 1} — e.g. "${examples[i] ?? examples[0]}"`}
-                      className="w-full px-4 py-2.5 border border-neutral-300 rounded-lg bg-neutral-50 text-neutral-900 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-                    />
-                    {promptWarnings[i] && (
-                      <p className="mt-1 text-xs text-yellow-700 flex items-center gap-1">
-                        <span>⚠</span>
-                        {t("promptNotViable")}
-                      </p>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
-
         {/* Blind Mode Toggle */}
-        <label className="flex items-center gap-3 cursor-pointer select-none">
-          <div
+        <div className="flex items-start gap-3">
+          <button
+            type="button"
             onClick={() => setIsBlind(!isBlind)}
             role="switch"
             aria-checked={isBlind}
-            className={`relative w-10 h-6 rounded-full border transition-all duration-200 ${
+            aria-labelledby="blind-mode-label"
+            className={`relative mt-0.5 h-6 w-10 shrink-0 rounded-full border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-100 ${
               isBlind
                 ? "bg-[#FF6B00] border-[#FF6B00] shadow-[0_0_0_2px_rgba(255,107,0,0.25)]"
                 : "bg-[#555555] border-[#6B6B6B]"
             }`}
           >
             <span
-              className={`absolute top-1 left-1 size-4 bg-white rounded-full shadow transition-transform duration-200 ${
+              className={`absolute left-1 top-1 size-4 rounded-full bg-white shadow transition-transform duration-200 ${
                 isBlind ? "translate-x-4" : "translate-x-0"
               }`}
             />
+          </button>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <span id="blind-mode-label" className="text-sm font-medium text-neutral-900">
+                {t("blindMode")}
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsBlindModeInfoOpen(true)}
+                aria-label={t("blindModeInfoLabel")}
+                className="inline-flex size-7 shrink-0 items-center justify-center rounded-full border border-neutral-300 bg-neutral-100 text-neutral-700 transition-colors hover:bg-neutral-200 hover:text-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              >
+                <Info className="size-4" aria-hidden="true" />
+              </button>
+            </div>
+            <p className="mt-1 text-xs leading-5 text-neutral-500">
+              {t("blindModeShortDescription")}
+            </p>
           </div>
-          <div>
-            <span className="text-sm font-medium text-neutral-900">Blind Mode</span>
-            <span className="block text-xs text-neutral-400">
-              Submitters hidden until all ratings are in — then everyone guesses who picked what
-            </span>
-          </div>
-        </label>
+        </div>
 
         {/* Invite Friends Button - Prominent */}
         {selectedFriendIds.size > 0 ? (
@@ -456,6 +353,61 @@ export function CreateGameSection({
         onFriendsSelected={setSelectedFriendIds}
         selectedFriendIds={selectedFriendIds}
       />
+
+      {isBlindModeInfoOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 px-4 py-4 backdrop-blur-sm sm:items-center"
+          role="presentation"
+          onClick={() => setIsBlindModeInfoOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="blind-mode-modal-title"
+            className="relative w-full max-w-md rounded-3xl border border-neutral-300 bg-neutral-100 p-5 shadow-2xl sm:p-6"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setIsBlindModeInfoOpen(false)}
+              aria-label={t("blindModeModalClose")}
+              className="absolute right-4 top-4 inline-flex size-9 items-center justify-center rounded-full bg-neutral-200 text-neutral-700 transition-colors hover:bg-neutral-300 hover:text-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            >
+              <X className="size-5" aria-hidden="true" />
+            </button>
+
+            <div className="pr-10">
+              <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-primary-500">
+                {t("blindModeModalEyebrow")}
+              </p>
+              <h3 id="blind-mode-modal-title" className="text-2xl font-bold text-neutral-900">
+                {t("blindModeModalTitle")}
+              </h3>
+            </div>
+
+            <p className="mt-4 text-sm leading-6 text-neutral-700">
+              {t("blindModeModalIntro")}
+            </p>
+
+            <div className="mt-5 space-y-3">
+              {[1, 2, 3].map((item) => (
+                <div key={item} className="flex gap-3 rounded-2xl border border-neutral-300 bg-neutral-200/60 p-3">
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary-500 text-sm font-bold text-white">
+                    {item}
+                  </span>
+                  <p className="text-sm leading-5 text-neutral-700">
+                    {t(`blindModeModalPoint${item}`)}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <p className="mt-5 rounded-2xl bg-primary-500/10 p-3 text-sm font-medium leading-5 text-neutral-900">
+              {t("blindModeModalBottomLine")}
+            </p>
+          </div>
+        </div>
+      )}
     </MagicCard>
   )
 }
