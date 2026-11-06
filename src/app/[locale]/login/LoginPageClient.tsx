@@ -76,10 +76,10 @@ export default function LoginPageClient() {
         timestamp: new Date().toISOString(),
       })
 
-      if (errorParam === "auth_failed") {
-        setError(t("authFailed"))
-      } else if (errorParam === "access_denied" || errorDescription?.toLowerCase().includes("invalid") || errorDescription?.toLowerCase().includes("expired")) {
+      if (errorParam === "access_denied" || errorDescription?.toLowerCase().includes("invalid") || errorDescription?.toLowerCase().includes("expired")) {
         setError(t("magicLinkExpired"))
+      } else if (errorParam === "auth_failed") {
+        setError(t("authFailed"))
       } else {
         setError(`${t("authenticationError")}: ${errorParam}${errorDescription ? ` - ${errorDescription}` : ""}`)
       }
@@ -252,7 +252,7 @@ export default function LoginPageClient() {
                 onClick={handleGoogleSignIn}
                 disabled={isLoading}
                 type="button"
-                className="w-full flex items-center justify-center gap-3 px-6 py-3 h-12 border border-neutral-300 rounded-full bg-white text-neutral-900 font-semibold hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-100 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                className="w-full flex items-center justify-center gap-3 px-6 py-3 h-12 border border-neutral-300 rounded-full bg-white text-[#171717] font-semibold hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-100 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
               >
                 {isLoading ? (
                   <Loader2 className="size-5 animate-spin" />
